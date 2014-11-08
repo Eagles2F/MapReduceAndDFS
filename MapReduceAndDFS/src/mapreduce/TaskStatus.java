@@ -21,4 +21,7 @@ public class TaskStatus{
     public TaskStatus(int taskid){
         taskId = taskid;
     }
+    public taskState getState(){
+        return runState;
+    }
 }

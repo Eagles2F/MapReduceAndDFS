@@ -1,7 +1,7 @@
 package mapreduce;
 public abstract class Task{
     int taskId;
-    
+    TaskStatus taskStatus;
     private int type; // specify the job is a map or a reduce, USELESS NOW!!
     public static final int MAP = 0;
     public static final int REDUCE = 1; // USELESS NOW!!

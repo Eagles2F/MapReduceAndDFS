@@ -1,5 +1,10 @@
 package mapreduce;
 public class TaskInstance{
-    Task task;
-    TaskRunner runner;
+    private Task task;
+    private TaskRunner runner;
+    private TaskStatus taskStatus;
+    public boolean slotTaken;
+    public TaskStatus.taskState getRunState(){
+        return taskStatus.getState();
+    }
 }

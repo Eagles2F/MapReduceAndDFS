@@ -371,6 +371,19 @@ public class WorkerNode {
 		}
 		
 	}
+
+    public void getFreeSlot() {
+        // every task launcher need to call this to get a free slot to launch
+        // the task. If no free slot, this call will wait
+        
+    }
+    public void addFreeSlot() {
+        // every task should call this in the runner onComplete
+        
+    }
+    
+    
+    
 }
 
 
