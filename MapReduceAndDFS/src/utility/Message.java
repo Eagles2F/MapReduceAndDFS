@@ -121,6 +121,13 @@ public class Message implements Serializable {
 
 
 
+    public int getTaskId() {
+        
+        return taskId;
+    }
+
+
+
 	
     
 }

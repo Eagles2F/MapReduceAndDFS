@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 
 
+
 import utility.Message;
 
 /*
@@ -27,7 +28,6 @@ import utility.Message;
  *  @Author Jian Wang
  **/
 import utility.Message.msgType;
-
 import utility.ResponseType;
 
 
@@ -37,6 +37,7 @@ public class WorkerNode {
 	private String host;
 	private int port;
 	private Socket socket;
+	private TaskLauncher taskLauncher;
 	
 	// object I/O port
 	private ObjectInputStream obis;
@@ -50,6 +51,9 @@ public class WorkerNode {
 	
 	//worker information report 
 	WorkerNodeStatus trackStatus;
+	WorkerInfoReport workerInfo;
+	workerThread workerCommunicator;
+    private int freeSlot;
 	
 // methods
  	//constructing method
@@ -57,15 +61,19 @@ public class WorkerNode {
 		this.host = null;
 		this.port = 0;
 		this.workerID = 0;
+		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
 		this.trackStatus= new WorkerNodeStatus();
+		this.taskLauncher = new TaskLauncher(this);
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
 		this.port = port;
 		this.workerID = 0;
+		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
         this.trackStatus= new WorkerNodeStatus();
+        this.taskLauncher = new TaskLauncher(this);
 	}
 	
 	//command handling methods
@@ -89,61 +97,7 @@ public class WorkerNode {
 		System.out.println("Killing process finished!");
 	}
 	
-	// receive the process from the process manager
-	private void handle_migratetarget(Message msg) {
-		System.out.println("Start to  migrate process to this machine!");
-		
-		//response prepared
-		Message response = new Message(msgType.RESPONSE);
-		/*
-		response.setResponseId(ResponseType.MIGRATETARGETRES);
-		response.setProcessId(msg.getProcessId());
-		response.setTargetId(workerID);
-		//continue the process here
-		MigratableProcess mp = msg.getProcessObject();
-		System.out.println("object received, ready to go!");
-		runProcess(mp);
-		
-		response.setResult(Message.msgResult.SUCCESS);*/
-		
-		//send the response back
-		sendToManager(response);
-		System.out.println("Process migration finished!");
-	}
 	
-	// handle the migrate from command. The worker received should package the process and diliver it to the master
-	private void handle_migratesource(Message msg) {
-		System.out.println("Start migrate process from this machine!");
-		// response prepared!
-		Message response = new Message(msgType.RESPONSE);
-		/*
-		response.setResponseId(ResponseType.MIGARATESOURCERES);
-
-		// package the process to be transfered!
-		MigratableProcess mp = currentMap.get(msg.getProcessId());
-		
-		//check the status of the process
-		if(mp.getStatus() != Status.RUNNING){//if the process is not in the RUNNING state,
-			response.setResult((Message.msgResult.FAILURE));
-			response.setCause("The process is not running!");
-			response.setProcessId(msg.getProcessId());
-			response.setStatus(mp.getStatus());
-			sendToManager(response);
-			System.out.println("Migration failed ! The process: "+msg.getProcessId()+" is not running!");
-		}
-		else{ // if it is running, do the migration
-			mp.suspend();
-			currentMap.remove(mp.getProcessID());
-			response.setTargetId(msg.getTargetId());
-			response.setProcessObject(mp);
-			response.setProcessId(msg.getProcessId());
-			response.setResult(Message.msgResult.SUCCESS);
-		*/
-			// send the response
-			sendToManager(response);
-			System.out.println("Migration finished!");
-		
-	}
 	// using reflection to construct the process and find the class by the name of it
 	private void handle_start(Message msg) {
 		
@@ -151,62 +105,17 @@ public class WorkerNode {
 		// response message prepared!
 		Message response=new Message(msgType.RESPONSE);
 		response.setResponseId(ResponseType.STARTRES);
-		/*
-		response.setProcessId(msg.getProcessId());
-		response.setProcessName(msg.getProcessName());
-		//start the process
-		Class processClass;
-		try {
-			processClass = WorkerNode.class.getClassLoader().loadClass(
-					msg.getProcessName());
 		
-			Constructor constructor;
-			constructor = processClass.getConstructor(String[].class);
-			System.out.println(msg.getArgs().length);
-			Object[] passed = { msg.getArgs() };
-			MigratableProcess process = (MigratableProcess) constructor.newInstance(passed);
-			process.setProcessID(msg.getProcessId()); // method needed to be created in MigratableProcess
-			System.out.println("run process");
-			runProcess(process);
-		}catch (ClassNotFoundException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Class not Found!");
-			sendToManager(response);
-			return;
-		}catch (NoSuchMethodException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("No such method!");
-			sendToManager(response);
-			return;
-		} catch (SecurityException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Security Exception!");
-			sendToManager(response);
-			return;
-		} catch (InstantiationException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Instantiation Exception!");
-			sendToManager(response);
-			return;
-		} catch (IllegalAccessException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Illegal Access !");
-			sendToManager(response);
-			return;
-		} catch (IllegalArgumentException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Illegal Argument!");
-			sendToManager(response);
-			return;
-		} catch (InvocationTargetException e) {
-			response.setResult(Message.msgResult.FAILURE);
-			response.setCause("Invocation Target Exception!");
-			sendToManager(response);
-			return;
-		}
+		response.setTaskId(msg.getTaskId());
+		
+		TaskInstance taskIns = new TaskInstance(msg.getTask());
+		currentTaskMap.put(msg.getTaskId(), taskIns);
+		
+		taskLauncher.addToTaskQueue(taskIns);
+		
 		// send the response back to the master
 		response.setResult(Message.msgResult.SUCCESS);
-		*/
+		
 		sendToManager(response);
 		System.out.println("Process has been started!");
 	}
@@ -231,8 +140,10 @@ public class WorkerNode {
 		System.exit(0);
 	}
 	private void startreport(){
-		//Thread t1 = new Thread(workerinfo);
-		//t1.start();
+	    Thread t = new Thread(workerCommunicator);
+        t.start();
+		Thread t1 = new Thread(workerInfo);
+		t1.start();
 	}
 	
 	// some auxiliary methods
@@ -249,7 +160,7 @@ public class WorkerNode {
 		*/
 		
 		//send method writes object into output stream
-		private void sendToManager(Message sc) {
+		public void sendToManager(Message sc) {
 			try {
 				obos.writeObject(sc);
 			} catch (IOException e) {
@@ -291,6 +202,7 @@ public class WorkerNode {
 			}
 
 			//worker info backend started
+			
 			worker.startreport();
 		
 			
@@ -371,15 +283,74 @@ public class WorkerNode {
 		}
 		
 	}
+	
+	public class workerThread implements Runnable{
 
-    public void getFreeSlot() {
+        @Override
+        public void run() {
+            while(!failure){
+                try {
+                    Message master_cmd = (Message) obis.readObject();
+                    switch(master_cmd.getCommandId()){
+                        
+                        case START:// this command tries to start a process on this worker
+                            handle_start(master_cmd);
+                            break;
+                        
+                        case KILLTASK:  // this command tries to kill a process on this worker
+                            handle_kill(master_cmd);
+                            break;
+                        case SHUTDOWN:// this command shutdown this worker
+                            handle_exit(master_cmd);
+                            break;
+                        default:
+                            System.out.println("Wrong cmd:"+master_cmd.getCommandId());
+                            break;
+                    }
+                    
+                } catch (ClassNotFoundException e) {
+                    failure = true;
+                    System.out.println("Class not found!");
+                } catch (IOException e) {
+                    failure = true;
+                    System.out.println("Cannot read from the stream!");
+                }
+            }
+            try {
+                obos.close();
+                obis.close();
+                socket.close();
+                System.out.println("Process Worker closed");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        
+            
+        }
+	    
+	}
+
+    synchronized public void getFreeSlot() {
         // every task launcher need to call this to get a free slot to launch
         // the task. If no free slot, this call will wait
+        while(freeSlot < 1){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        freeSlot--;
+        return;
+            
         
     }
-    public void addFreeSlot() {
+    synchronized public void addFreeSlot() {
         // every task should call this in the runner onComplete
-        
+        freeSlot++;
+        notify();
     }
     
     
