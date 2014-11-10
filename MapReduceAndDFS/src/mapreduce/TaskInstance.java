@@ -20,9 +20,23 @@ public class TaskInstance implements Runnable{
     public boolean slotTaken;
     public TaskInstance(Task taskToRun){
         task = taskToRun;
+        taskStatus = new TaskStatus(task.getTaskId());
     }
     public TaskStatus.taskState getRunState(){
         return taskStatus.getState();
+    }
+    public void setRunState(TaskStatus.taskState state){
+        taskStatus.setState(state);
+        
+    }
+    
+    public TaskStatus.taskPhase getTaskPhase(){
+        return taskStatus.getPhase();
+    }
+    
+    public void setProgress(float progress){
+        taskStatus.setProgress(progress);
+        
     }
     @Override
     public void run() {
@@ -42,9 +56,11 @@ public class TaskInstance implements Runnable{
             Mapper process = (Mapper) constructor.newInstance(null);
             
             RecordReader rr = task.getRecordReader();
+            
             try {
                 while(rr.next()){
                     process.map(rr.createKey(), rr.createValue());
+                    
                 }
                 taskComplete();
                 
@@ -99,5 +115,13 @@ public class TaskInstance implements Runnable{
         worker.sendToManager(completeMsg);
         
         
+    }
+    public TaskStatus getTaskStatus() {
+        // TODO Auto-generated method stub
+        return taskStatus;
+    }
+    public Task getTask() {
+        // TODO Auto-generated method stub
+        return task;
     }
 }

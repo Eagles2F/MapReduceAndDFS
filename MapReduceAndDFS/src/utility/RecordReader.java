@@ -10,7 +10,7 @@ public interface RecordReader<K, V> {
    * @param value the value to read data into
    * @return true iff a key/value was read, false if at EOF
    */      
-  boolean next(K key, V value) throws IOException;
+  boolean next() throws IOException;
   
   /**
    * Create an object of the appropriate type to be used as a key.

@@ -3,6 +3,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import mapreduce.Task;
+import mapreduce.WorkerNodeStatus;
 
 /**
 * Message class used to send between manager and worker
@@ -30,6 +31,15 @@ public class Message implements Serializable {
     private msgResult result;
     private String cause;
     private int workerID;
+    private WorkerNodeStatus workerStatus;
+    
+    public Message(){
+        workerStatus = new WorkerNodeStatus();
+    }
+    
+    public WorkerNodeStatus getWorkerStatus(){
+        return workerStatus;
+    }
     
     
     public Message (msgType type){

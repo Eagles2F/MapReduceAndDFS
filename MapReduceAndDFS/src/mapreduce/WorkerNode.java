@@ -15,6 +15,10 @@ import java.util.HashMap;
 
 
 
+
+
+
+import utility.CommandType;
 import utility.Message;
 
 /*
@@ -52,7 +56,7 @@ public class WorkerNode {
 	//worker information report 
 	WorkerNodeStatus trackStatus;
 	WorkerInfoReport workerInfo;
-	workerThread workerCommunicator;
+	
     private int freeSlot;
 	
 // methods
@@ -109,7 +113,9 @@ public class WorkerNode {
 		response.setTaskId(msg.getTaskId());
 		
 		TaskInstance taskIns = new TaskInstance(msg.getTask());
+		taskIns.setRunState(TaskStatus.taskState.QUEUING);
 		currentTaskMap.put(msg.getTaskId(), taskIns);
+		
 		
 		taskLauncher.addToTaskQueue(taskIns);
 		
@@ -140,8 +146,7 @@ public class WorkerNode {
 		System.exit(0);
 	}
 	private void startreport(){
-	    Thread t = new Thread(workerCommunicator);
-        t.start();
+	    
 		Thread t1 = new Thread(workerInfo);
 		t1.start();
 	}
@@ -256,79 +261,32 @@ public class WorkerNode {
 		@Override
 		public void run() {
 			// send the info about the current process running information every 5 seconds
-			/*
+			
 		    while(!failure){
-				Message response=new Message(msgType.RESPONSE);
-				response.setResponseId(ResponseType.PULLINFORES);
+				Message response=new Message(msgType.INDICATION);
+				response.setCommandId(CommandType.HEARTBEAT);
 				
-				HashMap<Integer,ProcessInfo.Status> workerinfo = new HashMap<Integer, ProcessInfo.Status>();
 				
-				for(int i:currentMap.keySet()){
-					MigratableProcess mp = currentMap.get(i);
-					if(mp.isComplete()){
-						mp.setStatus(ProcessInfo.Status.FINISHED);
-					}
-					workerinfo.put(i, mp.getStatus());
+				
+				for(int i:currentTaskMap.keySet()){
+					TaskInstance taskIns = currentTaskMap.get(i);
+					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
 				}
-				response.setWorkerInfo(workerinfo);
+				response.getWorkerStatus().setMaxTask(5);
 				sendToManager(response);
 				
 				try {
-					Thread.sleep(5 * Timer.ONE_SECOND);
+					Thread.sleep(5 * 1000);
 				} catch (InterruptedException e) {
 				
 				}
 			}
-			*/
+			
 		}
 		
 	}
 	
-	public class workerThread implements Runnable{
-
-        @Override
-        public void run() {
-            while(!failure){
-                try {
-                    Message master_cmd = (Message) obis.readObject();
-                    switch(master_cmd.getCommandId()){
-                        
-                        case START:// this command tries to start a process on this worker
-                            handle_start(master_cmd);
-                            break;
-                        
-                        case KILLTASK:  // this command tries to kill a process on this worker
-                            handle_kill(master_cmd);
-                            break;
-                        case SHUTDOWN:// this command shutdown this worker
-                            handle_exit(master_cmd);
-                            break;
-                        default:
-                            System.out.println("Wrong cmd:"+master_cmd.getCommandId());
-                            break;
-                    }
-                    
-                } catch (ClassNotFoundException e) {
-                    failure = true;
-                    System.out.println("Class not found!");
-                } catch (IOException e) {
-                    failure = true;
-                    System.out.println("Cannot read from the stream!");
-                }
-            }
-            try {
-                obos.close();
-                obis.close();
-                socket.close();
-                System.out.println("Process Worker closed");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        
-            
-        }
-	    
-	}
+	
 
     synchronized public void getFreeSlot() {
         // every task launcher need to call this to get a free slot to launch

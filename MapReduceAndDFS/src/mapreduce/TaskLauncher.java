@@ -74,6 +74,7 @@ public class TaskLauncher extends Thread{
     private void startNewTask(TaskInstance taskIns) {
         try {
           localizeJob(taskIns);
+          taskIns.setRunState(TaskStatus.taskState.RUNNING);
           Thread t = new Thread(taskIns);
           t.start();
         } catch (Throwable e) {
