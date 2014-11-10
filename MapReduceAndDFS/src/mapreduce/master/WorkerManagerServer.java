@@ -1,4 +1,4 @@
-package mapreduce;
+package mapreduce.master;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
