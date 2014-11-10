@@ -19,6 +19,9 @@ import java.util.HashMap;
 
 
 
+
+
+
 import utility.CommandType;
 import utility.IndicationType;
 import utility.Message;
@@ -35,13 +38,14 @@ import utility.Message;
  **/
 import utility.Message.msgType;
 import utility.ResponseType;
+import utility.WorkerConfig;
 
 
 public class WorkerNode {
 // properties
 	// socket related properties
 	private String host;
-	private int port;
+	//private int port;
 	private Socket socket;
 	private TaskLauncher taskLauncher;
 	
@@ -59,13 +63,20 @@ public class WorkerNode {
 	WorkerNodeStatus trackStatus;
 	WorkerInfoReport workerInfo;
 	
+	//worker configuration, read from the property file
+	WorkerConfig config;
+	
     private int freeSlot;
+    private int hostPort;
+    
 	
 // methods
  	//constructing method
 	public WorkerNode(){
-		this.host = null;
-		this.port = 0;
+	    config = new WorkerConfig();
+	    
+		this.host = config.getMasterAdd();
+		this.hostPort = Integer.valueOf(config.getMasterPort());
 		this.workerID = 0;
 		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
@@ -74,7 +85,7 @@ public class WorkerNode {
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
-		this.port = port;
+		this.hostPort = port;
 		this.workerID = 0;
 		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
@@ -177,11 +188,11 @@ public class WorkerNode {
 		
 	public static void main(String [] args){
 		//start only when there are two arguments 
-		if(args.length == 2){
-			// establish the connection first.
-			String host = args[0];
-			int port = Integer.parseInt(args[1]);
-			WorkerNode worker = new WorkerNode(host, port);
+		
+	        WorkerNode worker = new WorkerNode();
+			String host = worker.getHost();
+			int port = worker.getHostPort();
+			
 			
 			
 			try{
@@ -250,12 +261,19 @@ public class WorkerNode {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}else{
-			System.out.println("Please enter the host ip and port number");
-		}
+		
 	}
 	
-	// worker info method 
+	private int getHostPort() {
+        
+        return hostPort;
+    }
+    private String getHost() {
+        // TODO Auto-generated method stub
+        return host;
+    }
+
+    // worker info method 
 	public class WorkerInfoReport implements Runnable{
 
 		@Override

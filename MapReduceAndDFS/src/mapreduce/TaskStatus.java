@@ -11,7 +11,7 @@ public class TaskStatus implements Serializable{
     public static enum taskPhase{STARTING, MAP, SHUFFLE, SORT, REDUCE, CLEANUP}
 
     // what state is the task in?
-    public static enum taskState{QUEUING,RUNNING, SUCCEEDED, FAILED, UNASSIGNED, KILLED,COMMIT_PENDING, FAILED_UNCLEAN, KILLED_UNCLEAN}
+    public static enum taskState{QUEUING,RUNNING, SUCCEEDED, FAILED, UNASSIGNED, KILLED,COMMIT_PENDING, FAILED_UNCLEAN, KILLED_UNCLEAN,COMPLETE}
     private final int taskId;
     private float progress;
     private volatile taskState runState;
