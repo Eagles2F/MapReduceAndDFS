@@ -1,4 +1,4 @@
-package mapreduce;
+package mapreduce.master;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -31,7 +31,7 @@ public class HireWorkerServer implements Runnable{
 	       running = true;
 	       try {
 	        serverSocket = new ServerSocket(portNum);
-	    } catch (IOException e) {
+	       } catch (IOException e) {
 	        e.printStackTrace();
 	        System.out.println("failed to create the socket server");
 	        System.exit(0);
