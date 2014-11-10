@@ -87,19 +87,17 @@ public class WorkerNode {
 		System.out.println("Start to kill the process!");
 		//response message prepared!
 		Message response = new Message(msgType.RESPONSE);
-		/*
-		response.setResponseId(ResponseType.KILLRES);
-		MigratableProcess mp = currentMap.get(msg.getProcessId());
-		currentMap.remove(msg.getProcessId());
-		mp.suspend();
-
-		currentMap.remove(mp);
 		
-		response.setProcessId(mp.getProcessID());
+		response.setResponseId(ResponseType.KILLTASKRES);
+		TaskInstance taskIns = currentTaskMap.get(msg.getTaskId());
+		taskIns.setExit(true);
+		
+		
+		response.setTaskId(taskIns.getTask().getTaskId());
 		response.setResult(Message.msgResult.SUCCESS);
 		
 		//send the response back
-		sendToManager(response);		*/
+		sendToManager(response);		
 		System.out.println("Killing process finished!");
 	}
 	
@@ -272,6 +270,9 @@ public class WorkerNode {
 				
 				for(int i:currentTaskMap.keySet()){
 					TaskInstance taskIns = currentTaskMap.get(i);
+					if((taskIns.getThread().getState() == Thread.State.TERMINATED) &&
+					        (taskIns.getRunState() != TaskStatus.taskState.COMPLETE))
+					    taskIns.getTaskStatus().setState(TaskStatus.taskState.FAILED);
 					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
 				}
 				response.getWorkerStatus().setMaxTask(5);
