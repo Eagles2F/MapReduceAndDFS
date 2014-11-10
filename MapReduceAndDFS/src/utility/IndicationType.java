@@ -7,13 +7,8 @@ package utility;
 * @Author Jian Wang
 */
 
-public enum CommandType {
-    
-    START,
-    KILLTASK,
-    SHUTDOWN, 
-    ASSIGNID,
-    
+public enum IndicationType {
+    HEARTBEAT,
+    TASKCOMPLETE,
     
 }
-

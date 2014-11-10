@@ -18,7 +18,9 @@ import java.util.HashMap;
 
 
 
+
 import utility.CommandType;
+import utility.IndicationType;
 import utility.Message;
 
 /*
@@ -264,7 +266,7 @@ public class WorkerNode {
 			
 		    while(!failure){
 				Message response=new Message(msgType.INDICATION);
-				response.setCommandId(CommandType.HEARTBEAT);
+				response.setIndicationId(IndicationType.HEARTBEAT);
 				
 				
 				

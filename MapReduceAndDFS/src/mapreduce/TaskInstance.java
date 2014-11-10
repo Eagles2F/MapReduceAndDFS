@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import utility.CommandType;
+import utility.IndicationType;
 import utility.Message;
 import utility.RecordReader;
 import utility.ResponseType;
@@ -107,7 +108,7 @@ public class TaskInstance implements Runnable{
     private void taskComplete() {
         // sedn complete to master
         Message completeMsg = new Message(Message.msgType.INDICATION);
-        completeMsg.setCommandId(CommandType.TASKCOMPLETE);
+        completeMsg.setIndicationId(IndicationType.TASKCOMPLETE);
         completeMsg.setJobId(task.getJobId());
         completeMsg.setTaskId(task.getTaskId());
         completeMsg.setWorkerID(task.getWorkerId());

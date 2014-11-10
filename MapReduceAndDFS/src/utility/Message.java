@@ -23,6 +23,7 @@ public class Message implements Serializable {
     private msgType messageType;
     private CommandType cmdId;
     private ResponseType resId;
+    private IndicationType indId;
     private int jobId;
     private int taskId;
     Task taskItem;
@@ -134,6 +135,16 @@ public class Message implements Serializable {
     public int getTaskId() {
         
         return taskId;
+    }
+
+    public void setIndicationId(IndicationType id) {
+        // TODO Auto-generated method stub
+        indId = id;
+    }
+    
+    public IndicationType getIndicationId() {
+        // TODO Auto-generated method stub
+        return indId;
     }
 
 
