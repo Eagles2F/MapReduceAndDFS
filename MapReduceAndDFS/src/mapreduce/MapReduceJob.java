@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class MapReduceJob {
 	private Socket clientSocket;
-	
+	private ArrayList<>
 	
 	public MapReduceJob(Socket soc){
 		this.clientSocket =soc;
