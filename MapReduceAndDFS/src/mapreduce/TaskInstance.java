@@ -19,12 +19,22 @@ public class TaskInstance implements Runnable{
     
     private TaskStatus taskStatus;
     public boolean slotTaken;
+    public boolean exit;
+    private Thread runningThread;
     public TaskInstance(Task taskToRun){
         task = taskToRun;
+        exit = false;
         taskStatus = new TaskStatus(task.getTaskId());
     }
     public TaskStatus.taskState getRunState(){
         return taskStatus.getState();
+    }
+    
+    public void setExit(boolean e){
+        exit = e;
+    }
+    public boolean getExit(){
+        return exit;
     }
     public void setRunState(TaskStatus.taskState state){
         taskStatus.setState(state);
@@ -59,10 +69,12 @@ public class TaskInstance implements Runnable{
             RecordReader rr = task.getRecordReader();
             
             try {
-                while(rr.next()){
+                while(rr.next() && !exit){
                     process.map(rr.createKey(), rr.createValue());
                     
                 }
+                if(exit)
+                    taskStatus.setState(TaskStatus.taskState.KILLED);
                 taskComplete();
                 
             } catch (IOException e) {
@@ -124,5 +136,13 @@ public class TaskInstance implements Runnable{
     public Task getTask() {
         // TODO Auto-generated method stub
         return task;
+    }
+    public void setThread(Thread t) {
+        // TODO Auto-generated method stub
+        runningThread = t;
+    }
+    
+    public Thread getThread(){
+        return runningThread;
     }
 }
