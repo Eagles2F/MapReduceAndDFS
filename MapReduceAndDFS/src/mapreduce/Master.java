@@ -26,6 +26,10 @@ class Master{
 		//The HashMap for worker status:-1 represents "dead", 1 represents "alive so far".
 		public ConcurrentHashMap<Integer,Integer> workerStatusMap;
 		
+		//The HashMap for received MapReduce jobs
+		public ConcurrentHashMap<Integer,MapReduceJob> jobMap; 
+		
+		
 		private HireWorkerServer hireWorkerServer;
 		
 		
@@ -35,7 +39,7 @@ class Master{
 	public static void main(String[] args){
 		//initialization
 		
-		//start the MapReduceServer thread
+		//start the JobReceiveServer thread
 		
 		//start the HireWorkerServer thread
 		

@@ -11,7 +11,7 @@ public abstract class Task{
     public static final int MAP = 0;
     public static final int REDUCE = 1; 
 
-    // should get from conf file
+    // get these information from the client submission
     @SuppressWarnings("rawtypes")
     private Class mapClass;
     @SuppressWarnings("rawtypes")
@@ -34,17 +34,11 @@ public abstract class Task{
     @SuppressWarnings({ "rawtypes", "unused" })
     private Class reduceOutputValueClass;
     
-    private RecordReader recordReader;
+    // combiner, partitioner, input split
+    
     private int workerId;
     private int jobId;
     
-    public RecordReader getRecordReader(){
-        return recordReader;
-    }
-    public void setRecordReader(RecordReader rr){
-        recordReader = rr;
-    }
-
     public int getTaskId(){
         return taskId;
     }
@@ -156,10 +150,4 @@ public abstract class Task{
         // TODO Auto-generated method stub
         return jobId;
     }
-
- 
-    /*
-     * spliter
-     * combiner
-     */
 }
