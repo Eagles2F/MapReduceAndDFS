@@ -1,8 +1,11 @@
 package utility;
+
+import java.util.Properties;
+
 /*
  * This class offers the configuration parameters loaded from the configuration file.
  */
-public class Configuration {
+public class Configuration extends ConfigurationBase{
 	private int master_ip;
 	private int jobSubmission_port;
 	private int hireWorkerServer_port;
@@ -29,6 +32,10 @@ public class Configuration {
 	}
 	public void setHireWorkerServer_port(int hireWorkerServer_port) {
 		this.hireWorkerServer_port = hireWorkerServer_port;
+	}
+	
+	public  Properties getProperties(){
+	    return prop;
 	}
 
 }
