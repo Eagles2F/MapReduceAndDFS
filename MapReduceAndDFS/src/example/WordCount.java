@@ -1,6 +1,7 @@
 package example;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import utility.Configuration;
@@ -20,7 +21,7 @@ public class WordCount {
 	       implements Mapper<Object, String, String, Integer>{
 		private String word="";  
 
-	    public void map(Object key, String value, RecordWriter<String,Integer> output,int taskId
+	    public void map(Object key, String value, RecordWriter output,int taskId
 	    		) throws IOException{
 	      StringTokenizer itr = new StringTokenizer(value.toString());
 	      while (itr.hasMoreTokens()) {
@@ -34,12 +35,12 @@ public class WordCount {
 	       implements Reducer<String,Integer,String,Integer> {
 	    private Integer result =0;
 
-	    public void reduce(String key, Iterable<Integer> values,
-	    		RecordWriter<String,Integer> output,int taskId    
+	    public void reduce(String key, Iterator<Integer> values,
+	    		RecordWriter output,int taskId    
 	                       ) throws IOException{
 	      int sum = 0;
-	      for (Integer val : values) {
-	        sum += val;
+	       while(values.hasNext()) {
+	        sum += values.next();
 	      }
 	      result = sum;
 	      output.write(key, result, taskId);

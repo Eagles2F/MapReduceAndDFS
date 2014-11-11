@@ -5,15 +5,19 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 
 import mapreduce.fileIO.RecordReader;
 import mapreduce.userlib.Mapper;
 import mapreduce.userlib.Reducer;
+import utility.CombinerRecordWriter;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.KeyValue;
+import utility.MapperRecordWriter;
 import utility.Message;
 import utility.RecordWriter;
+import utility.ReducerRecordWriter;
 import utility.ResponseType;
 import utility.Message.msgType;
 
@@ -27,7 +31,9 @@ public class TaskInstance implements Runnable{
     public boolean slotTaken;
     public boolean exit;
     private Thread runningThread;
-    private boolean isComplete;
+    private boolean isMapComplete;
+    private boolean isConbinComplete;
+    private boolean isReduceComplete;
     public TaskInstance(Task taskToRun){
         task = taskToRun;
         exit = false;
@@ -71,7 +77,7 @@ public class TaskInstance implements Runnable{
                 Constructor constructor;
                 constructor = mapperClass.getConstructor(null);
                 
-                RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
+                MapperRecordWriter rw = new MapperRecordWriter();
                 Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
                 Class<?> inputKeyClass = task.getMapInputKeyClass();
                 Class<?> inputValueClass = task.getMapInputValueClass();
@@ -81,20 +87,50 @@ public class TaskInstance implements Runnable{
                 
                 
                 try {
-                    while(!exit && ! isComplete){
+                    while(!exit && ! isMapComplete){
                         KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
                         if(keyValuePair != null){
-                            process.map(keyValuePair.getKey(), keyValuePair.getValue(), (RecordWriter<Object, Object>) rw);
+                            process.map(keyValuePair.getKey(), keyValuePair.getValue(), rw,task.getTaskId());
                         }
                         else{
-                            isComplete = true;
+                            isMapComplete = true;
                         }
                           
                         
                     }
-                    if(exit)
+                    if(exit){
                         taskStatus.setState(TaskStatus.taskState.KILLED);
-                    taskComplete();
+                        taskComplete();
+                    }
+                    
+                    //combine the output of mapper
+                    Class combinerClass = task.getReduceClass();
+                    Constructor constructor1;
+                    try {
+                        constructor1 = combinerClass.getConstructor();
+                        CombinerRecordWriter crw = new CombinerRecordWriter();
+                        try {
+                            Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer) constructor1.newInstance();
+                            PriorityQueue<KeyValue> valueQ = rw.getPairQ();
+                            Iterator valueItr;
+                            while(true){
+                                Object currentKey = valueQ.peek().getKey();
+                                valueItr = getValueIterator(valueQ);
+                                conbiner.reduce(currentKey, valueItr, crw, task.getTaskId());
+                                
+                            }
+                            
+                        } catch (InstantiationException | IllegalAccessException
+                                | IllegalArgumentException | InvocationTargetException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } catch (NoSuchMethodException | SecurityException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                    
                     
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -134,6 +170,10 @@ public class TaskInstance implements Runnable{
                 worker.sendToManager(response);
                 return;
             }
+            
+            
+            
+            
         }
         else{
             Class reduceClass;
@@ -143,7 +183,7 @@ public class TaskInstance implements Runnable{
                 Constructor constructor;
                 constructor = reduceClass.getConstructor(null);
                 
-                RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
+                ReducerRecordWriter rw = new ReducerRecordWriter();
                 Reducer<Object, Object,Object, Object> process = (Reducer) constructor.newInstance();
                 Class<?> inputKeyClass = task.getReduceInputKeyClass();
                 Class<?> inputValueClass = task.getReduceInputValueClass();
@@ -156,15 +196,16 @@ public class TaskInstance implements Runnable{
                     KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
                     KeyValue<?, ?> keyValuePairPre = rr.GetNextRecord();
                     if(keyValuePair == null)
-                        isComplete = true;
-                    while(!exit && ! isComplete){
+                        isReduceComplete = true;
+                    while(!exit && ! isReduceComplete){
                         keyValuePairPre = keyValuePair;
                         ArrayList valueArray = new ArrayList();
+                        Iterator<Object> valueItr;
                         
                         do{
-                            KeyValue<?, ?> keyValuePairNext = rr.GetNextRecord();
+                            KeyValue<Object, Object> keyValuePairNext = rr.GetNextRecord();
                             if(keyValuePairNext == null){
-                                isComplete = true;
+                                isReduceComplete = true;
                                 break;
                             }
                             int tmpHash = keyValuePair.getKey().hashCode();
@@ -177,11 +218,12 @@ public class TaskInstance implements Runnable{
                             }
                             
                         }while(true);
-                        if(isComplete != true){
-                            process.reduce(keyValuePairPre.getKey(), valueArray.iterator(), (RecordWriter<Object, Object>) rw);
+                        if(isReduceComplete != true){
+                            valueItr = valueArray.iterator();
+                            process.reduce(keyValuePairPre.getKey(),valueItr,rw, task.getTaskId());
                         }
                         else{
-                            isComplete = true;
+                            isReduceComplete = true;
                         }
                           
                         
@@ -259,4 +301,35 @@ public class TaskInstance implements Runnable{
     public Thread getThread(){
         return runningThread;
     }
+    
+    protected Iterator<Object> getValueIterator(PriorityQueue<KeyValue> inputQ){
+        ArrayList<Object> valueList = new ArrayList<Object>();
+        
+        if(inputQ.isEmpty())
+            return null;
+        KeyValue<Object, Object> keyValuePair = inputQ.peek();
+        valueList.add(keyValuePair);
+        inputQ.remove();
+        if(inputQ.isEmpty()){
+            return valueList.iterator();
+        }
+
+            
+            do{
+                KeyValue<Object, Object> keyValuePairNext = inputQ.peek();
+
+                if(keyValuePair.compareTo(keyValuePairNext) == 0){
+                    valueList.add(keyValuePairNext.getValue());
+                    inputQ.remove();
+                }
+                else{
+                    
+                    break;
+                }
+            }while(true);
+        return valueList.iterator();
+        
+    
+   }
+ 
 }

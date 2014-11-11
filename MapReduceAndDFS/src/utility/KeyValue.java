@@ -1,6 +1,6 @@
 package utility;
 
-public class KeyValue<Key,Value>{
+public class KeyValue<Key,Value> implements Comparable{
     private Key key;
     private Value value;
     
@@ -18,5 +18,15 @@ public class KeyValue<Key,Value>{
     
     public Value getValue(){
         return value;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        int thisHash;
+        int compareHash;
+        thisHash = key.hashCode();
+        compareHash = o.hashCode();
+            
+        return thisHash - compareHash;
     }
 }
