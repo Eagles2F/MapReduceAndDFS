@@ -15,7 +15,7 @@ import java.io.ObjectOutputStream;
  * 
  * @see OutputFormat
  */
-public class RecordWriter<K, V> {
+public class RecordWriter<Key, Value> {
   /** 
    * Writes a key/value pair.
    *
@@ -23,19 +23,22 @@ public class RecordWriter<K, V> {
    * @param value the value to write.
    * @throws IOException
    */      
-  void write(K key, V value) throws IOException{
-      /*
-      String strTaskID = Long.toString(taskID);
-      File fileToWrite = new File("MapReduce/Intermedia/" + strTaskID +".out");
+  void write(Key key, Value value, int taskId) throws IOException{
+      
+      String strTaskID = Long.toString(taskId);
+      File fileToWrite = new File("Output/Intermedia/" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
               fileToWrite.createNewFile();
 
           }
+          KeyValue pair = new KeyValue();
+          pair.setKey(key);
+          pair.setValue(value);
           FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
           ObjectOutputStream outputStream = new ObjectOutputStream(fileStream);
-          outputStream.writeObject(keyValuePair);
+          outputStream.writeObject(pair);
           
           //close the writer
           outputStream.close();
@@ -43,7 +46,7 @@ public class RecordWriter<K, V> {
       } catch (IOException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
-      }*/
+      }
   }
 
   /** 

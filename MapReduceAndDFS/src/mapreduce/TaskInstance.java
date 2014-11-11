@@ -3,9 +3,12 @@ package mapreduce;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import mapreduce.fileIO.RecordReader;
 import mapreduce.userlib.Mapper;
+import mapreduce.userlib.Reducer;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.KeyValue;
@@ -60,75 +63,171 @@ public class TaskInstance implements Runnable{
         response.setResponseId(ResponseType.STARTRES);
         
         response.setTaskId(task.getTaskId());
-        Class mapperClass;
-        try {
-            mapperClass = task.getMapClass();
-        
-            Constructor constructor;
-            constructor = mapperClass.getConstructor(null);
-            
-            RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
-            Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
-            Class<?> inputKeyClass = task.getMapInputKeyClass();
-            Class<?> inputValueClass = task.getMapInputValueClass();
-            
-            RecordReader rr = 
-                new RecordReader(task.getSplit());
-            
-            
+        if(task.getType() == Task.MAP){
+            Class mapperClass;
             try {
-                while(!exit && ! isComplete){
-                    KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
-                    if(keyValuePair != null){
-                        process.map(keyValuePair.getKey(), keyValuePair.getValue(), (RecordWriter<Object, Object>) rw);
-                    }
-                    else{
-                        isComplete = true;
-                    }
-                      
-                    
-                }
-                if(exit)
-                    taskStatus.setState(TaskStatus.taskState.KILLED);
-                taskComplete();
+                mapperClass = task.getMapClass();
+            
+                Constructor constructor;
+                constructor = mapperClass.getConstructor(null);
                 
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
+                Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
+                Class<?> inputKeyClass = task.getMapInputKeyClass();
+                Class<?> inputValueClass = task.getMapInputValueClass();
+                
+                RecordReader rr = 
+                    new RecordReader(task.getSplit());
+                
+                
+                try {
+                    while(!exit && ! isComplete){
+                        KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
+                        if(keyValuePair != null){
+                            process.map(keyValuePair.getKey(), keyValuePair.getValue(), (RecordWriter<Object, Object>) rw);
+                        }
+                        else{
+                            isComplete = true;
+                        }
+                          
+                        
+                    }
+                    if(exit)
+                        taskStatus.setState(TaskStatus.taskState.KILLED);
+                    taskComplete();
+                    
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                System.out.println("run process");
+                
+            }catch (NoSuchMethodException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("No such method!");
+                worker.sendToManager(response);
+                return;
+            } catch (SecurityException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Security Exception!");
+                worker.sendToManager(response);
+                return;
+            } catch (InstantiationException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Instantiation Exception!");
+                worker.sendToManager(response);
+                return;
+            } catch (IllegalAccessException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Illegal Access !");
+                worker.sendToManager(response);
+                return;
+            } catch (IllegalArgumentException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Illegal Argument!");
+                worker.sendToManager(response);
+                return;
+            } catch (InvocationTargetException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Invocation Target Exception!");
+                worker.sendToManager(response);
+                return;
             }
+        }
+        else{
+            Class reduceClass;
+            try {
+                reduceClass = task.getReduceClass();
             
-            System.out.println("run process");
-            
-        }catch (NoSuchMethodException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("No such method!");
-            worker.sendToManager(response);
-            return;
-        } catch (SecurityException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("Security Exception!");
-            worker.sendToManager(response);
-            return;
-        } catch (InstantiationException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("Instantiation Exception!");
-            worker.sendToManager(response);
-            return;
-        } catch (IllegalAccessException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("Illegal Access !");
-            worker.sendToManager(response);
-            return;
-        } catch (IllegalArgumentException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("Illegal Argument!");
-            worker.sendToManager(response);
-            return;
-        } catch (InvocationTargetException e) {
-            response.setResult(Message.msgResult.FAILURE);
-            response.setCause("Invocation Target Exception!");
-            worker.sendToManager(response);
-            return;
+                Constructor constructor;
+                constructor = reduceClass.getConstructor(null);
+                
+                RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
+                Reducer<Object, Object,Object, Object> process = (Reducer) constructor.newInstance();
+                Class<?> inputKeyClass = task.getReduceInputKeyClass();
+                Class<?> inputValueClass = task.getReduceInputValueClass();
+                
+                RecordReader rr = 
+                    new RecordReader(task.getSplit());
+                
+                
+                try {
+                    KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
+                    KeyValue<?, ?> keyValuePairPre = rr.GetNextRecord();
+                    if(keyValuePair == null)
+                        isComplete = true;
+                    while(!exit && ! isComplete){
+                        keyValuePairPre = keyValuePair;
+                        ArrayList valueArray = new ArrayList();
+                        
+                        do{
+                            KeyValue<?, ?> keyValuePairNext = rr.GetNextRecord();
+                            if(keyValuePairNext == null){
+                                isComplete = true;
+                                break;
+                            }
+                            int tmpHash = keyValuePair.getKey().hashCode();
+                            int tmpHashNext = keyValuePairNext.getKey().hashCode();
+                            if(tmpHash == tmpHashNext)
+                                valueArray.add(keyValuePairNext.getValue());
+                            else{
+                                keyValuePair = keyValuePairNext;
+                                break;
+                            }
+                            
+                        }while(true);
+                        if(isComplete != true){
+                            process.reduce(keyValuePairPre.getKey(), valueArray.iterator(), (RecordWriter<Object, Object>) rw);
+                        }
+                        else{
+                            isComplete = true;
+                        }
+                          
+                        
+                    }
+                    if(exit)
+                        taskStatus.setState(TaskStatus.taskState.KILLED);
+                    taskComplete();
+                    
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                System.out.println("run process");
+                
+            }catch (NoSuchMethodException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("No such method!");
+                worker.sendToManager(response);
+                return;
+            } catch (SecurityException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Security Exception!");
+                worker.sendToManager(response);
+                return;
+            } catch (InstantiationException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Instantiation Exception!");
+                worker.sendToManager(response);
+                return;
+            } catch (IllegalAccessException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Illegal Access !");
+                worker.sendToManager(response);
+                return;
+            } catch (IllegalArgumentException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Illegal Argument!");
+                worker.sendToManager(response);
+                return;
+            } catch (InvocationTargetException e) {
+                response.setResult(Message.msgResult.FAILURE);
+                response.setCause("Invocation Target Exception!");
+                worker.sendToManager(response);
+                return;
+            }
         }
         
     }
