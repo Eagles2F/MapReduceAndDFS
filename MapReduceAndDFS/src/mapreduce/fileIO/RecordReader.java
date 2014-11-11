@@ -10,8 +10,8 @@ package mapreduce.fileIO;
 
 import utility.KeyValue;
 
-<<<<<<< HEAD
-public class RecordReader<K,V> {
+
+public class RecordReader {
 	private SplitFile split;
 	
 	//the current position of the reader
@@ -22,10 +22,6 @@ public class RecordReader<K,V> {
 		this.current_id = split.getStartId();
 	}
 	
-	
-=======
-public class RecordReader{
->>>>>>> a9b89d169398d4ff0c757ecb4798796fe69b10b3
 	public SplitFile getSplit() {
 		return split;
 	}
