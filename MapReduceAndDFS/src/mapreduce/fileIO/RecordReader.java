@@ -10,6 +10,7 @@ package mapreduce.fileIO;
 
 import utility.KeyValue;
 
+<<<<<<< HEAD
 public class RecordReader<K,V> {
 	private SplitFile split;
 	
@@ -22,6 +23,9 @@ public class RecordReader<K,V> {
 	}
 	
 	
+=======
+public class RecordReader{
+>>>>>>> a9b89d169398d4ff0c757ecb4798796fe69b10b3
 	public SplitFile getSplit() {
 		return split;
 	}
@@ -40,7 +44,7 @@ public class RecordReader<K,V> {
 
 	
 	
-	public KeyValue<?, ?> GetNextRecord(){
+	public KeyValue<Object,Object> GetNextRecord(){
 		// find the record at the current_id and increment the current_id by 1
 		return this.split.getUserInputFiles().GetRecordById(current_id);
 	}
