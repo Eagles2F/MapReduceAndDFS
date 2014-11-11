@@ -42,7 +42,7 @@ public class HireWorkerServer implements Runnable{
 	    @Override
 	    public void run(){   
 	       try{
-	    	   System.out.println("waiting for new workers");
+	    	   System.out.println("HireWorkerServer is waiting for new workers on the port: "+this.portNum);
 	           while(running){
 	               Socket workerSocket = serverSocket.accept();
 	               System.out.println("worker: "+workerSocket.getInetAddress()+":"+workerSocket.getPort()+" join in");

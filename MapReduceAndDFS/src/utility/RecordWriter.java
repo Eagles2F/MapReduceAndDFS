@@ -23,7 +23,7 @@ public class RecordWriter<Key, Value> {
    * @param value the value to write.
    * @throws IOException
    */      
-  void write(Key key, Value value, int taskId) throws IOException{
+  public void write(Key key, Value value, int taskId) throws IOException{
       
       String strTaskID = Long.toString(taskId);
       File fileToWrite = new File("Output/Intermedia/" + strTaskID +".output");

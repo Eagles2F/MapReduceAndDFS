@@ -1,12 +1,21 @@
 package mapreduce.userlib;
 
-import utility.Configuration;
-import mapreduce.fileIO.FileInputFormat;
-import mapreduce.fileIO.FileOutputFormat;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.Socket;
 
-public class Job {
-	private Class Mapper;
-	private Class Reducer;
+import utility.Configuration;
+
+public class Job implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4325665659967502371L;
+	private Class MapperClass;
+	private Class ReducerClass;
+	private Class CombinerClass;
 	private FileInputFormat fif;
 	private FileOutputFormat fof;
 	private String jobname;
@@ -20,25 +29,58 @@ public class Job {
 	//true-job succeccfully completed. false-job failed for some reason
 	public boolean waitForJobCompletion(){
 		//submit the job here, send the job object and related class files.
-		
-		return true;
-	}
-	
-	public Class getMapper() {
-		return Mapper;
+		try {
+			System.out.println(conf.getMaster_ip()+" "+conf.getJobSubmission_port());
+			Socket soc = new Socket(conf.getMaster_ip(),conf.getJobSubmission_port());
+			
+			ObjectOutputStream oos = new ObjectOutputStream(soc.getOutputStream());
+			
+			ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
+			
+			oos.writeObject(this);
+			//oos.flush();
+			System.out.println("SSSSSSSSSSSSS");
+			
+			int success = ois.readInt();
+			
+			oos.close();
+			ois.close();
+			soc.close();
+			if(success < 0){
+				return false;
+			}else{
+				return true;
+			}
+		} catch (IOException e) {
+			System.err.println("Socket creation failure!");
+			return false;
+		}
 	}
 
-	public void setMapper(Class mapper) {
-		Mapper = mapper;
+	public Class getMapperClass() {
+		return MapperClass;
 	}
 
-	public Class getReducer() {
-		return Reducer;
+	public void setMapperClass(Class mapperClass) {
+		MapperClass = mapperClass;
 	}
 
-	public void setReducer(Class reducer) {
-		Reducer = reducer;
+	public Class getReducerClass() {
+		return ReducerClass;
 	}
+
+	public void setReducerClass(Class reducerClass) {
+		ReducerClass = reducerClass;
+	}
+
+	public Class getCombinerClass() {
+		return CombinerClass;
+	}
+
+	public void setCombinerClass(Class combinerClass) {
+		CombinerClass = combinerClass;
+	}
+
 
 	public FileInputFormat getFif() {
 		return fif;

@@ -3,6 +3,7 @@ package mapreduce.fileIO;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import mapreduce.userlib.FileInputFormat;
 import utility.KeyValue;
 /*
  * This class is the core file I/O class in the MapReduce framework. This file model assumes each file has a fixed 

@@ -1,8 +1,12 @@
 package mapreduce.master;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import mapreduce.userlib.Job;
 
 /*
  * This server is responsible to listen to the job submit request from the MapReduce client and add the Job to
@@ -45,13 +49,19 @@ public class JobReceiveServer implements Runnable{
 	@Override
 	public void run() {
 		   try{
-	    	   System.out.println("waiting for new MapReduceJobs");
+	    	   System.out.println("JobReceiveServer is waiting for new MapReduceJobs on the port: "+this.port);
 	           while(running){
 	               Socket jobSocket = serverSocket.accept();
 	               System.out.println("MapReduceJob: "+jobSocket.getInetAddress()+":"+jobSocket.getPort()+" join in");
-	              
+	    
 	               //Parse the received Job submission and Create the job instance on the master
-	               MapReduceJob job = new MapReduceJob(jobSocket); 
+	               ObjectOutputStream oos = new ObjectOutputStream(jobSocket.getOutputStream());
+	   			   ObjectInputStream ois = new ObjectInputStream(jobSocket.getInputStream());
+	   			   
+	   			   //read the job from the input stream
+				   Job received_job = (Job)ois.readObject();
+	   			   
+	               MapReduceJob job = new MapReduceJob(jobSocket,received_job);
 	               master.jobMap.put(jobCnt, job);
 	               jobCnt++;
 	               
@@ -64,7 +74,10 @@ public class JobReceiveServer implements Runnable{
 	       }catch(IOException e){
 	           e.printStackTrace();
 	           System.out.println("socket server accept failed");
-	       }
+	       } catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	       try {
 	        serverSocket.close();
 	       } catch (IOException e) {

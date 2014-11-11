@@ -6,12 +6,15 @@ package mapreduce.master;
 
 import java.net.Socket;
 
+import mapreduce.userlib.Job;
+
 public class MapReduceJob {
 	private Socket clientSocket;
+	private Job job;
 	
-	
-	public MapReduceJob(Socket soc){
+	public MapReduceJob(Socket soc,Job job){
 		this.clientSocket =soc;
+		this.job = job;
 	}
 	
 	public Socket getClientSocket() {
@@ -20,5 +23,13 @@ public class MapReduceJob {
 
 	public void setClientSocket(Socket clientSocket) {
 		this.clientSocket = clientSocket;
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
 	}
 }

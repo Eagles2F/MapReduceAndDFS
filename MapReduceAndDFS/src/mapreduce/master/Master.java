@@ -35,8 +35,14 @@ class Master{
 		public Master(Configuration conf){
 			this.conf = conf;
 			//initialization for all the fields	
+			workerSocMap = new ConcurrentHashMap<Integer,Socket>();
+			workerStatusMap = new ConcurrentHashMap<Integer,Integer>();
+			workerMangerServerMap = new ConcurrentHashMap<Integer,WorkerManagerServer>();
+			jobMap = new ConcurrentHashMap<Integer, MapReduceJob>();
 			console = new BufferedReader(new InputStreamReader(System.in));
 			running = true;
+			hireWorkerServer = new HireWorkerServer(conf.getHireWorkerServer_port(),this);
+			jobReceiverServer = new JobReceiveServer(conf.getJobSubmission_port(),this);
 		}
 		
 	//methods
@@ -45,7 +51,7 @@ class Master{
 		        System.out.println("This is mapreduce master, type help for more information");
 		        
 		        String cmdLine=null;
-		        while(true){
+		        while(running){
 		            System.out.print(">>");
 		            try{
 		                cmdLine = console.readLine();
@@ -57,7 +63,9 @@ class Master{
 		            String[] inputLine = cmdLine.split(" ");
 		           
 		            switch(inputLine[0]){
-		        
+		            	case "ls":
+		            		handleLs();
+		            		break;
 		                default:
 		                    System.out.println(inputLine[0]+"is not a valid command");
 		            }
@@ -76,14 +84,29 @@ class Master{
         t1.start();
     }
     
+    //console cmd methods
+    /*list all the workers and their status*/
+    private void handleLs(){
+        if(0 == workerStatusMap.size())
+            System.out.println("no worker in system");
+        else{
+            for(int i : workerSocMap.keySet()){
+                if(workerStatusMap.get(i) == -1)
+                    System.out.println("worker ID: "+i+"  IP Address: "+workerSocMap.get(i).getInetAddress()+" FAILED");
+                else
+                    System.out.println("worker ID: "+i+"  IP Address: "+workerSocMap.get(i).getInetAddress()+" ALIVE");
+            }
+        }
+    }
+    
 	//main process
 	public static void main(String[] args){
 		//initialization
-		 if(args.length != 1){
-	            System.out.println("wrong arguments, usage: Master <configuration file directory>");
-	            return;
-	     }
-		 Master master =  new Master(new Configuration(args[0]));
+//		if(args.length != 1){
+//			System.out.println("wrong arguments, usage: Master <configuration file directory>");
+//			System.exit(1);
+//		}
+		 Master master =  new Master(new Configuration("128.237.196.248",11111,11112));
 		 
 		//start the JobReceiveServer thread
 		master.startHireWokerServer();
