@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import mapreduce.fileIO.RecordReader;
 import mapreduce.userlib.Mapper;
 import utility.CommandType;
 import utility.IndicationType;
+import utility.KeyValue;
 import utility.Message;
-import utility.RecordReader;
+import utility.RecordWriter;
 import utility.ResponseType;
 import utility.Message.msgType;
 
@@ -22,6 +24,7 @@ public class TaskInstance implements Runnable{
     public boolean slotTaken;
     public boolean exit;
     private Thread runningThread;
+    private boolean isComplete;
     public TaskInstance(Task taskToRun){
         task = taskToRun;
         exit = false;
@@ -64,14 +67,25 @@ public class TaskInstance implements Runnable{
             Constructor constructor;
             constructor = mapperClass.getConstructor(null);
             
+            RecordWriter<?,?> rw = new RecordWriter<Object,Object>();
+            Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
+            Class<?> inputKeyClass = task.getMapInputKeyClass();
+            Class<?> inputValueClass = task.getMapInputValueClass();
             
-            Mapper process = (Mapper) constructor.newInstance(null);
+            RecordReader rr = 
+                new RecordReader(task.getSplit());
             
-            RecordReader rr = task.getRecordReader();
             
             try {
-                while(rr.next() && !exit){
-                    process.map(rr.createKey(), rr.createValue());
+                while(!exit && ! isComplete){
+                    KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
+                    if(keyValuePair != null){
+                        process.map(keyValuePair.getKey(), keyValuePair.getValue(), (RecordWriter<Object, Object>) rw);
+                    }
+                    else{
+                        isComplete = true;
+                    }
+                      
                     
                 }
                 if(exit)

@@ -2,7 +2,8 @@ package mapreduce;
 
 import java.net.InetAddress;
 
-import utility.RecordReader;
+import mapreduce.fileIO.SplitFile;
+
 
 public abstract class Task{
     int taskId;
@@ -38,6 +39,7 @@ public abstract class Task{
     
     private int workerId;
     private int jobId;
+    private SplitFile split;
     
     public int getTaskId(){
         return taskId;
@@ -149,5 +151,13 @@ public abstract class Task{
     public int getJobId() {
         // TODO Auto-generated method stub
         return jobId;
+    }
+    public SplitFile getSplit() {
+        // TODO Auto-generated method stub
+        return split;
+    }
+    public void setSplit(SplitFile s) {
+        // TODO Auto-generated method stub
+        split =s ;
     }
 }

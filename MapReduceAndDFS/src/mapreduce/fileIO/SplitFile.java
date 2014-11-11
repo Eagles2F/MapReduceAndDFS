@@ -14,7 +14,7 @@ public class SplitFile {
 	//the length of this split
 	private int length;
 	//the input files this split related to
-	private UserInputFiles<?, ?> userInputFiles;
+	private UserInputFiles userInputFiles;
 
 	
 	public int getStartId() {
@@ -33,16 +33,16 @@ public class SplitFile {
 		this.length = length;
 	}
 
-	public UserInputFiles<?, ?> getUserInputFiles() {
+	public UserInputFiles getUserInputFiles() {
 		return userInputFiles;
 	}
 
-	public void setUserInputFiles(UserInputFiles<?, ?> userInputFiles) {
+	public void setUserInputFiles(UserInputFiles userInputFiles) {
 		this.userInputFiles = userInputFiles;
 	}
 
 	
-	public SplitFile(int startId,int length, UserInputFiles<?, ?> uif){
+	public SplitFile(int startId,int length, UserInputFiles uif){
 		this.startId = startId;
 		this.length = length;
 		this.userInputFiles = uif;
