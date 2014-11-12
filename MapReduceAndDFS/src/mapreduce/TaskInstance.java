@@ -25,6 +25,7 @@ import utility.Message.msgType;
 public class TaskInstance implements Runnable{
     private Task task;
     private WorkerNode worker;
+    private int reducerNum;
     
     
     private TaskStatus taskStatus;
@@ -79,8 +80,6 @@ public class TaskInstance implements Runnable{
                 
                 MapperRecordWriter rw = new MapperRecordWriter();
                 Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
-                Class<?> inputKeyClass = task.getMapInputKeyClass();
-                Class<?> inputValueClass = task.getMapInputValueClass();
                 
                 RecordReader rr = 
                     new RecordReader(task.getSplit());
@@ -108,9 +107,10 @@ public class TaskInstance implements Runnable{
                     Constructor constructor1;
                     try {
                         constructor1 = combinerClass.getConstructor();
-                        CombinerRecordWriter crw = new CombinerRecordWriter();
+                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum);
                         try {
                             Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer) constructor1.newInstance();
+                            //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
                             PriorityQueue<KeyValue> valueQ = rw.getPairQ();
                             Iterator valueItr;
                             while(true){
