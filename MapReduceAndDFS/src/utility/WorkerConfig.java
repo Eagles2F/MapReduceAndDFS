@@ -11,7 +11,7 @@ public class WorkerConfig extends ConfigurationBase{
         
         prop = new Properties();
         try {
-            input = new FileInputStream("workerConfig.properties");
+            input = new FileInputStream("../workerConfig.properties");
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
