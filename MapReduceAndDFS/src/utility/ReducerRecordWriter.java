@@ -1,8 +1,10 @@
 package utility;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.PriorityQueue;
 
@@ -33,6 +35,8 @@ public  class ReducerRecordWriter extends RecordWriter {
       
       String strTaskID = Long.toString(taskId);
       
+      
+      
       File fileToWrite = new File("Output/Intermedia/" + "reducer_" + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
@@ -40,15 +44,15 @@ public  class ReducerRecordWriter extends RecordWriter {
               fileToWrite.createNewFile();
 
           }
-          KeyValue pair = new KeyValue();
-          pair.setKey(key);
-          pair.setValue(value);
+         
           FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
-          ObjectOutputStream outputStream = new ObjectOutputStream(fileStream);
-          outputStream.writeObject(pair);
+          BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileStream));
           
+          String buf = key.toString()+" "+value.toString();
+          bw.write(buf);
+          bw.newLine();
           //close the writer
-          outputStream.close();
+          bw.close();
          
           
       } catch (IOException e) {

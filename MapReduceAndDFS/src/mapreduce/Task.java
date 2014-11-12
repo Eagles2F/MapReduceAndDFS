@@ -36,7 +36,11 @@ public class Task{
     private int workerId;
     private int jobId;
     private SplitFile split;
+    private String reducerInputFileName;
     
+    public void setReducerInputFileName(String reducerInputFileName) {
+        this.reducerInputFileName = reducerInputFileName;
+    }
     public int getTaskId(){
         return taskId;
     }
@@ -163,5 +167,9 @@ public class Task{
     
     public int getReducerNum(){
         return reducerNum;
+    }
+    public String getReducerInputFileName() {
+        
+        return reducerInputFileName;
     }
 }

@@ -1,6 +1,9 @@
 package mapreduce;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -30,16 +33,18 @@ public class TaskInstance implements Runnable{
     
     private TaskStatus taskStatus;
     public boolean slotTaken;
-    public boolean exit;
+    public volatile boolean exit;
     private Thread runningThread;
     private boolean isMapComplete;
     private boolean isConbinComplete;
     private boolean isReduceComplete;
+    private String ReducerInputFileName;
     public TaskInstance(Task taskToRun){
         task = taskToRun;
         exit = false;
         taskStatus = new TaskStatus(task.getTaskId());
         reducerNum = task.getReducerNum();
+        ReducerInputFileName = task.getReducerInputFileName();
                 
     }
     public TaskStatus.taskState getRunState(){
@@ -195,38 +200,25 @@ public class TaskInstance implements Runnable{
                 
                 
                 try {
-                    KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
-                    KeyValue<?, ?> keyValuePairPre = rr.GetNextRecord();
-                    if(keyValuePair == null)
-                        isReduceComplete = true;
+                    PriorityQueue reducerInputQ = sortReducerInput();
+                    
                     while(!exit && ! isReduceComplete){
-                        keyValuePairPre = keyValuePair;
-                        ArrayList valueArray = new ArrayList();
+                        
                         Iterator<Object> valueItr;
                         
-                        do{
-                            KeyValue<Object, Object> keyValuePairNext = rr.GetNextRecord();
-                            if(keyValuePairNext == null){
-                                isReduceComplete = true;
-                                break;
-                            }
-                            int tmpHash = keyValuePair.getKey().hashCode();
-                            int tmpHashNext = keyValuePairNext.getKey().hashCode();
-                            if(tmpHash == tmpHashNext)
-                                valueArray.add(keyValuePairNext.getValue());
-                            else{
-                                keyValuePair = keyValuePairNext;
-                                break;
-                            }
-                            
-                        }while(true);
-                        if(isReduceComplete != true){
-                            valueItr = valueArray.iterator();
-                            process.reduce(keyValuePairPre.getKey(),valueItr,rw, task.getTaskId());
-                        }
-                        else{
+                        valueItr = getValueIterator(reducerInputQ);
+                        if(valueItr == null){
                             isReduceComplete = true;
+                            taskStatus.setState(TaskStatus.taskState.COMPLETE);
+                            System.out.println("no more value in reducer input");
                         }
+                        if(isReduceComplete != true){
+                            Object key = ((KeyValue<Object,Object>)reducerInputQ.peek()).getKey();
+                            System.out.println("reduce key "+key.toString());
+                            process.reduce(((KeyValue<Object,Object>)reducerInputQ.peek()).getKey(),valueItr,rw, task.getTaskId());
+                        }
+                        
+                        
                           
                         
                     }
@@ -332,6 +324,38 @@ public class TaskInstance implements Runnable{
         return valueList.iterator();
         
     
+   }
+    
+   private PriorityQueue sortReducerInput(){
+       FileInputStream fileStream;
+       try {
+       fileStream = new FileInputStream(ReducerInputFileName);
+       try {
+           ObjectInputStream inputStream = new ObjectInputStream(fileStream);
+           try {
+               PriorityQueue pairQ = new PriorityQueue();
+               KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
+               while((pair = (KeyValue<Object, Object>) inputStream.readObject()) != null){
+                   pairQ.add(pair);
+               }
+               return pairQ;
+               
+           } catch (ClassNotFoundException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+               return null;
+           }
+       } catch (IOException e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+           return null;
+       }
+   } catch (FileNotFoundException e) {
+       // TODO Auto-generated catch block
+       e.printStackTrace();
+       return null;
+   }
+       
    }
  
 }
