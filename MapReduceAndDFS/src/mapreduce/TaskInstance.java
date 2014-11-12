@@ -112,6 +112,7 @@ public class TaskInstance implements Runnable{
                     //combine the output of mapper
                     Class combinerClass = task.getReduceClass();
                     Constructor constructor1;
+                    
                     try {
                         constructor1 = combinerClass.getConstructor();
                         CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum);
@@ -184,6 +185,7 @@ public class TaskInstance implements Runnable{
         }
         else{
             Class reduceClass;
+            taskStatus.setPhase(TaskStatus.taskPhase.STARTING);
             try {
                 reduceClass = task.getReduceClass();
             
@@ -201,7 +203,7 @@ public class TaskInstance implements Runnable{
                 
                 try {
                     PriorityQueue reducerInputQ = sortReducerInput();
-                    
+                    taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
                     while(!exit && ! isReduceComplete){
                         
                         Iterator<Object> valueItr;
