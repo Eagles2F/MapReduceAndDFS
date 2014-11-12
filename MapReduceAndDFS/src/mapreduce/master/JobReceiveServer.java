@@ -6,6 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import utility.CommandType;
+import utility.Message;
+import utility.Message.msgType;
+import mapreduce.Task;
 import mapreduce.userlib.Job;
 
 /*
@@ -45,6 +49,30 @@ public class JobReceiveServer implements Runnable{
 		System.out.println("create JobReceiverServer");
 	}
 	
+	//send the mapTask method
+	private void sendMapTasks(MapReduceJob job) throws IOException{
+		//Simple Scheduling: send the MapTask to the worker as long as it is not full
+		int current_worker = 0;
+		for(Task t:job.getMapTasks()){
+			while(master.workerStatusMap.get(current_worker).getMaxTask() >
+				master.workerStatusMap.get(current_worker).getTaskReports().size()){ //if there is still extra computing ability in the worker node
+				//send the task the worker with id current_worker
+				ObjectOutputStream oos = new ObjectOutputStream(master.workerSocMap.get(current_worker).getOutputStream());
+				Message msg = new Message();
+				msg.setMessageType(msgType.COMMAND);
+				msg.setCommandId(CommandType.START);
+				msg.setJobId(job.getJobId());
+				msg.setTaskId(t.getTaskId());
+				msg.setTaskItem(t);
+				oos.writeObject(msg);
+				oos.flush();
+				oos.close();
+				//goes to the next worker
+				current_worker++;
+				break;
+			}
+		}
+	}
 	
 	@Override
 	public void run() {
@@ -61,15 +89,17 @@ public class JobReceiveServer implements Runnable{
 	   			   //read the job from the input stream
 				   Job received_job = (Job)ois.readObject();
 	   			   
-	               MapReduceJob job = new MapReduceJob(jobSocket,received_job);
-	               master.jobMap.put(jobCnt, job);
-	               jobCnt++;
+	               MapReduceJob job = new MapReduceJob(jobSocket,received_job,jobCnt);
 	               
 	               //Split the job
-	               
+	               job.Split();
 	               //Create the MapTasks
-	               
+	               job.MapTaskGen();
 	               //send the MapTasks away
+	               sendMapTasks(job);
+	               //store the Mapreduce job into the ConcurrentHashmap
+	               master.jobMap.put(jobCnt, job);
+	               jobCnt++;
 	           } 
 	       }catch(IOException e){
 	           e.printStackTrace();

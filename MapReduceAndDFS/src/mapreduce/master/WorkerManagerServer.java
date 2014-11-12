@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import mapreduce.WorkerNodeStatus;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.Message;
@@ -33,10 +34,9 @@ public class WorkerManagerServer implements Runnable{
         this.master = master;
         workerId = id;
         running = true;
-
         System.out.println("adding a new manager server for worker "+id);
         socket = master.workerSocMap.get(id);
-        master.workerStatusMap.put(id,1);//set the worker status to be alive
+        master.workerStatusMap.put(id, new WorkerNodeStatus(id));//set the initial NodeStatus
         objInput = new ObjectInputStream(socket.getInputStream());
         objOutput = new ObjectOutputStream(socket.getOutputStream());
        

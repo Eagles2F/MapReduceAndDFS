@@ -7,17 +7,20 @@ public class WorkerNodeStatus{
     private int workerId;
     private int masterAdd;
     private int masterPort;
-
+    private boolean alive;
     private HashMap<Integer,TaskStatus> taskReports;
     private int failures;
     private int maxTasks;
-    
+
     public WorkerNodeStatus(int Id){
         workerId = Id;
         taskReports = new HashMap<Integer,TaskStatus>();
+        alive = true;
+        maxTasks = 0;
     }
     public WorkerNodeStatus(){
         taskReports = new HashMap<Integer,TaskStatus>();
+        alive = true;
     }
     
     public void setMaxTask(int n){
@@ -38,4 +41,10 @@ public class WorkerNodeStatus{
         return taskReports;
         
     }
+	public boolean isAlive() {
+		return alive;
+	}
+	public void setAlive(boolean alive) {
+		this.alive = alive;
+	}
 }

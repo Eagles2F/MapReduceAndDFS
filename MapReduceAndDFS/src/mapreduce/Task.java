@@ -1,11 +1,9 @@
 package mapreduce;
 
-import java.net.InetAddress;
-
 import mapreduce.fileIO.SplitFile;
 
 
-public abstract class Task{
+public class Task{
     int taskId;
     TaskStatus taskStatus;
     private int type; // specify the job is a map or a reduce
@@ -34,9 +32,7 @@ public abstract class Task{
     private Class reduceOutputKeyClass;
     @SuppressWarnings({ "rawtypes", "unused" })
     private Class reduceOutputValueClass;
-    
-    // combiner, partitioner, input split
-    
+  
     private int workerId;
     private int jobId;
     private SplitFile split;

@@ -59,8 +59,8 @@ public class WordCount {
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
-	    int num_kv_per_file = 100;  // what if there is a file with size 30, solving it by regulating file model
-	    FileInputFormat fif = new FileInputFormat(args[0],num_kv_per_file);
+	    int num_records = 1000000;  //number of records in the input file
+	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);
 	    job.setFof(fof);

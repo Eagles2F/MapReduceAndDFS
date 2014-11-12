@@ -3,7 +3,8 @@ package mapreduce.userlib;
 import java.io.Serializable;
 
 /*
- * This is the user API for specifying input files
+ * This is the user API for specifying input files, assuming the input file is a file with a lot of data inside.
+ * And we also assume that the record structure is just one line.
  *  
  */
 public class FileInputFormat implements Serializable {
@@ -12,11 +13,11 @@ public class FileInputFormat implements Serializable {
 	 */
 	private static final long serialVersionUID = -4063078446810176149L;
 	private String path;
-	private int size_per_file;
+	private int size_file;
 	
 	public FileInputFormat(String path, int size){
 		this.path = path;
-		this.size_per_file = size;
+		this.setSize_file(size);
 		
 	}
 
@@ -26,11 +27,14 @@ public class FileInputFormat implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	public int getSize_per_file() {
-		return size_per_file;
+
+	public int getSize_file() {
+		return size_file;
 	}
-	public void setSize_per_file(int size_per_file) {
-		this.size_per_file = size_per_file;
+
+	public void setSize_file(int size_file) {
+		this.size_file = size_file;
 	}
+	
 	
 }

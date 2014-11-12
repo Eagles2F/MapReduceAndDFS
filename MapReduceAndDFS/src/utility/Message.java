@@ -26,7 +26,7 @@ public class Message implements Serializable {
     private IndicationType indId;
     private int jobId;
     private int taskId;
-    Task taskItem;
+    private Task taskItem;
     private int sourceNode;
     private int targetNode;
     private msgResult result;
@@ -116,10 +116,6 @@ public class Message implements Serializable {
         cause = c;
     }
     
-    
-
-
-
 	public int getWorkerID() {
 		return workerID;
 	}
@@ -147,8 +143,56 @@ public class Message implements Serializable {
         return indId;
     }
 
+	public CommandType getCmdId() {
+		return cmdId;
+	}
 
+	public void setCmdId(CommandType cmdId) {
+		this.cmdId = cmdId;
+	}
 
+	public ResponseType getResId() {
+		return resId;
+	}
+
+	public void setResId(ResponseType resId) {
+		this.resId = resId;
+	}
+
+	public IndicationType getIndId() {
+		return indId;
+	}
+
+	public void setIndId(IndicationType indId) {
+		this.indId = indId;
+	}
+
+	public Task getTaskItem() {
+		return taskItem;
+	}
+
+	public void setTaskItem(Task taskItem) {
+		this.taskItem = taskItem;
+	}
+
+	public int getSourceNode() {
+		return sourceNode;
+	}
+
+	public void setSourceNode(int sourceNode) {
+		this.sourceNode = sourceNode;
+	}
+
+	public int getTargetNode() {
+		return targetNode;
+	}
+
+	public void setTargetNode(int targetNode) {
+		this.targetNode = targetNode;
+	}
+
+	public void setWorkerStatus(WorkerNodeStatus workerStatus) {
+		this.workerStatus = workerStatus;
+	}
 	
-    
 }

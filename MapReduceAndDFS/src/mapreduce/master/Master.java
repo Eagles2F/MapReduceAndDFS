@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 
+import mapreduce.WorkerNodeStatus;
 import utility.Configuration;
 
 class Master{
@@ -17,8 +18,8 @@ class Master{
 		//The HashMap for each worker's manager server 
 		public ConcurrentHashMap<Integer,WorkerManagerServer> workerMangerServerMap;
 		
-		//The HashMap for worker status:-1 represents "dead", 1 represents "alive so far".
-		public ConcurrentHashMap<Integer,Integer> workerStatusMap;
+		//The HashMap for worker status
+		public ConcurrentHashMap<Integer,WorkerNodeStatus> workerStatusMap;
 		
 		//The HashMap for received MapReduce jobs
 		public ConcurrentHashMap<Integer,MapReduceJob> jobMap; 
@@ -36,7 +37,7 @@ class Master{
 			this.conf = conf;
 			//initialization for all the fields	
 			workerSocMap = new ConcurrentHashMap<Integer,Socket>();
-			workerStatusMap = new ConcurrentHashMap<Integer,Integer>();
+			workerStatusMap = new ConcurrentHashMap<Integer,WorkerNodeStatus>();
 			workerMangerServerMap = new ConcurrentHashMap<Integer,WorkerManagerServer>();
 			jobMap = new ConcurrentHashMap<Integer, MapReduceJob>();
 			console = new BufferedReader(new InputStreamReader(System.in));
@@ -91,7 +92,7 @@ class Master{
             System.out.println("no worker in system");
         else{
             for(int i : workerSocMap.keySet()){
-                if(workerStatusMap.get(i) == -1)
+                if(workerStatusMap.get(i).isAlive() == false)
                     System.out.println("worker ID: "+i+"  IP Address: "+workerSocMap.get(i).getInetAddress()+" FAILED");
                 else
                     System.out.println("worker ID: "+i+"  IP Address: "+workerSocMap.get(i).getInetAddress()+" ALIVE");
