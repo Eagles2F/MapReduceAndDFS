@@ -25,10 +25,7 @@ public  class ReducerRecordWriter extends RecordWriter {
    * @param value the value to write.
    * @throws IOException
    */    
-  PriorityQueue pairQ;
-  public ReducerRecordWriter(){
-      pairQ = new PriorityQueue();
-  }
+  
 
   
   @Override
@@ -36,7 +33,7 @@ public  class ReducerRecordWriter extends RecordWriter {
       
       String strTaskID = Long.toString(taskId);
       
-      File fileToWrite = new File("Output/Intermedia/" + strTaskID +".output");
+      File fileToWrite = new File("Output/Intermedia/" + "reducer_" + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
@@ -46,13 +43,13 @@ public  class ReducerRecordWriter extends RecordWriter {
           KeyValue pair = new KeyValue();
           pair.setKey(key);
           pair.setValue(value);
-          /*FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
+          FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
           ObjectOutputStream outputStream = new ObjectOutputStream(fileStream);
           outputStream.writeObject(pair);
           
           //close the writer
-          outputStream.close();*/
-          pairQ.add(pair);
+          outputStream.close();
+         
           
       } catch (IOException e) {
           // TODO Auto-generated catch block
@@ -70,9 +67,7 @@ public  class ReducerRecordWriter extends RecordWriter {
       
   }
 
-  public PriorityQueue getPairQ(){
-      return pairQ;
-  }
+  
 
 
 }

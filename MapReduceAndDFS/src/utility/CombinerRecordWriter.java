@@ -25,12 +25,17 @@ public class CombinerRecordWriter extends RecordWriter{
    * @param value the value to write.
    * @throws IOException
    */    
-  
+  private int reducerNum;
+  public CombinerRecordWriter(int redNum){
+      reducerNum = redNum;
+  }
   public void write(Object key, Object value, int taskId) throws IOException{
       
       String strTaskID = Long.toString(taskId);
       
-      File fileToWrite = new File("Output/Intermedia/" + "combiner" + strTaskID +".output");
+      int fileNum = key.hashCode()%reducerNum;
+      System.out.println("combiner file num "+fileNum);
+      File fileToWrite = new File("Output/Intermedia/" + "combiner" + fileNum + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
