@@ -39,6 +39,8 @@ public class TaskInstance implements Runnable{
         task = taskToRun;
         exit = false;
         taskStatus = new TaskStatus(task.getTaskId());
+        reducerNum = task.getReducerNum();
+                
     }
     public TaskStatus.taskState getRunState(){
         return taskStatus.getState();

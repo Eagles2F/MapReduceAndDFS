@@ -9,7 +9,7 @@ public class Task{
     private int type; // specify the job is a map or a reduce
     public static final int MAP = 0;
     public static final int REDUCE = 1; 
-
+    private int reducerNum;
     // get these information from the client submission
     @SuppressWarnings("rawtypes")
     private Class mapClass;
@@ -155,5 +155,13 @@ public class Task{
     public void setSplit(SplitFile s) {
         // TODO Auto-generated method stub
         split =s ;
+    }
+    
+    public void setReducerNum(int num){
+        reducerNum = num;
+    }
+    
+    public int getReducerNum(){
+        return reducerNum;
     }
 }

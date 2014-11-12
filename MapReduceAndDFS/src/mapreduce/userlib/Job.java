@@ -20,8 +20,17 @@ public class Job implements Serializable{
 	private FileOutputFormat fof;
 	private String jobname;
 	private Configuration conf;
+	private int reducerNum;
 	
-	public Job(String jobname,Configuration conf){
+	public int getReducerNum() {
+        return reducerNum;
+    }
+
+    public void setReducerNum(int reducerNum) {
+        this.reducerNum = reducerNum;
+    }
+
+    public Job(String jobname,Configuration conf){
 		this.setJobname(jobname);
 		this.setConf(conf);
 	}
