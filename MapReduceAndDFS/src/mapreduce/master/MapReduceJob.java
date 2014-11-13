@@ -29,40 +29,6 @@ public class MapReduceJob {
 		this.MapTaskStatus = new ArrayList<TaskStatus>();
 	}
 	
-	/*
-	 * This method serves to split the job into MapTasks.
-	 */
-	public void Split(){
-		//get the inputfiles which offers the access to the user input data
-		UserInputFiles uif = new UserInputFiles(job.getFif());
-		
-		//compute the block_size for each split file
-		
-		/* Scheduling 1:
-			  a.get the number of available MapTask computing ability  --  num
-			  b.set the block_size as num_record / num
-		*/
-		/* Scheduling 2:
-		 * 	  just set the block_size as some magic number 
-		 */
-		int block_size = 50;
-		/* Scheduling 3:
-		 * 	  a.sum the max_mapper_num on each worker node as sum
-		 *    b.set the block_size as num_record/ sum
-		 */
-
-		//do the actual splitting
-		int size_file=job.getFif().getSize_file();
-		for(int i=0;i<(size_file-block_size);i = i+block_size){
-			SplitFile sf = new SplitFile(i,block_size,uif);
-			SplitList.add(sf);
-		}
-		//split the final file differently
-		if(size_file%block_size != 0){
-			SplitFile sf = new SplitFile(size_file-(size_file%block_size),size_file%block_size,uif);
-			SplitList.add(sf);
-		}		
-	}
 	
 	//generate the Maptasks
 	public void MapTaskGen(){

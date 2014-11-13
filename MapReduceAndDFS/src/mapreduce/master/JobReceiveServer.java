@@ -11,6 +11,8 @@ import utility.Message;
 import utility.Message.msgType;
 import mapreduce.Task;
 import mapreduce.TaskStatus.taskState;
+import mapreduce.fileIO.SplitFile;
+import mapreduce.fileIO.UserInputFiles;
 import mapreduce.userlib.Job;
 
 /*
@@ -77,6 +79,51 @@ public class JobReceiveServer implements Runnable{
 		}
 	}
 	
+	/*
+	 * This method serves to split the job into MapTasks.
+	 */
+	public void Split(MapReduceJob job) throws IOException{
+		//get the inputfiles which offers the access to the user input data
+		UserInputFiles uif = new UserInputFiles(job.getJob().getFif());
+		
+		//compute the block_size for each split file
+		
+		/* Scheduling 1:
+			  a.get the number of available MapTask computing ability  --  num
+			  b.set the block_size as num_record / num
+		*/
+		/* Scheduling 2:
+		 * 	  just set the block_size as some magic number 
+		 */
+		int block_size = 50;
+		/* Scheduling 3:
+		 * 	  a.sum the max_mapper_num on each worker node as sum
+		 *    b.set the block_size as num_record/ sum
+		 */
+	/*	int sum = 0;
+		if(master.workerStatusMap.size() ==0){ // if there is no worker in the server , we will refuse the job
+			ObjectOutputStream oos = new ObjectOutputStream(job.getClientSocket().getOutputStream());
+			oos.write(-1);//return failure information to the client
+		}
+		for(int i:master.workerStatusMap.keySet()){
+			sum += master.workerStatusMap.get(i).getMaxTask();
+		}			
+		int block_size = Math.max(5,job.getJob().getReducerNum()/sum); // 5 is the minimum block_size to maintain some global view. 
+	*/	
+		//do the actual splitting
+		int size_file=job.getJob().getFif().getSize_file();
+		for(int i=0;i<(size_file-block_size);i = i+block_size){
+			SplitFile sf = new SplitFile(i,block_size,uif);
+			job.getSplitList().add(sf);
+		}
+		//split the final file differently
+		if(size_file%block_size != 0){
+			SplitFile sf = new SplitFile(size_file-(size_file%block_size),size_file%block_size,uif);
+			job.getSplitList().add(sf);
+		}		
+	}
+	
+	
 	@Override
 	public void run() {
 		   try{
@@ -95,7 +142,7 @@ public class JobReceiveServer implements Runnable{
 	               MapReduceJob job = new MapReduceJob(jobSocket,received_job,jobCnt);
 	               
 	               //Split the job
-	               job.Split();
+	               Split(job);
 	               System.out.println("Split finished!");
 	               //Create the MapTasks
 	               job.MapTaskGen();
