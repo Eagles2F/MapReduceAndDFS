@@ -50,17 +50,7 @@ public class TaskLauncher extends Thread{
           //wait for a slot to run
           woker.getFreeSlot();
 
-          synchronized (taskIns) {
-            //to make sure that there is no kill task action for this
-            if (taskIns.getRunState() != TaskStatus.taskState.UNASSIGNED &&
-                taskIns.getRunState() != TaskStatus.taskState.FAILED_UNCLEAN &&
-                taskIns.getRunState() != TaskStatus.taskState.KILLED_UNCLEAN) {
-              //got killed externally while still in the launcher queue
-              woker.addFreeSlot();
-              continue;
-            }
-            taskIns.slotTaken = true;
-          }
+          
           //got a free slot. launch the task
           startNewTask(taskIns);
         } catch (InterruptedException e) { 
