@@ -2,8 +2,6 @@ package mapreduce;
 
 import java.io.Serializable;
 
-import mapreduce.TaskStatus.taskPhase;
-
 
 
 public class TaskStatus implements Serializable{

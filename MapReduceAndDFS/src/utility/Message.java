@@ -1,7 +1,5 @@
 package utility;
 import java.io.Serializable;
-import java.util.HashMap;
-
 import mapreduce.Task;
 import mapreduce.WorkerNodeStatus;
 
@@ -11,7 +9,12 @@ import mapreduce.WorkerNodeStatus;
 * @Author Jian Wang
 */
 public class Message implements Serializable {
-    public enum msgType {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7618909352734419757L;
+
+	public enum msgType {
         COMMAND,
         RESPONSE,
         INDICATION

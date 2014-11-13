@@ -1,10 +1,16 @@
 package mapreduce;
 
+import java.io.Serializable;
+
 import mapreduce.fileIO.SplitFile;
 
 
-public class Task{
-    int taskId;
+public class Task implements Serializable{
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7934122013241912385L;
+	int taskId;
     TaskStatus taskStatus;
     private int type; // specify the job is a map or a reduce
     public static final int MAP = 0;

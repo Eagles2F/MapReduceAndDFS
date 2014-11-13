@@ -8,13 +8,9 @@ public class WorkerNodeStatus implements Serializable{
      * 
      */
     private static final long serialVersionUID = -4950825013774155452L;
-    private String trackerName;
     private int workerId;
-    private int masterAdd;
-    private int masterPort;
     private boolean alive;
     private HashMap<Integer,TaskStatus> taskReports;
-    private int failures;
     private int maxTasks;
 
     public WorkerNodeStatus(int Id){
