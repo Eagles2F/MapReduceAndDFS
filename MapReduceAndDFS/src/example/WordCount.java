@@ -64,7 +64,9 @@ public class WordCount {
 			 System.exit(1);
 		 } 
 		  
+
 	    Configuration conf = new Configuration(host,hostPort,11112);
+
 	    Job job = new Job("WordCount",conf);
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);

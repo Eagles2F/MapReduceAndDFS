@@ -112,7 +112,7 @@ public class JobReceiveServer implements Runnable{
 	*/	
 		//do the actual splitting
 		int size_file=job.getJob().getFif().getSize_file();
-		for(int i=0;i<(size_file-block_size);i = i+block_size){
+		for(int i=0;i<=(size_file-block_size);i = i+block_size){
 			SplitFile sf = new SplitFile(i,block_size,uif);
 			job.getSplitList().add(sf);
 		}
@@ -121,6 +121,7 @@ public class JobReceiveServer implements Runnable{
 			SplitFile sf = new SplitFile(size_file-(size_file%block_size),size_file%block_size,uif);
 			job.getSplitList().add(sf);
 		}		
+		System.out.println("number of splits:"+job.getSplitList().size());
 	}
 	
 	

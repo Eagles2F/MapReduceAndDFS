@@ -48,6 +48,7 @@ public class MapReduceJob {
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			this.MapTaskStatus.add(taskStatus);
 		}
+		System.out.println("Number of MapTasks:"+this.MapTasks.size());
 	} 
 	
 	public ArrayList<TaskStatus> getMapTaskStatus() {
