@@ -24,6 +24,9 @@ public class MapReduceJob {
 		this.clientSocket =soc;
 		this.job = job;
 		this.jobId = jobid;
+		this.SplitList = new ArrayList<SplitFile>();
+		this.MapTasks = new ArrayList<Task>();
+		this.MapTaskStatus = new ArrayList<TaskStatus>();
 	}
 	
 	/*
@@ -42,7 +45,7 @@ public class MapReduceJob {
 		/* Scheduling 2:
 		 * 	  just set the block_size as some magic number 
 		 */
-		int block_size = 100;
+		int block_size = 50;
 		/* Scheduling 3:
 		 * 	  a.sum the max_mapper_num on each worker node as sum
 		 *    b.set the block_size as num_record/ sum
@@ -70,10 +73,10 @@ public class MapReduceJob {
 			task.setSplit(sf);
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
-			task.setMapInputKeyClass(this.job.getMapperClass().getTypeParameters()[0].getClass());
-			task.setMapInputValueClass(this.job.getMapperClass().getTypeParameters()[1].getClass());
-			task.setMapOutputKeyClass(this.job.getMapperClass().getTypeParameters()[2].getClass());
-			task.setMapOutputValueClass(this.job.getMapperClass().getTypeParameters()[3].getClass());
+		//	task.setMapInputKeyClass(this.job.getMapperClass().getTypeParameters()[0].getClass());
+		//	task.setMapInputValueClass(this.job.getMapperClass().getTypeParameters()[1].getClass());
+		//	task.setMapOutputKeyClass(this.job.getMapperClass().getTypeParameters()[2].getClass());
+		//	task.setMapOutputValueClass(this.job.getMapperClass().getTypeParameters()[3].getClass());
 			this.MapTasks.add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			this.MapTaskStatus.add(taskStatus);

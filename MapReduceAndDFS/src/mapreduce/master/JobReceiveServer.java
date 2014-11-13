@@ -52,30 +52,29 @@ public class JobReceiveServer implements Runnable{
 	
 	//send the mapTask method
 	private void sendMapTasks(MapReduceJob job) throws IOException{
-		//Simple Scheduling: send the MapTask to the worker as long as it is not full
-		int current_worker = 0;
-		for(int i=0;i<job.getMapTasks().size();i++){
-			
-			Task t=job.getMapTasks().get(i);
-			
-			while(master.workerStatusMap.get(current_worker).getMaxTask() >
-				master.workerStatusMap.get(current_worker).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-				//send the task the worker with id current_worker
-				ObjectOutputStream oos = new ObjectOutputStream(master.workerSocMap.get(current_worker).getOutputStream());
-				Message msg = new Message();
-				msg.setMessageType(msgType.COMMAND);
-				msg.setCommandId(CommandType.START);
-				msg.setJobId(job.getJobId());
-				msg.setTaskId(t.getTaskId());
-				msg.setTaskItem(t);
-				oos.writeObject(msg);
-				oos.flush();
-				job.getMapTaskStatus().get(i).setState(taskState.SENT);
-				oos.close();
-				//goes to the next worker
-				current_worker++;
-				break;
-			}
+		//Simple Scheduling: send the MapTask to the worker as long as it is not full.
+		// this is a best effort sending, we do not ensure all the tasks must be sent.
+			for(int i=0;i<job.getMapTasks().size();i++){
+				Task t=job.getMapTasks().get(i);
+				for(int key: master.workerStatusMap.keySet()){
+				if(master.workerStatusMap.get(key).getMaxTask() >
+					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
+					//send the task the worker with id key
+					ObjectOutputStream oos = new ObjectOutputStream(master.workerSocMap.get(key).getOutputStream());
+					Message msg = new Message();
+					msg.setMessageType(msgType.COMMAND);
+					msg.setCommandId(CommandType.START);
+					msg.setJobId(job.getJobId());
+					msg.setTaskId(t.getTaskId());
+					msg.setTaskItem(t);
+					oos.writeObject(msg);
+					oos.flush();
+					job.getMapTaskStatus().get(i).setState(taskState.SENT);
+					oos.close();
+					//goes to the next worker
+					break;
+				}
+				}
 		}
 	}
 	

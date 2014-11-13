@@ -1,5 +1,7 @@
 package mapreduce.fileIO;
 
+import java.io.Serializable;
+
 /*
  * This class represents the result files after the splitting stage of the user input files. 
  *@Author: Yifan Li
@@ -8,7 +10,11 @@ package mapreduce.fileIO;
  *@Date: 11/9/2014
  *@Version:0.00,developing version
  */
-public class SplitFile {
+public class SplitFile implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1980834077809901298L;
 	//the start record ID
 	private int startId;
 	//the length of this split
