@@ -54,12 +54,12 @@ public class WordCount {
 			 System.exit(1);
 		 } 
 		  
-	    Configuration conf = new Configuration("128.237.196.248",11111,11112);
+	    Configuration conf = new Configuration("128.237.194.124",11111,11112);
 	    Job job = new Job("WordCount",conf);
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
-	    int num_records = 1000000;  //number of records in the input file
+	    int num_records = 1000;  //number of records in the input file
 	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);

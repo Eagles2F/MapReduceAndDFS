@@ -1,8 +1,7 @@
 package mapreduce.fileIO;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
-
+import java.io.Serializable;
 import mapreduce.userlib.FileInputFormat;
 import utility.KeyValue;
 /*
@@ -14,7 +13,11 @@ import utility.KeyValue;
  *@Date: 11/9/2014
  *@Version:0.00,developing version
  */
-public class UserInputFiles{
+public class UserInputFiles implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3507871942167548213L;
 	//ordered user files array
 	public OutputStream inputFiles;
 	public FileInputFormat fileInputFormat;
