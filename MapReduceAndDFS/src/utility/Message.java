@@ -45,6 +45,7 @@ public class Message implements Serializable {
     
     public Message (msgType type){
         messageType = type;
+        workerStatus = new WorkerNodeStatus();
         
     }
     
