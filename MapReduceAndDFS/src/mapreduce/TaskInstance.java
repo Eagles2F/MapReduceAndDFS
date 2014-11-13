@@ -29,9 +29,16 @@ public class TaskInstance implements Runnable{
     private Task task;
     private WorkerNode worker;
     private int reducerNum;
+    private int jobId;
     
-    
-    private TaskStatus taskStatus;
+    public int getJobId() {
+		return jobId;
+	}
+	public void setJobId(int jobId) {
+		this.jobId = jobId;
+	}
+
+	private TaskStatus taskStatus;
     public boolean slotTaken;
     public volatile boolean exit;
     private Thread runningThread;
@@ -43,9 +50,10 @@ public class TaskInstance implements Runnable{
         task = taskToRun;
         exit = false;
         taskStatus = new TaskStatus(task.getTaskId());
+        taskStatus.setJobId(task.getJobId());
         reducerNum = task.getReducerNum();
         ReducerInputFileName = task.getReducerInputFileName();
-                
+        jobId = task.getJobId();
     }
     public TaskStatus.taskState getRunState(){
         return taskStatus.getState();

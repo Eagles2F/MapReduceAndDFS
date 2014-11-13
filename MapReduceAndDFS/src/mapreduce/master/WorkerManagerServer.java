@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import mapreduce.TaskStatus;
 import mapreduce.WorkerNodeStatus;
 import utility.CommandType;
 import utility.IndicationType;
@@ -43,9 +44,16 @@ public class WorkerManagerServer implements Runnable{
     }
     
     //This method will handle the heartbeat information from the worker to update the status of all the tasks and workers.
-    private void handleHeartbeat(){
+    private void handleHeartbeat(WorkerNodeStatus ws){
     	//update the worker status
+    	this.master.workerStatusMap.get(ws.getWorkerId()).setAlive(true);
+    	this.master.workerStatusMap.get(ws.getWorkerId()).setMaxTask(ws.getMaxTask());
     	//update the tasks status
+    	for(int i: ws.getTaskReports().keySet()){
+    		TaskStatus ts = ws.getTaskReports().get(i);
+    		master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+    	}
+    	System.out.println("HB:"+ws.getWorkerId());
     }
     
     //This method will handle the task complete infomation. If a MapTask completed, the method will check if all the related
@@ -64,7 +72,7 @@ public class WorkerManagerServer implements Runnable{
         	sendToWorker(assignIDmsg);
         	
             Message workerMessage;
-            System.out.println("managerServer for worker "+workerId+"running");
+            System.out.println("managerServer for worker "+workerId+" running");
             
             //start to listen to the response from the worker
             while(running){
@@ -77,7 +85,7 @@ public class WorkerManagerServer implements Runnable{
                 }   
                 
                 //process the msg
-             
+                System.out.println("Worker Msg:"+workerMessage.getWorkerID());
                 if(workerMessage.getMessageType() == msgType.RESPONSE){
                 	switch(workerMessage.getResponseId()){
                     	default:
@@ -86,7 +94,7 @@ public class WorkerManagerServer implements Runnable{
                 }else if(workerMessage.getMessageType() == msgType.INDICATION){
                 	switch(workerMessage.getIndicationId()){
                 		case HEARTBEAT:
-                			handleHeartbeat();
+                			handleHeartbeat(workerMessage.getWorkerStatus());
                 			break;
                 		case TASKCOMPLETE:
                 			handleTaskcomplete();
@@ -99,7 +107,7 @@ public class WorkerManagerServer implements Runnable{
             objInput.close();
             objOutput.close();
         }catch(IOException e){
-            
+          e.printStackTrace();  
         }
     }
     // the send msg method

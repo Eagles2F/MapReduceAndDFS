@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import mapreduce.Task;
+import mapreduce.TaskStatus;
 import mapreduce.fileIO.SplitFile;
 import mapreduce.fileIO.UserInputFiles;
 import mapreduce.userlib.Job;
@@ -17,6 +18,7 @@ public class MapReduceJob {
 	private Socket clientSocket;
 	private Job job;
 	private ArrayList<Task> MapTasks;
+	private ArrayList<TaskStatus> MapTaskStatus;
 	private ArrayList<SplitFile> SplitList;
 	public MapReduceJob(Socket soc,Job job,int jobid){
 		this.clientSocket =soc;
@@ -72,9 +74,19 @@ public class MapReduceJob {
 			task.setMapOutputKeyClass(this.job.getMapperClass().getTypeParameters()[2].getClass());
 			task.setMapOutputValueClass(this.job.getMapperClass().getTypeParameters()[3].getClass());
 			this.MapTasks.add(task);
+			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
+			this.MapTaskStatus.add(taskStatus);
 		}
 	} 
 	
+	public ArrayList<TaskStatus> getMapTaskStatus() {
+		return MapTaskStatus;
+	}
+
+	public void setMapTaskStatus(ArrayList<TaskStatus> mapTaskStatus) {
+		MapTaskStatus = mapTaskStatus;
+	}
+
 	public Socket getClientSocket() {
 		return clientSocket;
 	}

@@ -13,12 +13,14 @@ public class TaskStatus implements Serializable{
     // what state is the task in?
     public static enum taskState{QUEUING,RUNNING, SUCCEEDED, FAILED, UNASSIGNED, KILLED,COMMIT_PENDING, FAILED_UNCLEAN, KILLED_UNCLEAN,COMPLETE}
     private final int taskId;
+    private int jobId;
     private float progress;
     private volatile taskState runState;
     private volatile taskPhase currentPhase;
     private String diagnosticInfo;
     private String stateString;
     private String taskTracker;
+    
       
     private long startTime; 
     private long finishTime; 
@@ -50,4 +52,16 @@ public class TaskStatus implements Serializable{
         // TODO Auto-generated method stub
         return currentPhase;
     }
+
+	public int getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(int jobId) {
+		this.jobId = jobId;
+	}
+
+	public int getTaskId() {
+		return taskId;
+	}
 }
