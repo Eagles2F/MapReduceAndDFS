@@ -47,7 +47,7 @@ public class HireWorkerServer implements Runnable{
 	               Socket workerSocket = serverSocket.accept();
 	               System.out.println("worker: "+workerSocket.getInetAddress()+":"+workerSocket.getPort()+" join in");
 	               master.workerSocMap.put(workerCnt, workerSocket); //add the worker soc with workerCnt as the ID
-	               
+	             
 	               //create the specific manage server for the new worker
 	               WorkerManagerServer managerServer = new WorkerManagerServer(master,workerCnt,workerSocket); 
 	               master.workerMangerServerMap.put(workerCnt, managerServer);

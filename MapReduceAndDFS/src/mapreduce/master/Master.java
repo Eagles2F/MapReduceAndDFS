@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.net.*;
 
 import mapreduce.WorkerNodeStatus;
@@ -14,7 +15,7 @@ class Master{
 		
 		//The HashMap for worker's socket
 		public ConcurrentHashMap<Integer,Socket> workerSocMap;
-		
+		public ConcurrentHashMap<Integer,ObjectOutputStream> workerOosMap;
 		//The HashMap for each worker's manager server 
 		public ConcurrentHashMap<Integer,WorkerManagerServer> workerMangerServerMap;
 		
@@ -39,6 +40,7 @@ class Master{
 			workerSocMap = new ConcurrentHashMap<Integer,Socket>();
 			workerStatusMap = new ConcurrentHashMap<Integer,WorkerNodeStatus>();
 			workerMangerServerMap = new ConcurrentHashMap<Integer,WorkerManagerServer>();
+			workerOosMap = new ConcurrentHashMap<Integer, ObjectOutputStream>();
 			jobMap = new ConcurrentHashMap<Integer, MapReduceJob>();
 			console = new BufferedReader(new InputStreamReader(System.in));
 			running = true;

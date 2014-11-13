@@ -42,6 +42,7 @@ public class WorkerManagerServer implements Runnable{
         master.workerStatusMap.put(id, new WorkerNodeStatus(id));//set the initial NodeStatus
         objInput = new ObjectInputStream(socket.getInputStream());
         objOutput = new ObjectOutputStream(socket.getOutputStream());
+        master.workerOosMap.put(id, objOutput);//add the OOS to the map
        
     }
     
@@ -69,8 +70,8 @@ public class WorkerManagerServer implements Runnable{
     	}
     }
     
-    //This method will handle the task complete infomation. If a MapTask completed, the method will check if all the related
-    //tasks are completed or not. If a ReduceTask completed, the method will chekc if all the related tasks are completed or
+    //This method will handle the task complete information. If a MapTask completed, the method will check if all the related
+    //tasks are completed or not. If a ReduceTask completed, the method will check if all the related tasks are completed or
     //not.
     private void handleTaskcomplete(){
     	
@@ -98,7 +99,7 @@ public class WorkerManagerServer implements Runnable{
                 }   
                 
                 //process the msg
-                System.out.println("Worker Msg:"+workerMessage.getWorkerID());
+                System.out.println("Worker Msg:"+workerMessage.getWorkerID()+"Msg: "+workerMessage.getMessageType());
                 if(workerMessage.getMessageType() == msgType.RESPONSE){
                 	switch(workerMessage.getResponseId()){
                 		case STARTRES:
