@@ -73,15 +73,18 @@ public class WorkerNode {
 // methods
  	//constructing method
 	public WorkerNode(){
-	    config = new WorkerConfig();
+	    //config = new WorkerConfig();
 	    
-		this.host = config.getMasterAdd();
-		this.hostPort = Integer.valueOf(config.getMasterPort());
+		//this.host = config.getMasterAdd();
+		//this.hostPort = Integer.valueOf(config.getMasterPort());
+	    this.host = "128.237.194.124";
+	    this.hostPort = 11112;
 		this.workerID = 0;
 		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
+		this.workerInfo = new WorkerInfoReport();
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
@@ -91,6 +94,7 @@ public class WorkerNode {
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
+        this.workerInfo = new WorkerInfoReport();
 	}
 	
 	//command handling methods
@@ -218,7 +222,7 @@ public class WorkerNode {
 			}
 
 			//worker info backend started
-			
+			System.out.println("Start report!");
 			worker.startreport();
 		
 			
@@ -279,7 +283,7 @@ public class WorkerNode {
 		@Override
 		public void run() {
 			// send the info about the current process running information every 5 seconds
-			
+			System.out.println("worker report");
 		    while(!failure){
 				Message response=new Message(msgType.INDICATION);
 				response.setIndicationId(IndicationType.HEARTBEAT);
@@ -293,7 +297,8 @@ public class WorkerNode {
 					    taskIns.getTaskStatus().setState(TaskStatus.taskState.FAILED);
 					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
 				}
-				response.getWorkerStatus().setMaxTask(5);
+				WorkerNodeStatus ws = response.getWorkerStatus();
+				ws.setMaxTask(5);
 				sendToManager(response);
 				
 				try {
