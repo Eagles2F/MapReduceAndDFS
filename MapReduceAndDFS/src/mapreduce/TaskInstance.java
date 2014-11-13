@@ -129,7 +129,7 @@ public class TaskInstance implements Runnable{
                             //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
                             PriorityQueue<KeyValue> valueQ = rw.getPairQ();
                             Iterator valueItr;
-                            while(true){
+                            while(true && (valueQ != null)){
                                 Object currentKey = valueQ.peek().getKey();
                                 valueItr = getValueIterator(valueQ);
                                 conbiner.reduce(currentKey, valueItr, crw, task.getTaskId());

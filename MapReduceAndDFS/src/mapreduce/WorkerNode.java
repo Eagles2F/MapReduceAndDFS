@@ -224,12 +224,15 @@ public class WorkerNode {
 			//worker info backend started
 			System.out.println("Start report!");
 			worker.startreport();
+			worker.startTaskLauncher();
+			
 		
 			
 			//wait for the CMDs and deal with them
 			while(!worker.failure){
 				try {
 					Message master_cmd = (Message) worker.obis.readObject();
+					System.out.println("receive message: "+master_cmd.getCommandId());
 					switch(master_cmd.getCommandId()){
 						case ASSIGNID:// this command assignes the id to the process
 							worker.handle_assignID(master_cmd);
@@ -268,7 +271,12 @@ public class WorkerNode {
 		
 	}
 	
-	private int getHostPort() {
+	private void startTaskLauncher() {
+        Thread t = new Thread(taskLauncher);
+        t.start();
+        
+    }
+    private int getHostPort() {
         
         return hostPort;
     }

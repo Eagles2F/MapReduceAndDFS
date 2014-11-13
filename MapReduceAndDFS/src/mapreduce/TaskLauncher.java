@@ -23,9 +23,9 @@ public class TaskLauncher extends Thread{
 
     public void addToTaskQueue(TaskInstance taskIns) {
       synchronized (tasksToLaunch) {
-        
+        System.out.println("notify taskLauncher");
         tasksToLaunch.add(taskIns);
-        tasksToLaunch.notifyAll();
+        tasksToLaunch.notify();
       }
     }
     
@@ -36,6 +36,7 @@ public class TaskLauncher extends Thread{
 
     
     public void run() {
+        System.out.println("taskLauncher run");
       while (!Thread.interrupted()) {
         try {
           TaskInstance taskIns;
@@ -44,6 +45,7 @@ public class TaskLauncher extends Thread{
               tasksToLaunch.wait();
             }
             //get the TIP
+            System.out.println("taskLauncher get new task");
             taskIns = tasksToLaunch.remove(0);
             
           }
