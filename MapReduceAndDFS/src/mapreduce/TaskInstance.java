@@ -202,8 +202,7 @@ public class TaskInstance implements Runnable{
                 
                 ReducerRecordWriter rw = new ReducerRecordWriter();
                 Reducer<Object, Object,Object, Object> process = (Reducer) constructor.newInstance();
-                Class<?> inputKeyClass = task.getReduceInputKeyClass();
-                Class<?> inputValueClass = task.getReduceInputValueClass();
+                
                 
                 RecordReader rr = 
                     new RecordReader(task.getSplit());
