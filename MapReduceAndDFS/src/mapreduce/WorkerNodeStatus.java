@@ -1,8 +1,9 @@
 package mapreduce;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class WorkerNodeStatus{
+public class WorkerNodeStatus implements Serializable{
     private String trackerName;
     private int workerId;
     private int masterAdd;
@@ -21,6 +22,7 @@ public class WorkerNodeStatus{
     public WorkerNodeStatus(){
         taskReports = new HashMap<Integer,TaskStatus>();
         alive = true;
+        maxTasks = 0;
     }
     
     public void setMaxTask(int n){
