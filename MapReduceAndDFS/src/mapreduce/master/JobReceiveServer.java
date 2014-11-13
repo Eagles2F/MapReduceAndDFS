@@ -10,6 +10,7 @@ import utility.CommandType;
 import utility.Message;
 import utility.Message.msgType;
 import mapreduce.Task;
+import mapreduce.TaskStatus.taskState;
 import mapreduce.userlib.Job;
 
 /*
@@ -53,7 +54,10 @@ public class JobReceiveServer implements Runnable{
 	private void sendMapTasks(MapReduceJob job) throws IOException{
 		//Simple Scheduling: send the MapTask to the worker as long as it is not full
 		int current_worker = 0;
-		for(Task t:job.getMapTasks()){
+		for(int i=0;i<job.getMapTasks().size();i++){
+			
+			Task t=job.getMapTasks().get(i);
+			
 			while(master.workerStatusMap.get(current_worker).getMaxTask() >
 				master.workerStatusMap.get(current_worker).getTaskReports().size()){ //if there is still extra computing ability in the worker node
 				//send the task the worker with id current_worker
@@ -66,6 +70,7 @@ public class JobReceiveServer implements Runnable{
 				msg.setTaskItem(t);
 				oos.writeObject(msg);
 				oos.flush();
+				job.getMapTaskStatus().get(i).setState(taskState.SENT);
 				oos.close();
 				//goes to the next worker
 				current_worker++;
@@ -93,10 +98,13 @@ public class JobReceiveServer implements Runnable{
 	               
 	               //Split the job
 	               job.Split();
+	               System.out.println("Split finished!");
 	               //Create the MapTasks
 	               job.MapTaskGen();
+	               System.out.println("Task generation finished!");
 	               //send the MapTasks away
 	               sendMapTasks(job);
+	          
 	               //store the Mapreduce job into the ConcurrentHashmap
 	               master.jobMap.put(jobCnt, job);
 	               jobCnt++;

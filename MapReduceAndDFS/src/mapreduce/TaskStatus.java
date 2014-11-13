@@ -12,9 +12,9 @@ public class TaskStatus implements Serializable{
 
     //enumeration for reporting current phase of a task. 
     public static enum taskPhase{STARTING, MAP, SHUFFLE, SORT, REDUCE, CLEANUP}
-
+    
     // what state is the task in?
-    public static enum taskState{QUEUING,RUNNING, SUCCEEDED, FAILED, UNASSIGNED, KILLED,COMMIT_PENDING, FAILED_UNCLEAN, KILLED_UNCLEAN,COMPLETE}
+    public static enum taskState{UNSENT,SENT,RECEIVED,QUEUING,RUNNING, SUCCEEDED, FAILED, KILLED,COMPLETE}
     private final int taskId;
     private int jobId;
     private float progress;
@@ -30,6 +30,7 @@ public class TaskStatus implements Serializable{
     private long outputSize;
     public TaskStatus(int taskid){
         taskId = taskid;
+        runState = taskState.UNSENT;
     }
     
     public void setState(taskState state){

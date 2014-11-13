@@ -34,7 +34,7 @@ public class MapReduceJob {
 		UserInputFiles uif = new UserInputFiles(job.getFif());
 		
 		//compute the block_size for each split file
-		int block_size = 0;
+		
 		/* Scheduling 1:
 			  a.get the number of available MapTask computing ability  --  num
 			  b.set the block_size as num_record / num
@@ -42,11 +42,12 @@ public class MapReduceJob {
 		/* Scheduling 2:
 		 * 	  just set the block_size as some magic number 
 		 */
+		int block_size = 100;
 		/* Scheduling 3:
 		 * 	  a.sum the max_mapper_num on each worker node as sum
 		 *    b.set the block_size as num_record/ sum
 		 */
-		
+
 		//do the actual splitting
 		int size_file=job.getFif().getSize_file();
 		for(int i=0;i<(size_file-block_size);i = i+block_size){

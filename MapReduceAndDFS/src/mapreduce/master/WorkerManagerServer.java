@@ -6,10 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import mapreduce.TaskStatus;
+import mapreduce.TaskStatus.taskState;
 import mapreduce.WorkerNodeStatus;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.Message;
+import utility.Message.msgResult;
 import utility.Message.msgType;
 
 /*
@@ -56,6 +58,17 @@ public class WorkerManagerServer implements Runnable{
     	System.out.println("HB:"+ws.getWorkerId());
     }
     
+    //This method will handle the worker response to the task start command
+    private void handleStartres(Message msg){
+    	if(msg.getResult() == msgResult.SUCCESS){
+    		//update the task status
+    		master.jobMap.get(msg.getJobId()).getMapTaskStatus().get(msg.getTaskId()).setState(taskState.RECEIVED);
+    	}else{
+    		//update the task status
+    		master.jobMap.get(msg.getJobId()).getMapTaskStatus().get(msg.getTaskId()).setState(taskState.FAILED);;
+    	}
+    }
+    
     //This method will handle the task complete infomation. If a MapTask completed, the method will check if all the related
     //tasks are completed or not. If a ReduceTask completed, the method will chekc if all the related tasks are completed or
     //not.
@@ -88,6 +101,8 @@ public class WorkerManagerServer implements Runnable{
                 System.out.println("Worker Msg:"+workerMessage.getWorkerID());
                 if(workerMessage.getMessageType() == msgType.RESPONSE){
                 	switch(workerMessage.getResponseId()){
+                		case STARTRES:
+                			handleStartres(workerMessage);
                     	default:
                     		System.out.println("unrecagnized message");
                 	}
