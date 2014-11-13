@@ -7,7 +7,12 @@ import mapreduce.TaskStatus.taskPhase;
 
 
 public class TaskStatus implements Serializable{
-  //enumeration for reporting current phase of a task. 
+  /**
+     * 
+     */
+    private static final long serialVersionUID = 2855645783111865212L;
+
+    //enumeration for reporting current phase of a task. 
     public static enum taskPhase{STARTING, MAP, SHUFFLE, SORT, REDUCE, CLEANUP}
 
     // what state is the task in?

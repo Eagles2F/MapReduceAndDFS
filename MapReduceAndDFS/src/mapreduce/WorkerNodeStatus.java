@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class WorkerNodeStatus implements Serializable{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4950825013774155452L;
     private String trackerName;
     private int workerId;
     private int masterAdd;
