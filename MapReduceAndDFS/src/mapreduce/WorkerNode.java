@@ -73,12 +73,11 @@ public class WorkerNode {
 // methods
  	//constructing method
 	public WorkerNode(){
-	    //config = new WorkerConfig();
+	    config = new WorkerConfig();
 	    
-		//this.host = config.getMasterAdd();
-		//this.hostPort = Integer.valueOf(config.getMasterPort());
-	    this.host = "128.237.194.124";
-	    this.hostPort = 11112;
+		this.host = config.getMasterAdd();
+		this.hostPort = Integer.valueOf(config.getMasterPort());
+	    
 		this.workerID = 0;
 		this.freeSlot = 5;
 		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
