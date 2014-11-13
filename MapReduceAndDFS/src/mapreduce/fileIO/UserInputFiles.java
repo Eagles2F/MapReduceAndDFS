@@ -1,6 +1,8 @@
 package mapreduce.fileIO;
 
-import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 import mapreduce.userlib.FileInputFormat;
 import utility.KeyValue;
@@ -19,16 +21,26 @@ public class UserInputFiles implements Serializable{
 	 */
 	private static final long serialVersionUID = 3507871942167548213L;
 	//ordered user files array
-	public OutputStream inputFiles;
 	public FileInputFormat fileInputFormat;
 	
 	public UserInputFiles(FileInputFormat fif){
 		fileInputFormat = fif;
-		//get the output streams from the fif to the inputFiles
-		
 	}
 	public KeyValue<Object,Object> GetRecordById(int id){
 		//Read the number lineNum from the file file_id
-		return null;
+		int count =0;
+		String line ="";
+		try(BufferedReader in = new BufferedReader( new FileReader(this.fileInputFormat.getPath()) )){
+			while(true){
+				line = in.readLine();
+				if(count == id){
+					return new KeyValue<Object, Object>(id,line); 
+				}
+				count++;
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		return null;// if there is no such id, return null
 	}
 }

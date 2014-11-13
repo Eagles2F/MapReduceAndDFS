@@ -4,6 +4,14 @@ public class KeyValue<Key,Value> implements Comparable{
     private Key key;
     private Value value;
     
+    public KeyValue(){
+    	
+    }
+    public KeyValue(Key k, Value v){
+    	this.key = k;
+    	this.value = v;
+    }
+    
     public void setKey(Key k){
         key = k;
     }
