@@ -238,7 +238,7 @@ public class WorkerNode {
 							worker.handle_assignID(master_cmd);
 							break;
 						case START:// this command tries to start a process on this worker
-						    System.out.println("start task "+master_cmd.getTask().getTaskId());
+						    System.out.println("start task "+master_cmd.getTask().getTaskId()+" "+master_cmd.getTask().getType());
 							worker.handle_start(master_cmd);
 							break;
 						
@@ -306,8 +306,11 @@ public class WorkerNode {
     					if((taskIns.getThread().getState() == Thread.State.TERMINATED) &&
     					        (taskIns.getRunState() != TaskStatus.taskState.COMPLETE))
     					    taskIns.getTaskStatus().setState(TaskStatus.taskState.FAILED);
-    					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
+    					
     					}
+					taskIns.getTaskStatus().setTaskType(taskIns.getTask().getType());
+					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
+				
 				}
 				WorkerNodeStatus ws = response.getWorkerStatus();
 				ws.setMaxTask(100);

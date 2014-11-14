@@ -89,6 +89,7 @@ public class TaskInstance implements Runnable{
         System.out.println("task "+task.getTaskId()+" run");
         
         if(task.getType() == Task.MAP){
+            System.out.println("run map task "+task.getTaskId());
             Class<?> mapperClass;
             try {
                 mapperClass = task.getMapClass();
@@ -217,6 +218,7 @@ public class TaskInstance implements Runnable{
         }
         else{
             Class<?> reduceClass;
+            System.out.println("run rudcer task "+task.getTaskId());
             taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
             try {
                 reduceClass = task.getReduceClass();
@@ -228,8 +230,7 @@ public class TaskInstance implements Runnable{
                 Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
                 
                 
-                RecordReader rr = 
-                    new RecordReader(task.getSplit());
+                
                 
                 
                 try {
