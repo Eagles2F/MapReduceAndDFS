@@ -37,6 +37,7 @@ public class MapReduceJob {
 			task.setJobId(this.jobId);
 			task.setType(0);
 			task.setSplit(sf);
+			task.setReducerNum(job.getReducerNum());
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());
