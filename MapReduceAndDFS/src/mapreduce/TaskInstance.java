@@ -46,6 +46,7 @@ public class TaskInstance implements Runnable{
     private boolean isConbinComplete;
     private boolean isReduceComplete;
     private String ReducerInputFileName;
+    private String ReducerOutputPath;
     private String mapperOutputPath;
     public TaskInstance(Task taskToRun, WorkerNode w){
         task = taskToRun;
@@ -56,6 +57,7 @@ public class TaskInstance implements Runnable{
         ReducerInputFileName = task.getReducerInputFileName();
         jobId = task.getJobId();
         mapperOutputPath = task.getOutputPath();
+        ReducerOutputPath = task.getUserOutputPath();
         worker = w;
     }
     public TaskStatus.taskState getRunState(){
@@ -381,7 +383,7 @@ public class TaskInstance implements Runnable{
    private PriorityQueue<KeyValue<Object, Object>> sortReducerInput(){
        FileInputStream fileStream;
        try {
-       fileStream = new FileInputStream(ReducerInputFileName);
+       fileStream = new FileInputStream(ReducerOutputPath);
        try {
            ObjectInputStream inputStream = new ObjectInputStream(fileStream);
            try {

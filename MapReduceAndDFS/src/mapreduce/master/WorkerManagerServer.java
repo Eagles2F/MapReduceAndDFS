@@ -79,6 +79,7 @@ public class WorkerManagerServer implements Runnable{
     	
     	//Scan the intermediate output path of the job,Get the File List
     	File folder = new File(job.getMapTasks().get(0).getOutputPath());
+    	System.out.println("outPut path "+job.getMapTasks().get(0).getOutputPath());
     	File[] listOfFiles = folder.listFiles();
     	for (int i = 0; i < listOfFiles.length; i++) {
 			Task task = new Task();
@@ -88,7 +89,7 @@ public class WorkerManagerServer implements Runnable{
 			task.setTaskId(job.getMapTasks().size());
 			task.setReduceClass(job.getJob().getReducerClass());
 			//set file IO
-			task.setOutputPath(".");
+			
 			task.setUserOutputPath(job.getJob().getFof().getPath());
 			task.setReducerInputFileName(listOfFiles[i].getName());
 			
