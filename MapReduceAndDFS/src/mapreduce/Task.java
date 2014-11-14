@@ -3,6 +3,7 @@ package mapreduce;
 import java.io.Serializable;
 
 import mapreduce.fileIO.SplitFile;
+import mapreduce.userlib.FileOutputFormat;
 
 
 public class Task implements Serializable{
@@ -17,7 +18,17 @@ public class Task implements Serializable{
     public static final int REDUCE = 1; 
     private int reducerNum;
     private String outputPath;
-    // get these information from the client submission
+    
+    private String userOutputPath;
+    private String reduceTaskInputPath;
+    
+    public String getReduceTaskInputPath() {
+		return reduceTaskInputPath;
+	}
+	public void setReduceTaskInputPath(String reduceTaskInputPath) {
+		this.reduceTaskInputPath = reduceTaskInputPath;
+	}
+	// get these information from the client submission
     @SuppressWarnings("rawtypes")
     private Class mapClass;
     
@@ -186,4 +197,10 @@ public class Task implements Serializable{
         
         return reducerInputFileName;
     }
+	public String getUserOutputPath() {
+		return userOutputPath;
+	}
+	public void setUserOutputPath(String userOutputPath) {
+		this.userOutputPath = userOutputPath;
+	}
 }

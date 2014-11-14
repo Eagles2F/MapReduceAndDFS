@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.fileIO.SplitFile;
-import mapreduce.fileIO.UserInputFiles;
 import mapreduce.userlib.Job;
 
 public class MapReduceJob {
@@ -19,6 +18,8 @@ public class MapReduceJob {
 	private Job job;
 	private ArrayList<Task> MapTasks;
 	private ArrayList<TaskStatus> MapTaskStatus;
+	private ArrayList<Task> ReduceTasks;
+	private ArrayList<TaskStatus> ReduceTaskStatus;
 	private ArrayList<SplitFile> SplitList;
 	public MapReduceJob(Socket soc,Job job,int jobid){
 		this.clientSocket =soc;
@@ -100,6 +101,26 @@ public class MapReduceJob {
 
 	public void setSplitList(ArrayList<SplitFile> splitList) {
 		SplitList = splitList;
+	}
+
+
+	public ArrayList<Task> getReduceTasks() {
+		return ReduceTasks;
+	}
+
+
+	public void setReduceTasks(ArrayList<Task> reduceTasks) {
+		ReduceTasks = reduceTasks;
+	}
+
+
+	public ArrayList<TaskStatus> getReduceTaskStatus() {
+		return ReduceTaskStatus;
+	}
+
+
+	public void setReduceTaskStatus(ArrayList<TaskStatus> reduceTaskStatus) {
+		ReduceTaskStatus = reduceTaskStatus;
 	}
 
 }
