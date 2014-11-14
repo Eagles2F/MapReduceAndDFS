@@ -102,7 +102,9 @@ public class TaskInstance implements Runnable{
                 
                 try {
                     while(!exit && ! isMapComplete){
+                        
                         KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
+                        System.out.println("mapper Key "+keyValuePair.getKey().toString()+" value "+keyValuePair.getValue().toString());
                         if(keyValuePair != null){
                             process.map(keyValuePair.getKey(), keyValuePair.getValue(), rw,task.getTaskId());
                         }
