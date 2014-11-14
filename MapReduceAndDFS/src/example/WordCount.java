@@ -18,7 +18,7 @@ import mapreduce.userlib.Reducer;
 
 public class WordCount {
 
-      ClientConfig config;
+      static ClientConfig config;
     private static String host;
     private static Integer hostPort;
 	  public static class TokenizerMapper
@@ -63,7 +63,10 @@ public class WordCount {
 			 System.out.println("Usage: java exmple.WordCount <intput_file_path> <output_file_path>");
 			 System.exit(1);
 		 } 
-		  
+		 config = new ClientConfig();
+         
+         host = config.getMasterAdd();
+         hostPort = Integer.valueOf(config.getMasterPort());  
 
 	    Configuration conf = new Configuration(host,hostPort,11112);
 
