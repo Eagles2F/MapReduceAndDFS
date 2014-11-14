@@ -217,7 +217,7 @@ public class TaskInstance implements Runnable{
         }
         else{
             Class<?> reduceClass;
-            taskStatus.setPhase(TaskStatus.taskPhase.STARTING);
+            taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
             try {
                 reduceClass = task.getReduceClass();
             
@@ -311,6 +311,7 @@ public class TaskInstance implements Runnable{
         indication.setJobId(task.getJobId());
         indication.setTaskId(task.getTaskId());
         indication.setWorkerID(task.getWorkerId());
+        indication.setTaskItem(task);
         
         worker.sendToManager(indication);
         
@@ -322,6 +323,7 @@ public class TaskInstance implements Runnable{
         completeMsg.setJobId(task.getJobId());
         completeMsg.setTaskId(task.getTaskId());
         completeMsg.setWorkerID(task.getWorkerId());
+        completeMsg.setTaskItem(task);
         
         worker.sendToManager(completeMsg);
         
