@@ -81,7 +81,7 @@ public class JobReceiveServer implements Runnable{
 	
 	/*
 	 * This method serves to split the job into MapTasks.
-	 */
+	 */	
 	public void Split(MapReduceJob job) throws IOException{
 		//get the inputfiles which offers the access to the user input data
 		UserInputFiles uif = new UserInputFiles(job.getJob().getFif());

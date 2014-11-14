@@ -12,7 +12,7 @@ public class WorkerNodeStatus implements Serializable{
     private boolean alive;
     private HashMap<Integer,TaskStatus> taskReports;
     private int maxTasks;
-    private int taskType;
+ 
     
 
     public WorkerNodeStatus(int Id){
