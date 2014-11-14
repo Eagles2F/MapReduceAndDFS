@@ -126,7 +126,7 @@ public class WorkerNode {
 		
 		response.setTaskId(msg.getTaskId());
 		
-		TaskInstance taskIns = new TaskInstance(msg.getTask());
+		TaskInstance taskIns = new TaskInstance(msg.getTask(),this);
 		taskIns.setRunState(TaskStatus.taskState.QUEUING);
 		currentTaskMap.put(msg.getTaskId(), taskIns);
 		

@@ -1,6 +1,8 @@
 package utility;
 
-public class KeyValue<Key,Value> implements Comparable{
+import java.io.Serializable;
+
+public class KeyValue<Key,Value> implements Comparable,Serializable{
     private Key key;
     private Value value;
     
