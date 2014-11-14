@@ -6,7 +6,6 @@ import java.util.StringTokenizer;
 
 import utility.Configuration;
 import utility.RecordWriter;
-import utility.WorkerConfig;
 import mapreduce.userlib.FileInputFormat;
 import mapreduce.userlib.FileOutputFormat;
 import mapreduce.userlib.Job;
@@ -69,10 +68,7 @@ public class WordCount {
          host = config.getMasterAdd();
          hostPort = Integer.valueOf(config.getMasterPort());  
 
-	    Configuration conf = new Configuration(host,hostPort,11112);
-
-
-	    Job job = new Job("WordCount",conf);
+	    Job job = new Job("WordCount",config);
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);

@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 
+import example.ClientConfig;
 import utility.Configuration;
 
 public class Job implements Serializable{
@@ -19,7 +20,7 @@ public class Job implements Serializable{
 	private FileInputFormat fif;
 	private FileOutputFormat fof;
 	private String jobname;
-	private Configuration conf;
+	private ClientConfig conf;
 	private int reducerNum;
 	
 	public int getReducerNum() {
@@ -30,17 +31,16 @@ public class Job implements Serializable{
         this.reducerNum = reducerNum;
     }
 
-    public Job(String jobname,Configuration conf){
+    public Job(String jobname,ClientConfig conf){
 		this.setJobname(jobname);
-		this.setConf(conf);
 	}
 	
 	//true-job succeccfully completed. false-job failed for some reason
 	public boolean waitForJobCompletion(){
 		//submit the job here, send the job object and related class files.
 		try {
-			System.out.println(conf.getMaster_ip()+" "+conf.getJobSubmission_port());
-			Socket soc = new Socket(conf.getMaster_ip(),conf.getJobSubmission_port());
+			System.out.println(conf.getMasterAdd()+" "+conf.getMasterPort());
+			Socket soc = new Socket(conf.getMasterAdd(),Integer.valueOf(conf.getMasterPort()));
 			
 			ObjectOutputStream oos = new ObjectOutputStream(soc.getOutputStream());
 			
@@ -113,14 +113,5 @@ public class Job implements Serializable{
 
 	public void setJobname(String jobname) {
 		this.jobname = jobname;
-	}
-
-	public Configuration getConf() {
-		return conf;
-	}
-
-	public void setConf(Configuration conf) {
-		this.conf = conf;
-	}
-	
+	}	
 }

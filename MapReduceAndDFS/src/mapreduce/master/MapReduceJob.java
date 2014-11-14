@@ -45,11 +45,7 @@ public class MapReduceJob {
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());
-			task.setOutputPath(".");
-		//	task.setMapInputKeyClass(this.job.getMapperClass().getTypeParameters()[0].getClass());
-		//	task.setMapInputValueClass(this.job.getMapperClass().getTypeParameters()[1].getClass());
-		//	task.setMapOutputKeyClass(this.job.getMapperClass().getTypeParameters()[2].getClass());
-		//	task.setMapOutputValueClass(this.job.getMapperClass().getTypeParameters()[3].getClass());
+			task.setOutputPath("./temp");
 			this.MapTasks.add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			taskStatus.setTaskType(Task.MAP);

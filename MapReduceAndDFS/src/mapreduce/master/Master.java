@@ -105,10 +105,6 @@ class Master{
 	//main process
 	public static void main(String[] args){
 		//initialization
-//		if(args.length != 1){
-//			System.out.println("wrong arguments, usage: Master <configuration file directory>");
-//			System.exit(1);
-//		}
 		 Master master =  new Master(new Configuration("128.237.196.248",11111,11112));
 		 
 		//start the JobReceiveServer thread
