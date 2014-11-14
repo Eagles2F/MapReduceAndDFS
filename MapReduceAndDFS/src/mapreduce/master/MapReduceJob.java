@@ -27,6 +27,8 @@ public class MapReduceJob {
 		this.jobId = jobid;
 		this.SplitList = new ArrayList<SplitFile>();
 		this.MapTasks = new ArrayList<Task>();
+		this.ReduceTasks = new ArrayList<Task>();
+		this.ReduceTaskStatus = new ArrayList<TaskStatus>();
 		this.MapTaskStatus = new ArrayList<TaskStatus>();
 	}
 	
@@ -50,6 +52,7 @@ public class MapReduceJob {
 		//	task.setMapOutputValueClass(this.job.getMapperClass().getTypeParameters()[3].getClass());
 			this.MapTasks.add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
+			taskStatus.setTaskType(Task.MAP);
 			this.MapTaskStatus.add(taskStatus);
 		}
 		System.out.println("Number of MapTasks:"+this.MapTasks.size());

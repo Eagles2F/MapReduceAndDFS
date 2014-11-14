@@ -23,7 +23,7 @@ public class TaskStatus implements Serializable{
     private String diagnosticInfo;
     private String stateString;
     private String taskTracker;
-    
+    private int taskType;
       
     private long startTime; 
     private long finishTime; 
@@ -67,5 +67,13 @@ public class TaskStatus implements Serializable{
 
 	public int getTaskId() {
 		return taskId;
+	}
+
+	public int getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(int taskType) {
+		this.taskType = taskType;
 	}
 }
