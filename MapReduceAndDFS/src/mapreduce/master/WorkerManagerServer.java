@@ -11,7 +11,6 @@ import mapreduce.TaskStatus;
 import mapreduce.TaskStatus.taskState;
 import mapreduce.WorkerNodeStatus;
 import utility.CommandType;
-import utility.IndicationType;
 import utility.Message;
 import utility.Message.msgResult;
 import utility.Message.msgType;
