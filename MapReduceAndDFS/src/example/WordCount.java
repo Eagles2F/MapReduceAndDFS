@@ -54,7 +54,7 @@ public class WordCount {
 			 System.exit(1);
 		 } 
 		  
-	    Configuration conf = new Configuration("128.237.200.1",11111,11112);
+	    Configuration conf = new Configuration("128.237.195.41",11111,11112);
 	    Job job = new Job("WordCount",conf);
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);

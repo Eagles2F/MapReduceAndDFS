@@ -99,11 +99,13 @@ public class WorkerManagerServer implements Runnable{
                 }   
                 
                 //process the msg
-                System.out.println("Worker Msg:"+workerMessage.getWorkerID()+"Msg: "+workerMessage.getMessageType());
+                System.out.println("Worker Msg:"+workerMessage.getWorkerID()+"Msg: "+workerMessage.getMessageType()+" "+
+                workerMessage.getResponseId());
                 if(workerMessage.getMessageType() == msgType.RESPONSE){
                 	switch(workerMessage.getResponseId()){
                 		case STARTRES:
                 			handleStartres(workerMessage);
+                			break;
                     	default:
                     		System.out.println("unrecagnized message");
                 	}

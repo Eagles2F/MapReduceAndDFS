@@ -42,6 +42,7 @@ public class RecordReader {
 	
 	public KeyValue<Object,Object> GetNextRecord(){
 		// find the record at the current_id and increment the current_id by 1
-		return this.split.getUserInputFiles().GetRecordById(current_id);
+		current_id++;
+		return this.split.getUserInputFiles().GetRecordById(current_id-1);
 	}
 }
