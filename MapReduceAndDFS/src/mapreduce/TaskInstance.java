@@ -86,15 +86,15 @@ public class TaskInstance implements Runnable{
         
         response.setTaskId(task.getTaskId());
         if(task.getType() == Task.MAP){
-            Class mapperClass;
+            Class<?> mapperClass;
             try {
                 mapperClass = task.getMapClass();
             
-                Constructor constructor;
+                Constructor<?> constructor;
                 constructor = mapperClass.getConstructor(null);
                 
                 MapperRecordWriter rw = new MapperRecordWriter();
-                Mapper<Object, Object,Object, Object> process = (Mapper) constructor.newInstance();
+                Mapper<Object, Object,Object, Object> process = (Mapper<Object, Object, Object, Object>) constructor.newInstance();
                 
                 RecordReader rr = 
                     new RecordReader(task.getSplit());
@@ -104,8 +104,9 @@ public class TaskInstance implements Runnable{
                     while(!exit && ! isMapComplete){
                         
                         KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
-                        System.out.println("mapper Key "+keyValuePair.getKey().toString()+" value "+keyValuePair.getValue().toString());
+                        
                         if(keyValuePair != null){
+                            
                             process.map(keyValuePair.getKey(), keyValuePair.getValue(), rw,task.getTaskId());
                         }
                         else{
@@ -120,17 +121,17 @@ public class TaskInstance implements Runnable{
                     }
                     
                     //combine the output of mapper
-                    Class combinerClass = task.getReduceClass();
-                    Constructor constructor1;
+                    Class<?> combinerClass = task.getReduceClass();
+                    Constructor<?> constructor1;
                     
                     try {
                         constructor1 = combinerClass.getConstructor();
                         CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum);
                         try {
-                            Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer) constructor1.newInstance();
+                            Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer<Object, Iterator<Object>, Object, Object>) constructor1.newInstance();
                             //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
-                            PriorityQueue<KeyValue> valueQ = rw.getPairQ();
-                            Iterator valueItr;
+                            PriorityQueue<KeyValue<Object,Object>> valueQ = rw.getPairQ();
+                            Iterator<Object> valueItr;
                             while(true && (valueQ != null)){
                                 Object currentKey = valueQ.peek().getKey();
                                 valueItr = getValueIterator(valueQ);
@@ -194,16 +195,16 @@ public class TaskInstance implements Runnable{
             
         }
         else{
-            Class reduceClass;
+            Class<?> reduceClass;
             taskStatus.setPhase(TaskStatus.taskPhase.STARTING);
             try {
                 reduceClass = task.getReduceClass();
             
-                Constructor constructor;
+                Constructor<?> constructor;
                 constructor = reduceClass.getConstructor(null);
                 
                 ReducerRecordWriter rw = new ReducerRecordWriter();
-                Reducer<Object, Object,Object, Object> process = (Reducer) constructor.newInstance();
+                Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
                 
                 
                 RecordReader rr = 
@@ -211,7 +212,7 @@ public class TaskInstance implements Runnable{
                 
                 
                 try {
-                    PriorityQueue reducerInputQ = sortReducerInput();
+                    PriorityQueue<KeyValue<Object, Object>> reducerInputQ = sortReducerInput();
                     taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
                     while(!exit && ! isReduceComplete){
                         
@@ -307,13 +308,13 @@ public class TaskInstance implements Runnable{
         return runningThread;
     }
     
-    protected Iterator<Object> getValueIterator(PriorityQueue<KeyValue> inputQ){
+    protected Iterator<Object> getValueIterator(PriorityQueue<KeyValue<Object,Object>> inputQ){
         ArrayList<Object> valueList = new ArrayList<Object>();
         
         if(inputQ.isEmpty())
             return null;
         KeyValue<Object, Object> keyValuePair = inputQ.peek();
-        valueList.add(keyValuePair);
+        valueList.add(keyValuePair.getValue());
         inputQ.remove();
         if(inputQ.isEmpty()){
             return valueList.iterator();
@@ -337,14 +338,14 @@ public class TaskInstance implements Runnable{
     
    }
     
-   private PriorityQueue sortReducerInput(){
+   private PriorityQueue<KeyValue<Object, Object>> sortReducerInput(){
        FileInputStream fileStream;
        try {
        fileStream = new FileInputStream(ReducerInputFileName);
        try {
            ObjectInputStream inputStream = new ObjectInputStream(fileStream);
            try {
-               PriorityQueue pairQ = new PriorityQueue();
+               PriorityQueue<KeyValue<Object, Object>> pairQ = new PriorityQueue<KeyValue<Object, Object>>();
                KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
                while((pair = (KeyValue<Object, Object>) inputStream.readObject()) != null){
                    pairQ.add(pair);
