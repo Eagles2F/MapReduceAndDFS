@@ -38,9 +38,11 @@ public class MapReduceJob {
 			task.setType(0);
 			task.setSplit(sf);
 			task.setReducerNum(job.getReducerNum());
+			System.out.println("Reducer Num:"+job.getReducerNum());
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());
+			task.setOutputPath(".");
 		//	task.setMapInputKeyClass(this.job.getMapperClass().getTypeParameters()[0].getClass());
 		//	task.setMapInputValueClass(this.job.getMapperClass().getTypeParameters()[1].getClass());
 		//	task.setMapOutputKeyClass(this.job.getMapperClass().getTypeParameters()[2].getClass());

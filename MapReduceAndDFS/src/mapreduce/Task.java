@@ -16,10 +16,12 @@ public class Task implements Serializable{
     public static final int MAP = 0;
     public static final int REDUCE = 1; 
     private int reducerNum;
+    private String outputPath;
     // get these information from the client submission
     @SuppressWarnings("rawtypes")
     private Class mapClass;
-    @SuppressWarnings("rawtypes")
+    
+	@SuppressWarnings("rawtypes")
     private Class mapInputKeyClass;
     @SuppressWarnings("rawtypes")
     private Class mapInputValueClass;
@@ -44,6 +46,12 @@ public class Task implements Serializable{
     private SplitFile split;
     private String reducerInputFileName;
     
+    public String getOutputPath() {
+		return outputPath;
+	}
+	public void setOutputPath(String outputPath) {
+		this.outputPath = outputPath;
+	}
     public void setReducerInputFileName(String reducerInputFileName) {
         this.reducerInputFileName = reducerInputFileName;
     }

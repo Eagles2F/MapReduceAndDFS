@@ -82,7 +82,6 @@ public class WordCount {
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);
 	    job.setFof(fof);
-	    job.setReducerNum(10);
 	 	if(job.waitForJobCompletion()){
 	 		System.out.println("Job Completed!");
 	 	}else{
