@@ -33,10 +33,14 @@ public class UserInputFiles implements Serializable{
 		try(BufferedReader in = new BufferedReader( new FileReader(this.fileInputFormat.getPath()) )){
 			while(true){
 				line = in.readLine();
-				if(count == id){
-					return new KeyValue<Object, Object>(id,line); 
-				}
-				count++;
+				if(line != null){
+					if(count == id){
+						return new KeyValue<Object, Object>(id,line); 
+					}
+					count++;
+				}else{
+					break;
+				}				
 			}
 		}catch(IOException e){
 			e.printStackTrace();
