@@ -22,9 +22,9 @@ public  class MapperRecordWriter extends RecordWriter {
    * @param value the value to write.
    * @throws IOException
    */    
-  PriorityQueue pairQ;
+  PriorityQueue<KeyValue<Object, Object>> pairQ;
   public MapperRecordWriter(){
-      pairQ = new PriorityQueue();
+      pairQ = new PriorityQueue<KeyValue<Object, Object>>();
   }
 
   
@@ -40,7 +40,7 @@ public  class MapperRecordWriter extends RecordWriter {
               fileToWrite.createNewFile();
 
           }
-          KeyValue pair = new KeyValue();
+          KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
           pair.setKey(key);
           pair.setValue(value);
           /*FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
@@ -67,7 +67,7 @@ public  class MapperRecordWriter extends RecordWriter {
       
   }
 
-  public PriorityQueue getPairQ(){
+  public PriorityQueue<KeyValue<Object, Object>> getPairQ(){
       return pairQ;
   }
 
