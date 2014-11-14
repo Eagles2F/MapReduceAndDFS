@@ -84,7 +84,7 @@ public class WorkerManagerServer implements Runnable{
     	for (int i = 0; i < listOfFiles.length; i++) {
 			Task task = new Task();
 			task.setJobId(job.getJobId());
-			task.setType(1);//reducer type
+			task.setType(Task.REDUCE);//reducer type
 			task.setReducerNum(job.getJob().getReducerNum());
 			task.setTaskId(job.getMapTasks().size());
 			task.setReduceClass(job.getJob().getReducerClass());
@@ -95,6 +95,7 @@ public class WorkerManagerServer implements Runnable{
 			
 			job.getReduceTasks().add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
+			taskStatus.setTaskType(Task.REDUCE);
 			job.getReduceTaskStatus().add(taskStatus);
     	}
     	return true;
@@ -108,7 +109,11 @@ public class WorkerManagerServer implements Runnable{
     	//update the tasks status
     	for(int i: ws.getTaskReports().keySet()){
     		TaskStatus ts = ws.getTaskReports().get(i);
-    		master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+    		if(ts.getTaskType() == Task.MAP){
+    			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+    		}else{
+    			master.jobMap.get(ts.getJobId()).getReduceTaskStatus().set(ts.getTaskId(), ts);
+    		}
     	}
     	System.out.println("HB:"+ws.getWorkerId());
     }

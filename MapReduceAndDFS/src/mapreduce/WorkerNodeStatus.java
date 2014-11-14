@@ -18,12 +18,12 @@ public class WorkerNodeStatus implements Serializable{
     public WorkerNodeStatus(int Id){
         workerId = Id;
         taskReports = new HashMap<Integer,TaskStatus>();
-        alive = true;
+        setAlive(true);
         maxTasks = 0;
     }
     public WorkerNodeStatus(){
         taskReports = new HashMap<Integer,TaskStatus>();
-        alive = true;
+        setAlive(true);
         maxTasks = 0;
     }
     
@@ -45,11 +45,12 @@ public class WorkerNodeStatus implements Serializable{
         return taskReports;
         
     }
+    public boolean isAlive() {
+        return alive;
+    }
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
 	
-    public void setTaskType(int type){
-        taskType = type;
-    }
-    public int getTaskType(){
-        return taskType;
-    }
+    
 }

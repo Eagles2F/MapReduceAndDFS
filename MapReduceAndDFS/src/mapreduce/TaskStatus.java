@@ -24,7 +24,7 @@ public class TaskStatus implements Serializable{
     private String stateString;
     private String taskTracker;
     private int taskType;
-    
+
       
     
     public TaskStatus(int taskid){
@@ -67,11 +67,15 @@ public class TaskStatus implements Serializable{
 	public int getTaskId() {
 		return taskId;
 	}
+
+
+	public int getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(int taskType) {
+		this.taskType = taskType;
+	}
 	
-	public void setTaskType(int type){
-        taskType = type;
-    }
-    public int getTaskType(){
-        return taskType;
-    }
+
 }

@@ -59,7 +59,7 @@ public class JobReceiveServer implements Runnable{
 			for(int i=0;i<job.getMapTasks().size();i++){
 				Task t=job.getMapTasks().get(i);
 				for(int key: master.workerStatusMap.keySet()){
-				if(master.workerStatusMap.get(key).getMaxTask() >
+				if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
 					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
 					//send the task the worker with id key
 					System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
