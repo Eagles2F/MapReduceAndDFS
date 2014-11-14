@@ -63,12 +63,14 @@ public class WordCount {
 			 System.out.println("Usage: java exmple.WordCount <intput_file_path> <output_file_path>");
 			 System.exit(1);
 		 } 
+
 		 config = new ClientConfig();
          
          host = config.getMasterAdd();
          hostPort = Integer.valueOf(config.getMasterPort());  
 
 	    Configuration conf = new Configuration(host,hostPort,11112);
+
 
 	    Job job = new Job("WordCount",conf);
 	    job.setMapperClass(TokenizerMapper.class);
