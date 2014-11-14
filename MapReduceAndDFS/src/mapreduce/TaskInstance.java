@@ -86,7 +86,7 @@ public class TaskInstance implements Runnable{
         // instantiate the task method
         Message indication=new Message(msgType.INDICATION);
         
-        
+        System.out.println("task "+task.getTaskId()+" run");
         
         if(task.getType() == Task.MAP){
             Class<?> mapperClass;
@@ -306,7 +306,7 @@ public class TaskInstance implements Runnable{
         
     }
     private void taskFail(Message indication) {
-        
+        worker.addFreeSlot();
         indication.setIndicationId(IndicationType.TASKFAIL);
         indication.setJobId(task.getJobId());
         indication.setTaskId(task.getTaskId());
@@ -317,7 +317,8 @@ public class TaskInstance implements Runnable{
         
     }
     private void taskComplete() {
-        // sedn complete to master
+        // free the slot and let the queuing task run
+        worker.addFreeSlot();
         Message completeMsg = new Message(Message.msgType.INDICATION);
         completeMsg.setIndicationId(IndicationType.TASKCOMPLETE);
         completeMsg.setJobId(task.getJobId());

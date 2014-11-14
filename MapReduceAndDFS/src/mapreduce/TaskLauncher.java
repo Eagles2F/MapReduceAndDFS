@@ -45,8 +45,9 @@ public class TaskLauncher extends Thread{
               tasksToLaunch.wait();
             }
             //get the TIP
-            System.out.println("taskLauncher get new task");
+            
             taskIns = tasksToLaunch.remove(0);
+            System.out.println("taskLauncher get new task "+taskIns.getTask().getTaskId());
             
           }
           //wait for a slot to run
@@ -69,6 +70,7 @@ public class TaskLauncher extends Thread{
           taskIns.setRunState(TaskStatus.taskState.RUNNING);
           Thread t = new Thread(taskIns);
           taskIns.setThread(t);
+          t.setName("task"+taskIns.getTask().getTaskId());
           t.start();
         } catch (Throwable e) {
           

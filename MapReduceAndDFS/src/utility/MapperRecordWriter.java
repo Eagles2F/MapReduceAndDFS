@@ -33,13 +33,8 @@ public  class MapperRecordWriter extends RecordWriter {
       
       String strTaskID = Long.toString(taskId);
       
-      File fileToWrite = new File("Output/Intermedia/" + strTaskID +".output");
-      try {
-          if (fileToWrite.exists() == false) {
-
-              fileToWrite.createNewFile();
-
-          }
+      
+      
           KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
           pair.setKey(key);
           pair.setValue(value);
@@ -51,10 +46,7 @@ public  class MapperRecordWriter extends RecordWriter {
           outputStream.close();*/
           pairQ.add(pair);
           
-      } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-      }
+      
   }
 
   /** 

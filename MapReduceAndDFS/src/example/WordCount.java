@@ -77,7 +77,7 @@ public class WordCount {
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setReducerNum(3);
-	    int num_records = 50;  //number of records in the input file
+	    int num_records = 1500;  //number of records in the input file
 	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);

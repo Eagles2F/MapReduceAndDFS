@@ -37,8 +37,8 @@ public class CombinerRecordWriter extends RecordWriter{
       String strTaskID = Long.toString(taskId);
       
       int fileNum = key.hashCode()%reducerNum;
-      System.out.println("combiner file num "+fileNum+"key "+key.toString());
-      File fileToWrite = new File(path + "/" + "combiner" + fileNum + "task" + strTaskID +".output");
+      //System.out.println("combiner file num "+fileNum+"key "+key.toString());
+      File fileToWrite = new File("../Output/Intermediate/"+ "combiner" + fileNum + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
