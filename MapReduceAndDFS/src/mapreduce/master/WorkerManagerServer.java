@@ -91,7 +91,7 @@ public class WorkerManagerServer implements Runnable{
 			//set file IO
 			task.setUserOutputPath(job.getJob().getFof().getPath());
 			task.setReducerInputFileName(listOfFiles[i].getName());
-			
+			task.setOutputPath(job.getMapTasks().get(0).getOutputPath());
 			job.getReduceTasks().add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			taskStatus.setTaskType(Task.REDUCE);
