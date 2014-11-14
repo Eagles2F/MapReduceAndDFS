@@ -10,5 +10,6 @@ package utility;
 public enum IndicationType {
     HEARTBEAT,
     TASKCOMPLETE,
+    TASKFAIL,
     
 }

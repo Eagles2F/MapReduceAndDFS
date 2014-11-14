@@ -46,7 +46,8 @@ public class TaskInstance implements Runnable{
     private boolean isConbinComplete;
     private boolean isReduceComplete;
     private String ReducerInputFileName;
-    public TaskInstance(Task taskToRun){
+    private String mapperOutputPath;
+    public TaskInstance(Task taskToRun, WorkerNode w){
         task = taskToRun;
         exit = false;
         taskStatus = new TaskStatus(task.getTaskId());
@@ -54,6 +55,8 @@ public class TaskInstance implements Runnable{
         reducerNum = task.getReducerNum();
         ReducerInputFileName = task.getReducerInputFileName();
         jobId = task.getJobId();
+        mapperOutputPath = task.getOutputPath();
+        worker = w;
     }
     public TaskStatus.taskState getRunState(){
         return taskStatus.getState();
@@ -81,10 +84,10 @@ public class TaskInstance implements Runnable{
     @Override
     public void run() {
         // instantiate the task method
-        Message response=new Message(msgType.RESPONSE);
-        response.setResponseId(ResponseType.STARTRES);
+        Message indication=new Message(msgType.INDICATION);
         
-        response.setTaskId(task.getTaskId());
+        
+        
         if(task.getType() == Task.MAP){
             Class<?> mapperClass;
             try {
@@ -117,7 +120,10 @@ public class TaskInstance implements Runnable{
                     }
                     if(exit){
                         taskStatus.setState(TaskStatus.taskState.KILLED);
-                        taskComplete();
+                        
+                        indication.setResult(Message.msgResult.FAILURE);
+                        indication.setCause("task killed");
+                        taskFail(indication);
                     }
                     
                     //combine the output of mapper
@@ -126,27 +132,39 @@ public class TaskInstance implements Runnable{
                     
                     try {
                         constructor1 = combinerClass.getConstructor();
-                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum);
+                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum,mapperOutputPath);
                         try {
                             Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer<Object, Iterator<Object>, Object, Object>) constructor1.newInstance();
                             //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
                             PriorityQueue<KeyValue<Object,Object>> valueQ = rw.getPairQ();
                             Iterator<Object> valueItr;
-                            while(true && (valueQ != null)){
+                            while(!exit && (valueQ != null) && (valueQ.peek() != null)){
                                 Object currentKey = valueQ.peek().getKey();
                                 valueItr = getValueIterator(valueQ);
                                 conbiner.reduce(currentKey, valueItr, crw, task.getTaskId());
                                 
+                            }
+                            if(!exit){
+                                taskStatus.setState(TaskStatus.taskState.COMPLETE);
+                                
+                                
+                                taskComplete();
                             }
                             
                         } catch (InstantiationException | IllegalAccessException
                                 | IllegalArgumentException | InvocationTargetException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
+                            indication.setResult(Message.msgResult.FAILURE);
+                            indication.setCause("InstantiationException");
+                            taskFail(indication);
                         }
                     } catch (NoSuchMethodException | SecurityException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
+                        indication.setResult(Message.msgResult.FAILURE);
+                        indication.setCause("NoSuchMethodException");
+                        taskFail(indication);
                     }
                     
                     
@@ -154,39 +172,42 @@ public class TaskInstance implements Runnable{
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    indication.setResult(Message.msgResult.FAILURE);
+                    indication.setCause("IOException");
+                    taskFail(indication);
                 }
                 
                 System.out.println("run process");
                 
             }catch (NoSuchMethodException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("No such method!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("No such method!");
+                taskFail(indication);
                 return;
             } catch (SecurityException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Security Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Security Exception!");
+                taskFail(indication);
                 return;
             } catch (InstantiationException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Instantiation Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Instantiation Exception!");
+                taskFail(indication);
                 return;
             } catch (IllegalAccessException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Illegal Access !");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Illegal Access !");
+                taskFail(indication);
                 return;
             } catch (IllegalArgumentException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Illegal Argument!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Illegal Argument!");
+                taskFail(indication);
                 return;
             } catch (InvocationTargetException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Invocation Target Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Invocation Target Exception!");
+                taskFail(indication);
                 return;
             }
             
@@ -196,7 +217,7 @@ public class TaskInstance implements Runnable{
         }
         else{
             Class<?> reduceClass;
-            taskStatus.setPhase(TaskStatus.taskPhase.STARTING);
+            taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
             try {
                 reduceClass = task.getReduceClass();
             
@@ -234,49 +255,65 @@ public class TaskInstance implements Runnable{
                           
                         
                     }
-                    if(exit)
+                    if(exit){
                         taskStatus.setState(TaskStatus.taskState.KILLED);
-                    taskComplete();
+                        
+                        
+                    }
                     
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    indication.setResult(Message.msgResult.FAILURE);
+                    indication.setCause("No such method!");
+                    taskFail(indication);
                 }
                 
                 System.out.println("run process");
                 
             }catch (NoSuchMethodException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("No such method!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("No such method!");
+                taskFail(indication);
                 return;
             } catch (SecurityException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Security Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Security Exception!");
+                taskFail(indication);
                 return;
             } catch (InstantiationException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Instantiation Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Instantiation Exception!");
+                taskFail(indication);
                 return;
             } catch (IllegalAccessException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Illegal Access !");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Illegal Access !");
+                taskFail(indication);
                 return;
             } catch (IllegalArgumentException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Illegal Argument!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Illegal Argument!");
+                taskFail(indication);
                 return;
             } catch (InvocationTargetException e) {
-                response.setResult(Message.msgResult.FAILURE);
-                response.setCause("Invocation Target Exception!");
-                worker.sendToManager(response);
+                indication.setResult(Message.msgResult.FAILURE);
+                indication.setCause("Invocation Target Exception!");
+                taskFail(indication);
                 return;
             }
         }
+        
+    }
+    private void taskFail(Message indication) {
+        
+        indication.setIndicationId(IndicationType.TASKFAIL);
+        indication.setJobId(task.getJobId());
+        indication.setTaskId(task.getTaskId());
+        indication.setWorkerID(task.getWorkerId());
+        indication.setTaskItem(task);
+        
+        worker.sendToManager(indication);
         
     }
     private void taskComplete() {
@@ -286,6 +323,7 @@ public class TaskInstance implements Runnable{
         completeMsg.setJobId(task.getJobId());
         completeMsg.setTaskId(task.getTaskId());
         completeMsg.setWorkerID(task.getWorkerId());
+        completeMsg.setTaskItem(task);
         
         worker.sendToManager(completeMsg);
         

@@ -26,16 +26,19 @@ public class CombinerRecordWriter extends RecordWriter{
    * @throws IOException
    */    
   private int reducerNum;
-  public CombinerRecordWriter(int redNum){
+  private String path;
+  public CombinerRecordWriter(int redNum, String outputPath){
       reducerNum = redNum;
+      path = outputPath;
+      
   }
   public void write(Object key, Object value, int taskId) throws IOException{
       
       String strTaskID = Long.toString(taskId);
       
       int fileNum = key.hashCode()%reducerNum;
-      System.out.println("combiner file num "+fileNum);
-      File fileToWrite = new File("Output/Intermedia/" + "combiner" + fileNum + "task" + strTaskID +".output");
+      System.out.println("combiner file num "+fileNum+"key "+key.toString());
+      File fileToWrite = new File(path + "/" + "combiner" + fileNum + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
