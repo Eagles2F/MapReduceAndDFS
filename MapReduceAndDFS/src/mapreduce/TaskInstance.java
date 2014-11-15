@@ -228,7 +228,7 @@ public class TaskInstance implements Runnable{
                 Constructor<?> constructor;
                 constructor = reduceClass.getConstructor(null);
                 
-                ReducerRecordWriter rw = new ReducerRecordWriter();
+                ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath);
                 Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
                 
                 
@@ -383,7 +383,8 @@ public class TaskInstance implements Runnable{
    private PriorityQueue<KeyValue<Object, Object>> sortReducerInput(){
        FileInputStream fileStream;
        try {
-       fileStream = new FileInputStream(ReducerOutputPath);
+          System.out.println(mapperOutputPath+"/"+ReducerInputFileName);
+       fileStream = new FileInputStream(mapperOutputPath+"/"+ReducerInputFileName);
        try {
            ObjectInputStream inputStream = new ObjectInputStream(fileStream);
            try {

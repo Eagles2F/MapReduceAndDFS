@@ -29,7 +29,10 @@ public  class ReducerRecordWriter extends RecordWriter {
    */    
   
 
-  
+    private String ReducerOutputPath;
+    public ReducerRecordWriter(String outputPath){
+        ReducerOutputPath = outputPath;
+    }
   @Override
   public void write(Object key, Object value, int taskId) throws IOException{
       
@@ -37,7 +40,7 @@ public  class ReducerRecordWriter extends RecordWriter {
       
       
       
-      File fileToWrite = new File("Output/Intermedia/" + "reducer_" + "task" + strTaskID +".output");
+      File fileToWrite = new File(ReducerOutputPath+"/" + "reducer_" + "task" + strTaskID +".output");
       try {
           if (fileToWrite.exists() == false) {
 
