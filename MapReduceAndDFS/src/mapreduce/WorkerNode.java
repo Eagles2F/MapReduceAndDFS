@@ -200,8 +200,9 @@ public class WorkerNode {
 		*/
 		
 		//send method writes object into output stream
-		public void sendToManager(Message sc) {
+		synchronized public void sendToManager(Message sc) {
 			try {
+			    System.out.println("send "+sc.getMessageType()+" "+sc.getResponseId()+" "+sc.getIndicationId());
 				obos.writeObject(sc);
 			} catch (IOException e) {
 			    failure = true;
