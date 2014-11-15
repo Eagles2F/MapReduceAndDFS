@@ -1,17 +1,19 @@
 package mapreduce;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
-
+import java.util.ArrayList;
 import java.util.HashMap;
-
 
 import utility.CommandType;
 import utility.IndicationType;
+import utility.KeyValue;
 import utility.Message;
 
 /*
@@ -46,6 +48,7 @@ public class WorkerNode {
 	// process related properties
 	private Thread t;
 	private HashMap<Integer, TaskInstance> currentTaskMap;
+	private HashMap<Integer, ArrayList<ObjectOutputStream>> mapperOutputStreamMap;
 	
 	//worker information report 
 	WorkerNodeStatus trackStatus;
@@ -72,6 +75,8 @@ public class WorkerNode {
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
+		
+		this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
@@ -82,6 +87,8 @@ public class WorkerNode {
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
         this.workerInfo = new WorkerInfoReport();
+        
+        this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
 	}
 	
 	//command handling methods
@@ -114,6 +121,31 @@ public class WorkerNode {
 		
 		response.setTaskId(msg.getTaskId());
 		response.setTaskItem(msg.getTask());
+		int jobId = msg.getTask().getJobId();
+		if(!mapperOutputStreamMap.containsKey(jobId)){
+		    ArrayList<ObjectOutputStream> mapperOutputList = new ArrayList<ObjectOutputStream>();
+		    for(int i = 0;i<msg.getTask().getReducerNum();i++){
+    		    File fileToWrite = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+    		    try {
+    	          if (fileToWrite.exists() == false) {
+    
+    	              fileToWrite.createNewFile();
+    
+    	          }
+    	          
+    	          FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
+    	          ObjectOutputStream outputStream = new ObjectOutputStream(fileStream);
+    	          mapperOutputList.add(outputStream);
+ 
+
+	          
+	      } catch (IOException e) {
+	          // TODO Auto-generated catch block
+	          e.printStackTrace();
+	      }
+		    }
+		    mapperOutputStreamMap.put(msg.getTask().getJobId(), mapperOutputList);
+		}
 		
 		TaskInstance taskIns = new TaskInstance(msg.getTask(),this);
 		taskIns.setRunState(TaskStatus.taskState.QUEUING);
@@ -338,6 +370,10 @@ public class WorkerNode {
         // every task should call this in the runner onComplete
         freeSlot++;
         notify();
+    }
+    public ArrayList<ObjectOutputStream> getMapperOutputStream(int jobId) {
+        
+        return mapperOutputStreamMap.get(jobId);
     }
     
     

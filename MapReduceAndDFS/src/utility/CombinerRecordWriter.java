@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 
@@ -27,10 +28,11 @@ public class CombinerRecordWriter extends RecordWriter{
    */    
   private int reducerNum;
   private String path;
-  public CombinerRecordWriter(int redNum, String outputPath){
+  private ArrayList<ObjectOutputStream> outputStreamArrayList;
+  public CombinerRecordWriter(int redNum, String outputPath, ArrayList<ObjectOutputStream> outputStreamArray){
       reducerNum = redNum;
       path = outputPath;
-      
+      outputStreamArrayList = outputStreamArray;
   }
   public void write(Object key, Object value, int taskId) throws IOException{
       
@@ -38,28 +40,18 @@ public class CombinerRecordWriter extends RecordWriter{
       
       int fileNum = key.hashCode()%reducerNum;
       //System.out.println("combiner file num "+fileNum+"key "+key.toString());
-      File fileToWrite = new File("../Output/Intermediate/"+ "combiner" + fileNum + "task" + strTaskID +".output");
-      try {
-          if (fileToWrite.exists() == false) {
-
-              fileToWrite.createNewFile();
-
-          }
-          KeyValue pair = new KeyValue();
+      
+          KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
           pair.setKey(key);
           pair.setValue(value);
-          FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
-          ObjectOutputStream outputStream = new ObjectOutputStream(fileStream);
+          
+          ObjectOutputStream outputStream = outputStreamArrayList.get(fileNum);
           outputStream.writeObject(pair);
           
-          //close the writer
-          outputStream.close();
           
           
-      } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-      }
+          
+      
   }
 
   /** 

@@ -1,5 +1,6 @@
 package mapreduce;
 
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -135,7 +136,7 @@ public class TaskInstance implements Runnable{
                     
                     try {
                         constructor1 = combinerClass.getConstructor();
-                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum,mapperOutputPath);
+                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum,mapperOutputPath,worker.getMapperOutputStream(task.getJobId()));
                         try {
                             Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer<Object, Iterator<Object>, Object, Object>) constructor1.newInstance();
                             //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
@@ -239,19 +240,21 @@ public class TaskInstance implements Runnable{
                     PriorityQueue<KeyValue<Object, Object>> reducerInputQ = sortReducerInput();
                     taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
                     while(!exit && ! isReduceComplete){
-                        
-                        Iterator<Object> valueItr;
-                        
-                        valueItr = getValueIterator(reducerInputQ);
+                        Object key = null;
+                        Iterator<Object> valueItr = null;
+                        if(reducerInputQ.peek() != null){
+                            key = ((KeyValue<Object,Object>)reducerInputQ.peek()).getKey();
+                            valueItr = getValueIterator(reducerInputQ);
+                        }
                         if(valueItr == null){
                             isReduceComplete = true;
                             taskStatus.setState(TaskStatus.taskState.COMPLETE);
                             System.out.println("no more value in reducer input");
                         }
-                        if(isReduceComplete != true){
-                            Object key = ((KeyValue<Object,Object>)reducerInputQ.peek()).getKey();
+                        if((isReduceComplete != true) && (key != null)){
+                            
                             System.out.println("reduce key "+key.toString());
-                            process.reduce(((KeyValue<Object,Object>)reducerInputQ.peek()).getKey(),valueItr,rw, task.getTaskId());
+                            process.reduce(key,valueItr,rw, task.getTaskId());
                         }
                         
                         
@@ -260,9 +263,12 @@ public class TaskInstance implements Runnable{
                     }
                     if(exit){
                         taskStatus.setState(TaskStatus.taskState.KILLED);
-                        
+                        indication.setResult(Message.msgResult.FAILURE);
+                        indication.setCause("No such method!");
+                        taskFail(indication);
                         
                     }
+                    taskComplete();
                     
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -390,10 +396,15 @@ public class TaskInstance implements Runnable{
            try {
                PriorityQueue<KeyValue<Object, Object>> pairQ = new PriorityQueue<KeyValue<Object, Object>>();
                KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
+               try{
                while((pair = (KeyValue<Object, Object>) inputStream.readObject()) != null){
+                   System.out.println("sort:"+pair.getKey()+pair.getValue());
                    pairQ.add(pair);
                }
                return pairQ;
+               }catch(EOFException e){
+                   return pairQ;
+               }
                
            } catch (ClassNotFoundException e) {
                // TODO Auto-generated catch block

@@ -3,11 +3,12 @@ package example;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Properties;
 
 import utility.ConfigurationBase;
 
-public class ClientConfig extends ConfigurationBase{
+public class ClientConfig extends ConfigurationBase implements Serializable{
     
     public ClientConfig(){
         

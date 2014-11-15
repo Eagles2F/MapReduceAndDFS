@@ -33,6 +33,7 @@ public class Job implements Serializable{
 
     public Job(String jobname,ClientConfig conf){
 		this.setJobname(jobname);
+		this.conf = conf;
 	}
 	
 	//true-job succeccfully completed. false-job failed for some reason
