@@ -140,7 +140,7 @@ public class JobReceiveServer implements Runnable{
 	   			   //read the job from the input stream
 				   Job received_job = (Job)ois.readObject();
 	   			   
-	               MapReduceJob job = new MapReduceJob(jobSocket,received_job,jobCnt);
+	               MapReduceJob job = new MapReduceJob(oos,received_job,jobCnt);
 	               
 	               //Split the job
 	               Split(job);

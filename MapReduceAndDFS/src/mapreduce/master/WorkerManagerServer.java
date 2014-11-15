@@ -178,8 +178,7 @@ public class WorkerManagerServer implements Runnable{
         	//if all the tasks have been finished, started to build the reduce task and send them.
         	if(finished == true){
         		//send the message to the job client with a success
-        		ObjectOutputStream oos = new ObjectOutputStream(master.jobMap.get(msg.getJobId()).getClientSocket().getOutputStream());
-        		oos.write(1);//succeed!
+        		master.jobMap.get(msg.getJobId()).getClientOOS().write(1);//succeed!
         	}
     	}   	
     }

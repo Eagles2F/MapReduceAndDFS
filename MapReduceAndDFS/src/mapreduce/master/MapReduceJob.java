@@ -4,7 +4,7 @@ package mapreduce.master;
  */
 
 
-import java.net.Socket;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import mapreduce.Task;
@@ -14,15 +14,15 @@ import mapreduce.userlib.Job;
 
 public class MapReduceJob {
 	private int jobId;
-	private Socket clientSocket;
+	private ObjectOutputStream clientOOS;
 	private Job job;
 	private ArrayList<Task> MapTasks;
 	private ArrayList<TaskStatus> MapTaskStatus;
 	private ArrayList<Task> ReduceTasks;
 	private ArrayList<TaskStatus> ReduceTaskStatus;
 	private ArrayList<SplitFile> SplitList;
-	public MapReduceJob(Socket soc,Job job,int jobid){
-		this.clientSocket =soc;
+	public MapReduceJob(ObjectOutputStream oos,Job job,int jobid){
+		this.setClientOOS(oos);
 		this.job = job;
 		this.jobId = jobid;
 		this.SplitList = new ArrayList<SplitFile>();
@@ -61,14 +61,6 @@ public class MapReduceJob {
 
 	public void setMapTaskStatus(ArrayList<TaskStatus> mapTaskStatus) {
 		MapTaskStatus = mapTaskStatus;
-	}
-
-	public Socket getClientSocket() {
-		return clientSocket;
-	}
-
-	public void setClientSocket(Socket clientSocket) {
-		this.clientSocket = clientSocket;
 	}
 
 	public Job getJob() {
@@ -121,6 +113,16 @@ public class MapReduceJob {
 
 	public void setReduceTaskStatus(ArrayList<TaskStatus> reduceTaskStatus) {
 		ReduceTaskStatus = reduceTaskStatus;
+	}
+
+
+	public ObjectOutputStream getClientOOS() {
+		return clientOOS;
+	}
+
+
+	public void setClientOOS(ObjectOutputStream clientOOS) {
+		this.clientOOS = clientOOS;
 	}
 
 }
