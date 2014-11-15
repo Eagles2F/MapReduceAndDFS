@@ -64,8 +64,7 @@ public class WorkerManagerServer implements Runnable{
 					msg.setJobId(job.getJobId());
 					msg.setTaskId(t.getTaskId());
 					msg.setTaskItem(t);
-					master.workerOosMap.get(key).writeObject(msg);
-					//master.workerOosMap.get(key).flush();
+					master.workerOosMap.get(key).writeObject(msg);					
 					job.getReduceTaskStatus().get(i).setState(taskState.SENT);
 					//goes to the next worker
 					break;
@@ -86,7 +85,7 @@ public class WorkerManagerServer implements Runnable{
 			task.setJobId(job.getJobId());
 			task.setType(Task.REDUCE);//reducer type
 			task.setReducerNum(job.getJob().getReducerNum());
-			task.setTaskId(job.getMapTasks().size());
+			task.setTaskId(job.getReduceTasks().size());
 			task.setReduceClass(job.getJob().getReducerClass());
 			//set file IO
 			task.setUserOutputPath(job.getJob().getFof().getPath());
