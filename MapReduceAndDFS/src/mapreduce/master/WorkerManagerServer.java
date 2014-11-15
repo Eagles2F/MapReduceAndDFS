@@ -44,7 +44,7 @@ public class WorkerManagerServer implements Runnable{
         objInput = new ObjectInputStream(socket.getInputStream());
         objOutput = new ObjectOutputStream(socket.getOutputStream());
         master.workerOosMap.put(id, objOutput);//add the OOS to the map
-       
+     
     }
     
     //This method will send the reduce tasks
@@ -179,7 +179,7 @@ public class WorkerManagerServer implements Runnable{
         	if(finished == true){
         	    System.out.println("job finished, send cfm");
         		//send the message to the job client with a success
-        		master.jobMap.get(msg.getJobId()).getClientOOS().writeInt(1);;//succeed!
+        		master.jobMap.get(msg.getJobId()).getClientOOS().writeObject(Integer.getInteger("1"));//succeed!
         	}
     	}   	
     }
