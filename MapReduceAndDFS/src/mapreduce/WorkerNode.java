@@ -125,12 +125,20 @@ public class WorkerNode {
 		if(!mapperOutputStreamMap.containsKey(jobId)){
 		    ArrayList<ObjectOutputStream> mapperOutputList = new ArrayList<ObjectOutputStream>();
 		    for(int i = 0;i<msg.getTask().getReducerNum();i++){
+		        File dir = new File("../Output/Intermediate/");
+		        if(!dir.exists()){
+		            dir.mkdirs();
+		        }
     		    File fileToWrite = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
     		    try {
     	          if (fileToWrite.exists() == false) {
     
     	              fileToWrite.createNewFile();
     
+    	          }
+    	          else{
+    	              fileToWrite.delete();
+    	              fileToWrite.createNewFile();
     	          }
     	          
     	          FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
