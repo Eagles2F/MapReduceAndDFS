@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import utility.Configuration;
 import utility.RecordWriter;
 import mapreduce.userlib.FileInputFormat;
 import mapreduce.userlib.FileOutputFormat;
@@ -18,9 +17,7 @@ import mapreduce.userlib.Reducer;
 public class WordCount {
 
       static ClientConfig config;
-    private static String host;
-    private static Integer hostPort;
-	  public static class TokenizerMapper
+    public static class TokenizerMapper
 	       implements Mapper<Object, String, String, Integer>{
 	      
 		private String word="";  
@@ -37,8 +34,8 @@ public class WordCount {
 	  public WordCount(){
           config = new ClientConfig();
           
-          this.host = config.getMasterAdd();
-          this.hostPort = Integer.valueOf(config.getMasterPort());
+          config.getMasterAdd();
+          Integer.valueOf(config.getMasterPort());
       }
 	  public static class IntSumReducer
 	       implements Reducer<String,Integer,String,Integer> {
@@ -56,7 +53,7 @@ public class WordCount {
 	    }
 	  }
 
-	  public static void main(String[] args){
+	  public static void main(String[] args) throws ClassNotFoundException{
 		 if(args.length != 2){
 			 System.out.println("Wrong input parameters");
 			 System.out.println("Usage: java exmple.WordCount <intput_file_path> <output_file_path>");
@@ -65,8 +62,8 @@ public class WordCount {
 
 		 config = new ClientConfig();
          
-         host = config.getMasterAdd();
-         hostPort = Integer.valueOf(config.getMasterPort());  
+         config.getMasterAdd();
+         Integer.valueOf(config.getMasterPort());  
 
 	    Job job = new Job("WordCount",config);
 	    job.setMapperClass(TokenizerMapper.class);

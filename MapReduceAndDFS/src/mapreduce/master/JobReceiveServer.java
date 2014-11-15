@@ -102,7 +102,7 @@ public class JobReceiveServer implements Runnable{
 		 */
 	/*	int sum = 0;
 		if(master.workerStatusMap.size() ==0){ // if there is no worker in the server , we will refuse the job
-			ObjectOutputStream oos = new ObjectOutputStream(job.getClientSocket().getOutputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(job.getClientSocket().getOutputStream()); //something wrong here
 			oos.write(-1);//return failure information to the client
 		}
 		for(int i:master.workerStatusMap.keySet()){

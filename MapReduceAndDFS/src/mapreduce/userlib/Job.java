@@ -6,14 +6,18 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 
+import utility.ClientMessage;
 import example.ClientConfig;
-import utility.Configuration;
 
 public class Job implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4325665659967502371L;
+	private static final long serialVersionUID = -2812421050568588272L;
+	/**
+	 * 
+	 */
+	
 	private Class MapperClass;
 	private Class ReducerClass;
 	private Class CombinerClass;
@@ -37,7 +41,7 @@ public class Job implements Serializable{
 	}
 	
 	//true-job succeccfully completed. false-job failed for some reason
-	public boolean waitForJobCompletion(){
+	public boolean waitForJobCompletion() throws ClassNotFoundException{
 		//submit the job here, send the job object and related class files.
 		try {
 			System.out.println(conf.getMasterAdd()+" "+conf.getMasterPort());
@@ -48,19 +52,19 @@ public class Job implements Serializable{
 			ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
 			
 			oos.writeObject(this);
-			//oos.flush();
+			oos.flush();
 			System.out.println("SSSSSSSSSSSSS");
 			
-			int success = ois.readInt();
-			
+			ClientMessage m = (ClientMessage)ois.readObject();
 			oos.close();
 			ois.close();
 			soc.close();
-			if(success < 0){
+			if(m.getSuccess() < 0){
 				return false;
 			}else{
 				return true;
 			}
+			
 		} catch (IOException e) {
 			System.err.println("Socket creation failure!");
 			return false;

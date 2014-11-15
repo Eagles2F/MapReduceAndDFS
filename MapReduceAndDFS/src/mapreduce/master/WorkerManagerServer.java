@@ -10,10 +10,12 @@ import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.TaskStatus.taskState;
 import mapreduce.WorkerNodeStatus;
+import utility.ClientMessage;
 import utility.CommandType;
 import utility.Message;
 import utility.Message.msgResult;
 import utility.Message.msgType;
+
 
 /*
  * This is the specific manager server for each worker. This server will communicate with the worker and handle all
@@ -44,7 +46,7 @@ public class WorkerManagerServer implements Runnable{
         objInput = new ObjectInputStream(socket.getInputStream());
         objOutput = new ObjectOutputStream(socket.getOutputStream());
         master.workerOosMap.put(id, objOutput);//add the OOS to the map
-       
+     
     }
     
     //This method will send the reduce tasks
@@ -179,7 +181,8 @@ public class WorkerManagerServer implements Runnable{
         	if(finished == true){
         	    System.out.println("job finished, send cfm");
         		//send the message to the job client with a success
-        		master.jobMap.get(msg.getJobId()).getClientOOS().writeInt(1);;//succeed!
+        	   
+        		master.jobMap.get(msg.getJobId()).getClientOOS().writeObject(new ClientMessage(1));//succeed!
         	}
     	}   	
     }
