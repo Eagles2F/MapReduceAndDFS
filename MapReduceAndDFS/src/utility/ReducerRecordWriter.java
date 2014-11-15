@@ -52,7 +52,7 @@ public  class ReducerRecordWriter extends RecordWriter {
           BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileStream));
           
           String buf = key.toString()+" "+value.toString();
-          bw.write(buf);
+          bw.append(buf);
           bw.newLine();
           //close the writer
           bw.close();

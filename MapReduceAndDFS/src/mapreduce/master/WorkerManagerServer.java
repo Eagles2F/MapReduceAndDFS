@@ -170,7 +170,7 @@ public class WorkerManagerServer implements Runnable{
         	//check whether all the tasks in the same job has finished
         	boolean finished = true;
         	for(TaskStatus ts:master.jobMap.get(msg.getJobId()).getReduceTaskStatus()){
-        	    System.out.println("in complete: task "+msg.getTaskId()+" "+ts.getState());
+        	    System.out.println("in complete: task "+ts.getTaskId()+" "+ts.getState());
         		if(ts.getState() != taskState.COMPLETE){
         			finished = false;
         		}

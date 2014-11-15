@@ -371,15 +371,20 @@ public class TaskInstance implements Runnable{
             
             do{
                 KeyValue<Object, Object> keyValuePairNext = inputQ.peek();
-
-                if(keyValuePair.compareTo(keyValuePairNext) == 0){
-                    valueList.add(keyValuePairNext.getValue());
-                    inputQ.remove();
+                if(keyValuePairNext != null){
+                    if(keyValuePair.compareTo(keyValuePairNext.getKey()) == 0){
+                        valueList.add(keyValuePairNext.getValue());
+                        inputQ.remove();
+                    }
+                    else{
+                        
+                        break;
+                    }
                 }
                 else{
-                    
                     break;
                 }
+                   
             }while(true);
         return valueList.iterator();
         

@@ -31,12 +31,12 @@ public class ClientConfig extends ConfigurationBase implements Serializable{
     }
     
     public String getMasterAdd(){
-        System.out.println("master add"+prop.getProperty("MasterAddress"));
+        
         return prop.getProperty("MasterAddress");
         
     }
     public String getMasterPort(){
-        System.out.println("master port"+prop.getProperty("MasterPort"));
+        
         return prop.getProperty("MasterPort");
     }
     
