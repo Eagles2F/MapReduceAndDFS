@@ -9,11 +9,15 @@ import mapreduce.WorkerNodeStatus;
 * @Author Jian Wang
 */
 public class Message implements Serializable {
-    /**
+	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7618909352734419757L;
+	private static final long serialVersionUID = -7262370837710173507L;
 
+	/**
+	 * 
+	 */
+	
 	public enum msgType {
         COMMAND,
         RESPONSE,

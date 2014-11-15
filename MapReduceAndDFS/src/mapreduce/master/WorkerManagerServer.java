@@ -179,7 +179,7 @@ public class WorkerManagerServer implements Runnable{
         	if(finished == true){
         	    System.out.println("job finished, send cfm");
         		//send the message to the job client with a success
-        		master.jobMap.get(msg.getJobId()).getClientOOS().write(1);//succeed!
+        		master.jobMap.get(msg.getJobId()).getClientOOS().writeInt(1);;//succeed!
         	}
     	}   	
     }
