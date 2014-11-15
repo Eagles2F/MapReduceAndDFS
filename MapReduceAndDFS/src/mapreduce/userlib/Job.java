@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 
+import utility.ClientMessage;
 import example.ClientConfig;
 
 public class Job implements Serializable{
@@ -54,12 +55,11 @@ public class Job implements Serializable{
 			oos.flush();
 			System.out.println("SSSSSSSSSSSSS");
 			
-			Integer success = (Integer)ois.readObject();
-			
+			ClientMessage m = (ClientMessage)ois.readObject();
 			oos.close();
 			ois.close();
 			soc.close();
-			if(success < 0){
+			if(m.getSuccess() < 0){
 				return false;
 			}else{
 				return true;
