@@ -317,7 +317,7 @@ public class WorkerNode {
 				Message response=new Message(msgType.INDICATION);
 				response.setIndicationId(IndicationType.HEARTBEAT);
 				
-				
+				response.setWorkerID(workerID);
 				
 				for(int i:currentTaskMap.keySet()){
 					TaskInstance taskIns = currentTaskMap.get(i);

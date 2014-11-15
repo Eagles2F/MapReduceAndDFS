@@ -325,7 +325,7 @@ public class TaskInstance implements Runnable{
         worker.sendToManager(indication);
         
     }
-    private void taskComplete() {
+     private void taskComplete() {
         // free the slot and let the queuing task run
         worker.addFreeSlot();
         Message completeMsg = new Message(Message.msgType.INDICATION);

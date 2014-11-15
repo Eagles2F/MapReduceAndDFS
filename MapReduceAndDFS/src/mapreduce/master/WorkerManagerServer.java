@@ -177,6 +177,7 @@ public class WorkerManagerServer implements Runnable{
         	}
         	//if all the tasks have been finished, started to build the reduce task and send them.
         	if(finished == true){
+        	    System.out.println("job finished, send cfm");
         		//send the message to the job client with a success
         		master.jobMap.get(msg.getJobId()).getClientOOS().write(1);//succeed!
         	}
@@ -200,6 +201,7 @@ public class WorkerManagerServer implements Runnable{
             	//receive the msg
                 try{
                     workerMessage = (Message) objInput.readObject();
+                    System.out.println("receive "+workerMessage.getMessageType()+" "+workerMessage.getResponseId()+" "+workerMessage.getIndicationId());
                 }catch(ClassNotFoundException e){
                     continue;
                 }   
