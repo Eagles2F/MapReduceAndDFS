@@ -106,6 +106,7 @@ public class WorkerManagerServer implements Runnable{
     	//update the worker status
     	this.master.workerStatusMap.get(ws.getWorkerId()).setAlive(true);
     	this.master.workerStatusMap.get(ws.getWorkerId()).setMaxTask(ws.getMaxTask());
+    	this.master.workerStatusMap.get(ws.getWorkerId()).setTaskReports(ws.getTaskReports());
     	//update the tasks status
     	for(int i: ws.getTaskReports().keySet()){
     		TaskStatus ts = ws.getTaskReports().get(i);
