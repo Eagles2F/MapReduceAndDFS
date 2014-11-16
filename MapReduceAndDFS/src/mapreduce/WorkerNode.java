@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import utility.CombinerRecordWriter;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.KeyValue;
@@ -27,6 +28,7 @@ import utility.Message;
  *  @Author Jian Wang
  **/
 import utility.Message.msgType;
+import utility.RecordWriter;
 import utility.ResponseType;
 import utility.WorkerConfig;
 
@@ -59,6 +61,7 @@ public class WorkerNode {
 	
     private int freeSlot;
     private int hostPort;
+    private CombinerRecordWriter combinerRecordWriter;
     
 	
 // methods
@@ -77,6 +80,7 @@ public class WorkerNode {
 		this.workerInfo = new WorkerInfoReport();
 		
 		this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
+		
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
@@ -125,12 +129,20 @@ public class WorkerNode {
 		if(!mapperOutputStreamMap.containsKey(jobId)){
 		    ArrayList<ObjectOutputStream> mapperOutputList = new ArrayList<ObjectOutputStream>();
 		    for(int i = 0;i<msg.getTask().getReducerNum();i++){
+		        File dir = new File("../Output/Intermediate/");
+		        if(!dir.exists()){
+		            dir.mkdirs();
+		        }
     		    File fileToWrite = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
     		    try {
     	          if (fileToWrite.exists() == false) {
     
     	              fileToWrite.createNewFile();
     
+    	          }
+    	          else{
+    	              fileToWrite.delete();
+    	              fileToWrite.createNewFile();
     	          }
     	          
     	          FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
@@ -200,8 +212,9 @@ public class WorkerNode {
 		*/
 		
 		//send method writes object into output stream
-		public void sendToManager(Message sc) {
+		synchronized public void sendToManager(Message sc) {
 			try {
+			    System.out.println("send "+sc.getMessageType()+" "+sc.getResponseId()+" "+sc.getIndicationId());
 				obos.writeObject(sc);
 			} catch (IOException e) {
 			    failure = true;
@@ -330,10 +343,11 @@ public class WorkerNode {
     					}
 					taskIns.getTaskStatus().setTaskType(taskIns.getTask().getType());
 					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
+					System.out.println("report put task "+taskIns.getTask().getTaskId());
 				
 				}
 				WorkerNodeStatus ws = response.getWorkerStatus();
-				ws.setMaxTask(100);
+				ws.setMaxTask(5);
 				sendToManager(response);
 				
 				try {
@@ -374,6 +388,16 @@ public class WorkerNode {
     public ArrayList<ObjectOutputStream> getMapperOutputStream(int jobId) {
         
         return mapperOutputStreamMap.get(jobId);
+    }
+    
+    
+    public synchronized void writeToOutputStream(ObjectOutputStream output, KeyValue<Object,Object> pair){
+        try {
+            output.writeObject(pair);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     

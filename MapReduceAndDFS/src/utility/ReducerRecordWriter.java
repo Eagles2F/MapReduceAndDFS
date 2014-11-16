@@ -38,6 +38,11 @@ public  class ReducerRecordWriter extends RecordWriter {
       
       String strTaskID = Long.toString(taskId);
       
+      File dir = new File(ReducerOutputPath);
+      
+      if(!dir.exists()){
+          dir.mkdirs();
+      }
       
       
       File fileToWrite = new File(ReducerOutputPath+"/" + "reducer_" + "task" + strTaskID +".output");
@@ -47,6 +52,11 @@ public  class ReducerRecordWriter extends RecordWriter {
               fileToWrite.createNewFile();
 
           }
+          else{
+              fileToWrite.delete();
+              fileToWrite.createNewFile();
+          }
+          
          
           FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);
           BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileStream));

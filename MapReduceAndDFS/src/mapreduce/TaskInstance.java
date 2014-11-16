@@ -108,15 +108,18 @@ public class TaskInstance implements Runnable{
                 
                 
                 try {
+                    int i=0;
                     while(!exit && ! isMapComplete){
-                        
+                        i++;
                         KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
                         
                         if(keyValuePair != null){
+                            System.out.println("key "+keyValuePair.getKey().toString());
                             
                             process.map(keyValuePair.getKey(), keyValuePair.getValue(), rw,task.getTaskId());
                         }
                         else{
+                            System.out.println("task "+task.getTaskId()+" "+i);
                             isMapComplete = true;
                         }
                           
@@ -136,15 +139,18 @@ public class TaskInstance implements Runnable{
                     
                     try {
                         constructor1 = combinerClass.getConstructor();
-                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum,mapperOutputPath,worker.getMapperOutputStream(task.getJobId()));
+                        CombinerRecordWriter crw = new CombinerRecordWriter(reducerNum,mapperOutputPath,worker.getMapperOutputStream(task.getJobId()), worker);
                         try {
                             Reducer<Object, Iterator<Object>,Object, Object> conbiner = (Reducer<Object, Iterator<Object>, Object, Object>) constructor1.newInstance();
                             //use the RecordWriter from the mapper output to the priorirityQueue which store all the map output
                             PriorityQueue<KeyValue<Object,Object>> valueQ = rw.getPairQ();
+                            System.out.println("combine task "+task.getTaskId()+"queue "+valueQ.size());
+                            
                             Iterator<Object> valueItr;
                             while(!exit && (valueQ != null) && (valueQ.peek() != null)){
                                 Object currentKey = valueQ.peek().getKey();
                                 valueItr = getValueIterator(valueQ);
+                                System.out.println("combine key "+currentKey);
                                 conbiner.reduce(currentKey, valueItr, crw, task.getTaskId());
                                 
                             }
@@ -372,7 +378,7 @@ public class TaskInstance implements Runnable{
             do{
                 KeyValue<Object, Object> keyValuePairNext = inputQ.peek();
                 if(keyValuePairNext != null){
-                    if(keyValuePair.compareTo(keyValuePairNext.getKey()) == 0){
+                    if(keyValuePair.compareTo(keyValuePairNext) == 0){
                         valueList.add(keyValuePairNext.getValue());
                         inputQ.remove();
                     }

@@ -59,21 +59,23 @@ public class JobReceiveServer implements Runnable{
 			for(int i=0;i<job.getMapTasks().size();i++){
 				Task t=job.getMapTasks().get(i);
 				for(int key: master.workerStatusMap.keySet()){
-					if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
-						master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-						//send the task the worker with id key
-						System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
-						Message msg = new Message();
-						msg.setMessageType(msgType.COMMAND);
-						msg.setCommandId(CommandType.START);
-						msg.setJobId(job.getJobId());
-						msg.setTaskId(t.getTaskId());
-						msg.setTaskItem(t);
-						master.workerOosMap.get(key).writeObject(msg);
-						//master.workerOosMap.get(key).flush();
-						job.getMapTaskStatus().get(i).setState(taskState.SENT);
-						//goes to the next worker
-						break;
+				    System.out.println("scheduler "+master.workerStatusMap.get(key).getMaxTask()+" "
+				            + master.workerStatusMap.get(key).getTaskReports().size());
+				if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
+					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
+					//send the task the worker with id key
+					System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
+					Message msg = new Message();
+					msg.setMessageType(msgType.COMMAND);
+					msg.setCommandId(CommandType.START);
+					msg.setJobId(job.getJobId());
+					msg.setTaskId(t.getTaskId());
+					msg.setTaskItem(t);
+					master.workerOosMap.get(key).writeObject(msg);
+					//master.workerOosMap.get(key).flush();
+					job.getMapTaskStatus().get(i).setState(taskState.SENT);
+					//goes to the next worker
+					break;
 				}
 				}
 		}
@@ -95,7 +97,7 @@ public class JobReceiveServer implements Runnable{
 		/* Scheduling 2:
 		 * 	  just set the block_size as some magic number 
 		 */
-		int block_size = 50;
+		int block_size = 10;
 		/* Scheduling 3:
 		 * 	  a.sum the max_mapper_num on each worker node as sum
 		 *    b.set the block_size as num_record/ sum

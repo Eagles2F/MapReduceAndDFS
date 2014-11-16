@@ -46,7 +46,10 @@ public class WordCount {
 	                       ) throws IOException{
 	      int sum = 0;
 	       while(values.hasNext()) {
-	        sum += values.next();
+	           int i = values.next();
+	           System.out.println("key "+key+" "+i);
+	        //sum += values.next();
+	           sum += i;
 	      }
 	      result = sum;
 	      output.write(key, result, taskId);
@@ -70,7 +73,7 @@ public class WordCount {
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setReducerNum(3);
-	    int num_records = 10;  //number of records in the input file
+	    int num_records = 160;  //number of records in the input file
 	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);
