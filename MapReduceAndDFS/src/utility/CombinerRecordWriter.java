@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
+import mapreduce.WorkerNode;
+
 
 
 /**
@@ -29,10 +31,12 @@ public class CombinerRecordWriter extends RecordWriter{
   private int reducerNum;
   private String path;
   private ArrayList<ObjectOutputStream> outputStreamArrayList;
-  public CombinerRecordWriter(int redNum, String outputPath, ArrayList<ObjectOutputStream> outputStreamArray){
+  private WorkerNode worker;
+  public CombinerRecordWriter(int redNum, String outputPath, ArrayList<ObjectOutputStream> outputStreamArray, WorkerNode worker){
       reducerNum = redNum;
       path = outputPath;
       outputStreamArrayList = outputStreamArray;
+      this.worker = worker;
   }
   public void write(Object key, Object value, int taskId) throws IOException{
       
@@ -46,7 +50,8 @@ public class CombinerRecordWriter extends RecordWriter{
           pair.setValue(value);
           
           ObjectOutputStream outputStream = outputStreamArrayList.get(fileNum);
-          outputStream.writeObject(pair);
+          //outputStream.writeObject(pair);
+          worker.writeToOutputStream(outputStream, pair);
           
           
           

@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import utility.CombinerRecordWriter;
 import utility.CommandType;
 import utility.IndicationType;
 import utility.KeyValue;
@@ -27,6 +28,7 @@ import utility.Message;
  *  @Author Jian Wang
  **/
 import utility.Message.msgType;
+import utility.RecordWriter;
 import utility.ResponseType;
 import utility.WorkerConfig;
 
@@ -59,6 +61,7 @@ public class WorkerNode {
 	
     private int freeSlot;
     private int hostPort;
+    private CombinerRecordWriter combinerRecordWriter;
     
 	
 // methods
@@ -77,6 +80,7 @@ public class WorkerNode {
 		this.workerInfo = new WorkerInfoReport();
 		
 		this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
+		
 	}
 	public WorkerNode(String host, int port){
 		this.host=host;
@@ -339,10 +343,11 @@ public class WorkerNode {
     					}
 					taskIns.getTaskStatus().setTaskType(taskIns.getTask().getType());
 					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
+					System.out.println("report put task "+taskIns.getTask().getTaskId());
 				
 				}
 				WorkerNodeStatus ws = response.getWorkerStatus();
-				ws.setMaxTask(100);
+				ws.setMaxTask(5);
 				sendToManager(response);
 				
 				try {
@@ -383,6 +388,16 @@ public class WorkerNode {
     public ArrayList<ObjectOutputStream> getMapperOutputStream(int jobId) {
         
         return mapperOutputStreamMap.get(jobId);
+    }
+    
+    
+    public synchronized void writeToOutputStream(ObjectOutputStream output, KeyValue<Object,Object> pair){
+        try {
+            output.writeObject(pair);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     
