@@ -10,7 +10,7 @@ import java.net.*;
 import mapreduce.WorkerNodeStatus;
 import utility.Configuration;
 
-class Master{
+public class Master{
 	//properties
 		
 		//The HashMap for worker's socket
@@ -66,8 +66,23 @@ class Master{
 		            String[] inputLine = cmdLine.split(" ");
 		           
 		            switch(inputLine[0]){
+		            	case "ws":
+		            		handleWs();
+		            		break;
+		            	case "Js":
+		            		handleJs();
+		            		break;
+		            	case "kill":
+		            		handleKill();
+		            		break;
+		            	case "quit":
+		            		handleQuit();
+		            		break;
 		            	case "ls":
 		            		handleLs();
+		            		break;
+		            	case "cat":
+		            		handleCat();
 		            		break;
 		                default:
 		                    System.out.println(inputLine[0]+"is not a valid command");
@@ -89,7 +104,7 @@ class Master{
     
     //console cmd methods
     /*list all the workers and their status*/
-    private void handleLs(){
+    private void handleWs(){
         if(0 == workerStatusMap.size())
             System.out.println("no worker in system");
         else{
@@ -102,6 +117,30 @@ class Master{
         }
     }
     
+    /*list all the jobs and their related tasks status*/
+    private void handleJs(){
+    	
+    }
+    
+    /*kill a specified job*/
+    private void handleKill(){
+    	
+    }
+    
+    /*quit the whole system including dsf and mapreduce master*/
+    private void handleQuit(){
+    	
+    }
+    
+    /*Show all the files in the NameNode FileSystem*/
+    private void handleLs(){
+    	
+    }
+    
+    /*show the file's content*/
+    private void handleCat(){
+    	
+    }
 	//main process
 	public static void main(String[] args){
 		//initialization

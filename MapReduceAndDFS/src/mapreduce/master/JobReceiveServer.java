@@ -59,21 +59,21 @@ public class JobReceiveServer implements Runnable{
 			for(int i=0;i<job.getMapTasks().size();i++){
 				Task t=job.getMapTasks().get(i);
 				for(int key: master.workerStatusMap.keySet()){
-				if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
-					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-					//send the task the worker with id key
-					System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
-					Message msg = new Message();
-					msg.setMessageType(msgType.COMMAND);
-					msg.setCommandId(CommandType.START);
-					msg.setJobId(job.getJobId());
-					msg.setTaskId(t.getTaskId());
-					msg.setTaskItem(t);
-					master.workerOosMap.get(key).writeObject(msg);
-					//master.workerOosMap.get(key).flush();
-					job.getMapTaskStatus().get(i).setState(taskState.SENT);
-					//goes to the next worker
-					break;
+					if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
+						master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
+						//send the task the worker with id key
+						System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
+						Message msg = new Message();
+						msg.setMessageType(msgType.COMMAND);
+						msg.setCommandId(CommandType.START);
+						msg.setJobId(job.getJobId());
+						msg.setTaskId(t.getTaskId());
+						msg.setTaskItem(t);
+						master.workerOosMap.get(key).writeObject(msg);
+						//master.workerOosMap.get(key).flush();
+						job.getMapTaskStatus().get(i).setState(taskState.SENT);
+						//goes to the next worker
+						break;
 				}
 				}
 		}

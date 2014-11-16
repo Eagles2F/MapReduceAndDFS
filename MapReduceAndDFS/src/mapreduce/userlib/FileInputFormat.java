@@ -12,7 +12,7 @@ public class FileInputFormat implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -4063078446810176149L;
-	private String path;
+	private String path;   // DFS directory for the input file which are chopped off into different pieces
 	private int size_file;
 	
 	public FileInputFormat(String path, int size){

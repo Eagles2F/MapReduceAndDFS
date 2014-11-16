@@ -28,6 +28,9 @@ public class UserInputFiles implements Serializable{
 	}
 	public KeyValue<Object,Object> GetRecordById(int id){
 		//Read the number lineNum from the file file_id
+		
+		// send the read record request to the NameNode with the DFS path in the fileinputformat.
+		
 		int count =0;
 		String line ="";
 		try(BufferedReader in = new BufferedReader( new FileReader(this.fileInputFormat.getPath()) )){
