@@ -14,7 +14,7 @@ public class DFSClientRequest implements Serializable {
 	private String DesDFSDir; // the destination abstract DFSDirectory
 	private String FileName;
 	private int fileLineNum;
-	
+	private int downloadServerPort;
 	public DFSClientRequest(RequestType rt){
 		this.setReqType(rt);
 	}
@@ -65,6 +65,14 @@ public class DFSClientRequest implements Serializable {
 
 	public void setFileName(String fileName) {
 		FileName = fileName;
+	}
+
+	public int getDownloadServerPort() {
+		return downloadServerPort;
+	}
+
+	public void setDownloadServerPort(int downloadServerPort) {
+		this.downloadServerPort = downloadServerPort;
 	}
 	
 }

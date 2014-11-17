@@ -19,6 +19,7 @@ public class DFSClient {
 	private Socket soc;
 	private BufferedReader console;
 	private boolean running;
+	private  int downloadServerPort;
 	
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
@@ -97,11 +98,13 @@ public class DFSClient {
 		req.setDesDFSDir(cmd[2]);
 		req.setJobName(cmd[3]);
 		req.setFileLineNum(countLines(cmd[1]));//set the line number of the file
-		
+		req.setDownloadServerPort(12345); // set in the conf file
 		String[] temp = cmd[1].split("/");
 		req.setFileName(temp[temp.length-1]);
 		sendToNN(req);
 		System.out.println("Send upload request");
+		
+		//start the download server to listen to the getfile request from the datanodes.
 	}
 	public void startConsole() throws IOException{
         System.out.println("This is DFS client, type help for more information");
@@ -144,4 +147,13 @@ public class DFSClient {
 			System.err.println("DFSClient request sending failed!");
 		}
 	}
+
+	public int getDownloadServerPort() {
+		return downloadServerPort;
+	}
+
+	public void setDownloadServerPort(int downloadServerPort) {
+		this.downloadServerPort = downloadServerPort;
+	}
+	
 }
