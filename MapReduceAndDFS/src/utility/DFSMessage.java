@@ -52,7 +52,7 @@ public class DFSMessage implements Serializable {
     private int chunkLenth;
     private String cause;
     private int workerID;
-    private String fileName;
+    private String sourceFileName;
     private DownloadType downloadType;
     private rspId responseId;
     private nodeType sourceNode;
@@ -60,8 +60,23 @@ public class DFSMessage implements Serializable {
     private int    targetPortNum;
     private nodeType targetNode;
     private msgResult result;
+    private DFSCommandId cmdId;
+    private String localPath;
+    private String localFileName;
     
     
+    public String getLocalPath() {
+        return localPath;
+    }
+    public void setLocalPath(String localPath) {
+        this.localPath = localPath;
+    }
+    public String getLocalFileName() {
+        return localFileName;
+    }
+    public void setLocalFileName(String localFileName) {
+        this.localFileName = localFileName;
+    }
     public nodeType getSourceNode() {
         return sourceNode;
     }
@@ -96,11 +111,11 @@ public class DFSMessage implements Serializable {
     public void setDownloadType(DownloadType downloadType) {
         this.downloadType = downloadType;
     }
-    public String getFileName() {
-        return fileName;
+    public String getSourceFileName() {
+        return sourceFileName;
     }
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setSourceFileName(String fileName) {
+        this.sourceFileName = fileName;
     }
     private int chunkNum;
     public int getChunkNum() {
@@ -150,7 +165,7 @@ public class DFSMessage implements Serializable {
     public void setMessageType(msgType messageType) {
         this.messageType = messageType;
     }
-    private DFSCommandId cmdId;
+    
 
     public DFSCommandId getCmdId() {
         return cmdId;

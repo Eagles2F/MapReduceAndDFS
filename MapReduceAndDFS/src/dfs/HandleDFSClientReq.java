@@ -107,8 +107,8 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setCmdId(DFSCommandId.GETFILES);
 			msg.setStartIndex(key.startId);
 			msg.setChunkLenth(key.endId-key.startId);
-			msg.setTargetNodeAddr(f.getNodeAddress());
-			msg.setTargetPortNum(f.getPortNum());
+			msg.setTargetNodeAddr(soc.getInetAddress().toString());
+			msg.setTargetPortNum(12345);  // set by the system configuration
 			msg.setFileName(dif.getName());
 			
 			
@@ -117,7 +117,6 @@ public class HandleDFSClientReq implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 		}
 				
 	}
