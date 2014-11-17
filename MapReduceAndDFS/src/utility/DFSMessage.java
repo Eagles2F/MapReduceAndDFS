@@ -155,8 +155,15 @@ public class DFSMessage implements Serializable {
     public void setChunkLenth(int chunkLenth) {
         this.chunkLenth = chunkLenth;
     }
+    public String getLocalFileName() {
+        return localFileName;
+    }
+    public void setLocalFileName(String localFileName) {
+        this.localFileName = localFileName;
+    }
     private int recordLenth;
     private int startIndex;
     private int chunkLenth;
+    private String localFileName;//the loacal file to create when download from other datanode
        
 }
