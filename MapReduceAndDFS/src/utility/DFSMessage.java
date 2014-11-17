@@ -53,6 +53,8 @@ public class DFSMessage implements Serializable {
     private String cause;
     private int workerID;
     private String sourceFileName;
+    private String sourcePath;
+    
     private DownloadType downloadType;
     private rspId responseId;
     private nodeType sourceNode;
@@ -64,6 +66,12 @@ public class DFSMessage implements Serializable {
     private String localPath;
     private String localFileName;
     
+    public String getSourcePath() {
+        return sourcePath;
+    }
+    public void setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
+    }
     
     public String getLocalPath() {
         return localPath;
