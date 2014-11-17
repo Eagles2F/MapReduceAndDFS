@@ -6,6 +6,8 @@ public class DFSFile extends DFSFileEntry{
 	private String dupNodeAddress = null;
 	private int portNum;
 	private int dupPortNum;
+	private int nodeId;
+	private int dupId;
 	
 	private String nodeLocalFilePath;
 	private String dupLocalFilePath;
@@ -77,6 +79,22 @@ public class DFSFile extends DFSFileEntry{
 
 	public void setDupLocalFilePath(String dupLocalFilePath) {
 		this.dupLocalFilePath = dupLocalFilePath;
+	}
+
+	public int getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(int nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public int getDupId() {
+		return dupId;
+	}
+
+	public void setDupId(int dupId) {
+		this.dupId = dupId;
 	}
 
 }

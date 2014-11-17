@@ -11,13 +11,9 @@ public class WorkerNodeStatus implements Serializable{
     private int workerId;
     private boolean alive;
     private HashMap<Integer,TaskStatus> taskReports;
-    public void setTaskReports(HashMap<Integer, TaskStatus> taskReports) {
-        this.taskReports = taskReports;
-    }
     private int maxTasks;
- 
+    private boolean dataNode_alive;
     
-
     public WorkerNodeStatus(int Id){
         workerId = Id;
         taskReports = new HashMap<Integer,TaskStatus>();
@@ -28,6 +24,10 @@ public class WorkerNodeStatus implements Serializable{
         taskReports = new HashMap<Integer,TaskStatus>();
         setAlive(true);
         maxTasks = 0;
+    }
+    
+    public void setTaskReports(HashMap<Integer, TaskStatus> taskReports) {
+        this.taskReports = taskReports;
     }
     
     public void setMaxTask(int n){
@@ -56,6 +56,12 @@ public class WorkerNodeStatus implements Serializable{
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
+	public boolean isDataNode_alive() {
+		return dataNode_alive;
+	}
+	public void setDataNode_alive(boolean dataNode_alive) {
+		this.dataNode_alive = dataNode_alive;
+	}
 	
     
 }

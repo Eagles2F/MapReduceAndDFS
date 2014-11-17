@@ -1,19 +1,25 @@
 package dfs;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
 import mapreduce.master.Master;
 
 public class NameNode implements Runnable{
+	
+	public ConcurrentHashMap<Integer,Socket> dataNodeSocMap;
+	public ConcurrentHashMap<Integer,ObjectOutputStream> dataNodeOosMap;
+	public ConcurrentHashMap<Integer,DataNodeManagerServer> dataNodeManagerMap;
 	
 	private DFSDirectory rootDir;
 	private Master master;
 	
 	//the port this server is listening to 
 	private int port;
-
+		
 	private volatile boolean running;
 	ServerSocket serverSocket;
 	
@@ -30,6 +36,9 @@ public class NameNode implements Runnable{
 		        System.exit(0);
 		}
 		System.out.println("create NameNode");
+		dataNodeSocMap = new ConcurrentHashMap<Integer,Socket>();
+		dataNodeOosMap = new ConcurrentHashMap<Integer,ObjectOutputStream>();
+		dataNodeManagerMap = new ConcurrentHashMap<Integer,DataNodeManagerServer>();
 	}
 	@Override
 	public void run() {

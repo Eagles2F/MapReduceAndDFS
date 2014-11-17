@@ -47,30 +47,27 @@ public class DFSMessage implements Serializable {
         OBJECT
     }
     private msgType messageType;
-    public msgType getMessageType() {
-        return messageType;
-    }
-    public void setMessageType(msgType messageType) {
-        this.messageType = messageType;
-    }
-    private DFSCommandId cmdId;
-
-    public DFSCommandId getCmdId() {
-        return cmdId;
-    }
-    public void setCmdId(DFSCommandId cmdId) {
-        this.cmdId = cmdId;
-    }
-    
+    private int recordLenth;
+    private int startIndex;
+    private int chunkLenth;
+    private String cause;
+    private int workerID;
+    private String fileName;
+    private DownloadType downloadType;
     private rspId responseId;
     private nodeType sourceNode;
+    private String targetNodeAddr;
+    private int    targetPortNum;
+    private nodeType targetNode;
+    private msgResult result;
+    
+    
     public nodeType getSourceNode() {
         return sourceNode;
     }
     public void setSourceNode(nodeType sourceNode) {
         this.sourceNode = sourceNode;
     }
-    private nodeType targetNode;
     public nodeType getTargetNode() {
         return targetNode;
     }
@@ -84,8 +81,7 @@ public class DFSMessage implements Serializable {
     public void setResponseId(rspId responseId) {
         this.responseId = responseId;
     }
-    private msgResult result;
-    public msgResult getResult() {
+   public msgResult getResult() {
         return result;
     }
     public void setResult(msgResult result) {
@@ -97,10 +93,6 @@ public class DFSMessage implements Serializable {
     public void setCause(String cause) {
         this.cause = cause;
     }
-    private String cause;
-    private int workerID;
-    private String fileName;
-    private DownloadType downloadType;
     public void setDownloadType(DownloadType downloadType) {
         this.downloadType = downloadType;
     }
@@ -118,8 +110,6 @@ public class DFSMessage implements Serializable {
         this.chunkNum = chunkNum;
     }
 
-    private String targetNodeAddr;
-    private int    targetPortNum;
     public String getTargetNodeAddr() {
         return targetNodeAddr;
     }
@@ -133,7 +123,6 @@ public class DFSMessage implements Serializable {
         this.targetPortNum = targetPortNum;
     }
     public DownloadType getDownloadType() {
-        // TODO Auto-generated method stub
         return downloadType;
     }
     
@@ -155,8 +144,19 @@ public class DFSMessage implements Serializable {
     public void setChunkLenth(int chunkLenth) {
         this.chunkLenth = chunkLenth;
     }
-    private int recordLenth;
-    private int startIndex;
-    private int chunkLenth;
+    public msgType getMessageType() {
+        return messageType;
+    }
+    public void setMessageType(msgType messageType) {
+        this.messageType = messageType;
+    }
+    private DFSCommandId cmdId;
+
+    public DFSCommandId getCmdId() {
+        return cmdId;
+    }
+    public void setCmdId(DFSCommandId cmdId) {
+        this.cmdId = cmdId;
+    }
        
 }

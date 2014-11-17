@@ -2,6 +2,6 @@ package utility;
 public enum DFSCommandId{
         CREATE,
         REMOVE,
-        GETFILES,
-        DOWNLOAD
+        GETFILES,   // between datanode and namenode
+        DOWNLOAD   //between datanode
     }

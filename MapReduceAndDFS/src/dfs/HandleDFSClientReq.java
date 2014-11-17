@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import utility.DFSCommandId;
+import utility.DFSMessage;
+
 public class HandleDFSClientReq implements Runnable{
 
 	private Socket soc;
@@ -74,6 +77,7 @@ public class HandleDFSClientReq implements Runnable{
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
 			f.setPortNum(11114); ////data node communication port ,should be from the conf file
 			f.setNodeLocalFilePath(".."); // should be up to conf
+			f.setNodeId(i);
 			// set duplication here unfinished
 			
 			dif.getFileChunks().put(r,f);
@@ -85,6 +89,7 @@ public class HandleDFSClientReq implements Runnable{
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
 			f.setPortNum(11114); ////data node communication port ,should be from the conf file
 			f.setNodeLocalFilePath(".."); // should be up to conf
+			f.setNodeId(sumOfAliveDataNodes-1);
 			// set duplication here unfinished
 			
 			dif.getFileChunks().put(r,f);
@@ -94,8 +99,20 @@ public class HandleDFSClientReq implements Runnable{
 		//Store the DFSInput File in the NameNode Directory, assuming all DFSInputFile are stored in the rootDir
 		nn.getRootDir().createSubEntry(dif);
 		
-		//send the response back to the client with the chopping guide line, the response contains
+		//tell the destination node to download the chunks from the target client socket and file path
+		for(Range key:dif.getFileChunks().keySet()){
+			int nodeId = dif.getFileChunks().get(key).getNodeId();
+			DFSMessage msg = new DFSMessage();
+			msg.setMessageType(DFSMessage.msgType.COMMAND);
+			msg.setCmdId(DFSCommandId.GETFILES);
+			msg.setStartIndex();
+			msg.setChunkLenth(chunkLenth);
+			msg.setTargetNodeAddr(targetNodeAddr);
+			msg.setTargetPortNum(targetPortNum);
+			msg.setFileName(dif.getName());
+		}
+		
+		
 		
 	}
-	
 }
