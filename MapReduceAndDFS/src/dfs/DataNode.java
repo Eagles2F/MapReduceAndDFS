@@ -136,8 +136,7 @@ public class DataNode {
                  * file
                  */
                 File downloadFile = new File(DFSFolder
-                        + msg.getFileName() + ".part"
-                        + msg.getChunkNum());
+                        + msg.getFileName());
                 if(downloadFile.exists() == false){
                     DFSMessage rspMsg = new DFSMessage();
                     rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
@@ -148,11 +147,9 @@ public class DataNode {
                     downloadSocket.close();
                 }
                 FileInputStream fileInput = new FileInputStream(DFSFolder
-                        + msg.getFileName() + ".part"
-                        + msg.getChunkNum());
+                        + msg.getFileName());
                 File inputFile = new File(DFSFolder
-                        + msg.getFileName() + ".part"
-                        + msg.getChunkNum());
+                        + msg.getFileName());
                 RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
                 fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
                 
@@ -318,7 +315,8 @@ public class DataNode {
         downloadMsg.setMessageType(DFSMessage.msgType.COMMAND);
         downloadMsg.setCmdId(DFSCommandId.DOWNLOAD);
         downloadMsg.setFileName(msg.getFileName());
-        downloadMsg.setChunkNum(msg.getChunkNum());
+        downloadMsg.setStartIndex(msg.getStartIndex());
+        downloadMsg.setChunkLenth(msg.getChunkLenth());
         
         try {
             objOutput.writeObject(downloadMsg);
