@@ -105,6 +105,7 @@ public class DFSClient {
 		System.out.println("Send upload request");
 		
 		//start the download server to listen to the getfile request from the datanodes.
+		DFSClientDownloadServer server = new DFSClientDownloadServer(this);
 	}
 	public void startConsole() throws IOException{
         System.out.println("This is DFS client, type help for more information");
