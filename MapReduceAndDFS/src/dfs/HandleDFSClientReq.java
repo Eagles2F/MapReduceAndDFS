@@ -109,7 +109,7 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setChunkLenth(chunkLenth);
 			msg.setTargetNodeAddr(targetNodeAddr);
 			msg.setTargetPortNum(targetPortNum);
-			msg.setFileName(dif.getName());
+			msg.setSourceFileName(dif.getName());
 		}
 		
 		

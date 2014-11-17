@@ -136,7 +136,7 @@ public class DataNode {
                  * file
                  */
                 File downloadFile = new File(DFSFolder
-                        + msg.getFileName());
+                        + msg.getSourceFileName());
                 if(downloadFile.exists() == false){
                     DFSMessage rspMsg = new DFSMessage();
                     rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
@@ -147,9 +147,9 @@ public class DataNode {
                     downloadSocket.close();
                 }
                 FileInputStream fileInput = new FileInputStream(DFSFolder
-                        + msg.getFileName());
+                        + msg.getSourceFileName());
                 File inputFile = new File(DFSFolder
-                        + msg.getFileName());
+                        + msg.getSourceFileName());
                 RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
                 fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
                 
@@ -314,7 +314,7 @@ public class DataNode {
         DFSMessage downloadMsg = new DFSMessage();
         downloadMsg.setMessageType(DFSMessage.msgType.COMMAND);
         downloadMsg.setCmdId(DFSCommandId.DOWNLOAD);
-        downloadMsg.setFileName(msg.getFileName());
+        downloadMsg.setSourceFileName(msg.getSourceFileName());
         downloadMsg.setStartIndex(msg.getStartIndex());
         downloadMsg.setChunkLenth(msg.getChunkLenth());
         
@@ -348,7 +348,7 @@ public class DataNode {
         try {
             DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
             if(downloadMsgRsp.getResult() != DFSMessage.msgResult.SUCCESS){
-                System.out.println("download file "+msg.getFileName()+" failed");
+                System.out.println("download file "+msg.getSourceFileName()+" failed");
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
                 rspMsg.setCause(downloadMsgRsp.getCause());
                 try {
@@ -419,14 +419,13 @@ public class DataNode {
              */
             FileOutputStream fileOutput = null;
             try {
-                File outputFile = new File(DFSFolder
+                File outputFile = new File(msg.getLocalPath() + "/" 
                         + msg.getLocalFileName());
                 if(!outputFile.exists()){
                     outputFile.createNewFile();
                 }
-                fileOutput = new FileOutputStream(DFSFolder
-                        + msg.getFileName() + ".part"
-                        + msg.getChunkNum(),true);
+                fileOutput = new FileOutputStream(msg.getLocalPath() + "/"
+                        + msg.getLocalFileName(),true);
                 byte[] buffer = new byte[50];
                 int length = -1;
                 try {
