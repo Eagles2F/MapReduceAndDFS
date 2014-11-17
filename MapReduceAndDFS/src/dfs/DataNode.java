@@ -1,3 +1,13 @@
+/*
+ * This is the dataNode for DFS. the dataNode will run on the same machine with the MapReduce worker node
+ * every dataNode will have a thread the receive the message from nameNode and will have a download server thread
+ * to receive the downlaod request from other dataNode
+ * @Author: Yifan Li
+ * @Author: Jian Wang
+ * 
+ * @Date: 11/9/2014
+ * @Version:0.00,developing version
+ */
 package dfs;
 
 import java.awt.TrayIcon.MessageType;
@@ -72,6 +82,7 @@ public class DataNode {
         
     }
     
+    //download server thread, it will create a new thread for every download request
     public class dataNodeDownloadServer extends Thread{
 
 
@@ -97,6 +108,7 @@ public class DataNode {
     
     }
     
+    //the acutual working thread for any download request
     public class dataNodeDownloadThread extends Thread{
         private Socket downloadSocket;
 
@@ -203,6 +215,7 @@ public class DataNode {
         
     }
     
+    //the main thread for the dataNode, start when the system boot up
     public class dataNodeThread extends Thread {
 
         Socket s;
@@ -236,6 +249,10 @@ public class DataNode {
         }
         }
 
+    /*download files from other dataNode
+     * nameNode will send the getFiles request to the target dataNode
+     * source dataNode will download the file from the source dataNode
+     */
     public DFSMessage downloadFiles(DFSMessage msg) {
         System.out.println("Start File Transfer from " + msg.getTargetNodeAddr() + " "
                 + msg.getTargetPortNum());
@@ -333,7 +350,7 @@ public class DataNode {
         try {
             DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
             if(downloadMsgRsp.getResult() != DFSMessage.msgResult.SUCCESS){
-                System.out.println("download file "+msg.getFileName()+" chunk "+msg.getChunkNum()+" failed");
+                System.out.println("download file "+msg.getFileName()+" failed");
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
                 rspMsg.setCause(downloadMsgRsp.getCause());
                 try {
@@ -405,8 +422,7 @@ public class DataNode {
             FileOutputStream fileOutput = null;
             try {
                 File outputFile = new File(DFSFolder
-                        + msg.getFileName() + ".part"
-                        + msg.getChunkNum());
+                        + msg.getLocalFileName());
                 if(!outputFile.exists()){
                     outputFile.createNewFile();
                 }
