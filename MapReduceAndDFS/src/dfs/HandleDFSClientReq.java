@@ -88,7 +88,7 @@ public class HandleDFSClientReq implements Runnable{
 			DFSFile f = new DFSFile(req.getFileName());
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
 			f.setPortNum(11114); ////data node communication port ,should be from the conf file
-			f.setNodeLocalFilePath(".."); // should be up to conf
+			f.setNodeLocalFilePath("../DFS"); // should be up to conf
 			f.setNodeId(sumOfAliveDataNodes-1);
 			// set duplication here unfinished
 			
@@ -101,18 +101,24 @@ public class HandleDFSClientReq implements Runnable{
 		
 		//tell the destination node to download the chunks from the target client socket and file path
 		for(Range key:dif.getFileChunks().keySet()){
-			int nodeId = dif.getFileChunks().get(key).getNodeId();
+			DFSFile f = dif.getFileChunks().get(key);
 			DFSMessage msg = new DFSMessage();
 			msg.setMessageType(DFSMessage.msgType.COMMAND);
 			msg.setCmdId(DFSCommandId.GETFILES);
-			msg.setStartIndex();
-			msg.setChunkLenth(chunkLenth);
-			msg.setTargetNodeAddr(targetNodeAddr);
-			msg.setTargetPortNum(targetPortNum);
+			msg.setStartIndex(key.startId);
+			msg.setChunkLenth(key.endId-key.startId);
+			msg.setTargetNodeAddr(f.getNodeAddress());
+			msg.setTargetPortNum(f.getPortNum());
 			msg.setFileName(dif.getName());
+			
+			
+			try {
+				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 		}
-		
-		
-		
+				
 	}
 }

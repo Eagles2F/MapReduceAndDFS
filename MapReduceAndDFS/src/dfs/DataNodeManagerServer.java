@@ -91,8 +91,8 @@ public class DataNodeManagerServer implements Runnable{
         }
     }
     // the send msg method
-    public int sendToDataNode(Message cmd) throws IOException{
-        objOutput.writeObject(cmd);
+    public int sendToDataNode(DFSMessage msg) throws IOException{
+        objOutput.writeObject(msg);
         objOutput.flush();
         return 0;
 }
