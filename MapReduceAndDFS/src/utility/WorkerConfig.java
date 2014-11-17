@@ -28,12 +28,12 @@ public class WorkerConfig extends ConfigurationBase{
     }
     
     public String getMasterAdd(){
-        System.out.println("master add"+prop.getProperty("MasterAddress"));
+        
         return prop.getProperty("MasterAddress");
         
     }
     public String getMasterPort(){
-        System.out.println("master port"+prop.getProperty("MasterPort"));
+        
         return prop.getProperty("MasterPort");
     }
     
@@ -42,6 +42,10 @@ public class WorkerConfig extends ConfigurationBase{
     @Override
     public Properties getProperties() {
         return prop;
+    }
+
+    public String getLocalPort() {
+        return prop.getProperty("LocalPort");
     }
     
 }
