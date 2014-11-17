@@ -136,5 +136,27 @@ public class DFSMessage implements Serializable {
         // TODO Auto-generated method stub
         return downloadType;
     }
+    
+    public int getRecordLenth() {
+        return recordLenth;
+    }
+    public void setRecordLenth(int recordLenth) {
+        this.recordLenth = recordLenth;
+    }
+    public int getStartIndex() {
+        return startIndex;
+    }
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
+    }
+    public int getChunkLenth() {
+        return chunkLenth;
+    }
+    public void setChunkLenth(int chunkLenth) {
+        this.chunkLenth = chunkLenth;
+    }
+    private int recordLenth;
+    private int startIndex;
+    private int chunkLenth;
        
 }
