@@ -99,6 +99,8 @@ public class HandleDFSClientReq implements Runnable{
 		//Store the DFSInput File in the NameNode Directory, assuming all DFSInputFile are stored in the rootDir
 		nn.getRootDir().createSubEntry(dif);
 		
+		//tell client to establish the download server for dataNodes
+		
 		//tell the destination node to download the chunks from the target client socket and file path
 		for(Range key:dif.getFileChunks().keySet()){
 			DFSFile f = dif.getFileChunks().get(key);
@@ -109,8 +111,10 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setChunkLenth(key.endId-key.startId);
 			msg.setTargetNodeAddr(soc.getInetAddress().toString());
 			msg.setTargetPortNum(12345);  // set by the system configuration
-			msg.setFileName(dif.getName());
-			
+			msg.setLocalFileName(f.getName());
+			msg.setLocalPath(f.getNodeLocalFilePath());
+			msg.setTargetPath(req.getInputFilePath());
+			msg.setTargetFileName(req.getFileName());
 			
 			try {
 				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
@@ -118,6 +122,6 @@ public class HandleDFSClientReq implements Runnable{
 				e.printStackTrace();
 			}
 		}
-				
+		
 	}
 }

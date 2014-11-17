@@ -52,26 +52,20 @@ public class DFSMessage implements Serializable {
     private int chunkLenth;
     private String cause;
     private int workerID;
-    private String sourceFileName;
-    private String sourcePath;
+    
+    private String targetFileName;
+    private String targetPath;
+    private String targetNodeAddr;
+    private int    targetPortNum;
     
     private DownloadType downloadType;
     private rspId responseId;
-    private nodeType sourceNode;
-    private String targetNodeAddr;
-    private int    targetPortNum;
-    private nodeType targetNode;
+    
+    private nodeType messageSource;
     private msgResult result;
     private DFSCommandId cmdId;
     private String localPath;
     private String localFileName;
-    
-    public String getSourcePath() {
-        return sourcePath;
-    }
-    public void setSourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
-    }
     
     public String getLocalPath() {
         return localPath;
@@ -85,19 +79,6 @@ public class DFSMessage implements Serializable {
     public void setLocalFileName(String localFileName) {
         this.localFileName = localFileName;
     }
-    public nodeType getSourceNode() {
-        return sourceNode;
-    }
-    public void setSourceNode(nodeType sourceNode) {
-        this.sourceNode = sourceNode;
-    }
-    public nodeType getTargetNode() {
-        return targetNode;
-    }
-    public void setTargetNode(nodeType targetNode) {
-        this.targetNode = targetNode;
-    }
-    
     public rspId getResponseId() {
         return responseId;
     }
@@ -119,20 +100,6 @@ public class DFSMessage implements Serializable {
     public void setDownloadType(DownloadType downloadType) {
         this.downloadType = downloadType;
     }
-    public String getSourceFileName() {
-        return sourceFileName;
-    }
-    public void setSourceFileName(String fileName) {
-        this.sourceFileName = fileName;
-    }
-    private int chunkNum;
-    public int getChunkNum() {
-        return chunkNum;
-    }
-    public void setChunkNum(int chunkNum) {
-        this.chunkNum = chunkNum;
-    }
-
     public String getTargetNodeAddr() {
         return targetNodeAddr;
     }
@@ -173,14 +140,36 @@ public class DFSMessage implements Serializable {
     public void setMessageType(msgType messageType) {
         this.messageType = messageType;
     }
-    
-
     public DFSCommandId getCmdId() {
         return cmdId;
     }
     public void setCmdId(DFSCommandId cmdId) {
         this.cmdId = cmdId;
     }
+	public String getTargetFileName() {
+		return targetFileName;
+	}
+	public void setTargetFileName(String targetFileName) {
+		this.targetFileName = targetFileName;
+	}
+	public String getTargetPath() {
+		return targetPath;
+	}
+	public void setTargetPath(String targetPath) {
+		this.targetPath = targetPath;
+	}
+	public nodeType getMessageSource() {
+		return messageSource;
+	}
+	public void setMessageSource(nodeType messageSource) {
+		this.messageSource = messageSource;
+	}
+	public int getWorkerID() {
+		return workerID;
+	}
+	public void setWorkerID(int workerID) {
+		this.workerID = workerID;
+	}
 
        
 }
