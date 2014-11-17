@@ -8,5 +8,6 @@ package utility;
 public enum ResponseType {
     STARTRES,
     KILLTASKRES,/*manager to source worker*/
+    CLEANRSP,
     
 }

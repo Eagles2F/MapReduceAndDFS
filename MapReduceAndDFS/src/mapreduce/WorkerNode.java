@@ -178,12 +178,16 @@ public class WorkerNode {
 		this.workerID =msg.getWorkerID(); 
 	}
 	
-	// handle the command clear
+	// clean all the resources and temp files related with the job
 	private void  handle_clear(Message msg){
-	    /*
-		this.currentMap.remove(msg.getProcessId());
-		System.out.println("Process:"+msg.getProcessId()+"is cleared!");
-		*/
+	    for(int i=0;i<msg.getTask().getReducerNum();i++){
+	        File fileToClear = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+	        if(fileToClear.exists()){
+	            fileToClear.delete();
+	        }
+	    }
+	    mapperOutputStreamMap.remove(msg.getJobId());
+	    
 	}
 	
 	// hanld the command exit
@@ -274,6 +278,9 @@ public class WorkerNode {
 						    System.out.println("start task "+master_cmd.getTask().getTaskId()+" "+master_cmd.getTask().getType());
 							worker.handle_start(master_cmd);
 							break;
+							
+						case CLEAN:
+						    worker.handle_clear(master_cmd);
 						
 						case KILLTASK:	// this command tries to kill a process on this worker
 							worker.handle_kill(master_cmd);

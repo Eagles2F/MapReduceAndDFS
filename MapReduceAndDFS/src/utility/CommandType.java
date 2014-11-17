@@ -13,6 +13,7 @@ public enum CommandType {
     KILLTASK,
     SHUTDOWN, 
     ASSIGNID,
+    CLEAN,
     
     
 }
