@@ -135,8 +135,8 @@ public class DataNode {
                  * create the file and write what the server get from socket into the
                  * file
                  */
-                File downloadFile = new File(DFSFolder
-                        + msg.getSourceFileName());
+                File downloadFile = new File(msg.getTargetPath()+"/"
+                        + msg.getTargetFileName());
                 if(downloadFile.exists() == false){
                     DFSMessage rspMsg = new DFSMessage();
                     rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
@@ -147,9 +147,9 @@ public class DataNode {
                     downloadSocket.close();
                 }
                 FileInputStream fileInput = new FileInputStream(DFSFolder
-                        + msg.getSourceFileName());
+                        + msg.getTargetFileName());
                 File inputFile = new File(DFSFolder
-                        + msg.getSourceFileName());
+                        + msg.getTargetFileName());
                 RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
                 fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
                 
@@ -314,7 +314,8 @@ public class DataNode {
         DFSMessage downloadMsg = new DFSMessage();
         downloadMsg.setMessageType(DFSMessage.msgType.COMMAND);
         downloadMsg.setCmdId(DFSCommandId.DOWNLOAD);
-        downloadMsg.setSourceFileName(msg.getSourceFileName());
+        downloadMsg.setTargetFileName(msg.getTargetFileName());
+        downloadMsg.setTargetPath(msg.getTargetPath());
         downloadMsg.setStartIndex(msg.getStartIndex());
         downloadMsg.setChunkLenth(msg.getChunkLenth());
         
@@ -348,7 +349,7 @@ public class DataNode {
         try {
             DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
             if(downloadMsgRsp.getResult() != DFSMessage.msgResult.SUCCESS){
-                System.out.println("download file "+msg.getSourceFileName()+" failed");
+                System.out.println("download file "+msg.getTargetFileName()+" failed");
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
                 rspMsg.setCause(downloadMsgRsp.getCause());
                 try {
