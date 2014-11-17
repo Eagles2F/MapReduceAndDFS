@@ -146,9 +146,9 @@ public class DataNode {
                     objectOutputStream.writeObject(rspMsg);
                     downloadSocket.close();
                 }
-                FileInputStream fileInput = new FileInputStream(DFSFolder
+                FileInputStream fileInput = new FileInputStream(msg.getTargetPath()
                         + msg.getTargetFileName());
-                File inputFile = new File(DFSFolder
+                File inputFile = new File(msg.getTargetPath()
                         + msg.getTargetFileName());
                 RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
                 fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
@@ -170,7 +170,7 @@ public class DataNode {
                 } 
                 else{
                     output = downloadSocket.getOutputStream();
-                    byte[] buffer = new byte[50];
+                    byte[] buffer ;
                     String inputString;
                     fileHdl.readLine();
                     int readLength = -1;
@@ -318,6 +318,7 @@ public class DataNode {
         downloadMsg.setTargetPath(msg.getTargetPath());
         downloadMsg.setStartIndex(msg.getStartIndex());
         downloadMsg.setChunkLenth(msg.getChunkLenth());
+        downloadMsg.setDownloadType(msg.getDownloadType());
         
         try {
             objOutput.writeObject(downloadMsg);
