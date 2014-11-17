@@ -10,9 +10,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 
 import utility.DFSMessage;
 import utility.DFSCommandId;
@@ -38,6 +41,8 @@ public class DataNode {
         createDFSDirectory();
         try {
             Socket nameNodeSocket = new Socket(host,hostPort);
+            dataNodeThread t = new dataNodeThread(nameNodeSocket);
+            t.start();
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -133,6 +138,12 @@ public class DataNode {
                 FileInputStream fileInput = new FileInputStream(DFSFolder
                         + msg.getFileName() + ".part"
                         + msg.getChunkNum());
+                File inputFile = new File(DFSFolder
+                        + msg.getFileName() + ".part"
+                        + msg.getChunkNum());
+                RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
+                fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
+                
                 if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
                     
                     ObjectInputStream inputStream = new ObjectInputStream(fileInput);
@@ -150,12 +161,29 @@ public class DataNode {
                 } 
                 else{
                     output = downloadSocket.getOutputStream();
-                    byte[] buffer = new byte[100];
+                    byte[] buffer = new byte[50];
+                    String inputString;
+                    fileHdl.readLine();
                     int readLength = -1;
-                    int writeLenth = -1;
-                    while((readLength = input.read(buffer)) > 0){
-                        
-                        output.write(buffer, 0, readLength);
+                    int writeLenth = 0;
+                    
+                    for(int i=0;i<msg.getStartIndex()+msg.getChunkLenth();i++){
+                        inputString = fileHdl.readLine();
+                        if(i>=msg.getStartIndex()){
+                            
+                            buffer = inputString.getBytes();
+                            
+                            if(inputString.length() <= 50)
+                                output.write(buffer, 0, inputString.length());
+                            else{
+                                int j=0;
+                                for(j =0 ;j<(inputString.length()/50);j++){
+                                    output.write(buffer, j*50, 50);
+                                }
+                                //the remaining part
+                                output.write(buffer, j*50, inputString.length()-j*50);
+                            }
+                        }
                         
                     }
                 }
@@ -376,13 +404,20 @@ public class DataNode {
              */
             FileOutputStream fileOutput = null;
             try {
+                File outputFile = new File(DFSFolder
+                        + msg.getFileName() + ".part"
+                        + msg.getChunkNum());
+                if(!outputFile.exists()){
+                    outputFile.createNewFile();
+                }
                 fileOutput = new FileOutputStream(DFSFolder
                         + msg.getFileName() + ".part"
                         + msg.getChunkNum(),true);
-                byte[] buffer = new byte[200];
+                byte[] buffer = new byte[50];
                 int length = -1;
                 try {
                     while ((length = input.read(buffer)) > 0) {
+                        
                         fileOutput.write(buffer, 0, length);
                         fileOutput.flush();
                     }
