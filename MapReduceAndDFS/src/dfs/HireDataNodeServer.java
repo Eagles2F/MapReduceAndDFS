@@ -16,14 +16,12 @@ public class HireDataNodeServer implements Runnable{
 	 	
 		private NameNode nn;
 	    private int portNum;//the port number which is used by this server thread
-	    private int dataNodeCnt;
 	    private volatile boolean running;
 	    ServerSocket serverSocket;
 	    
 	    public HireDataNodeServer(int port,NameNode nn){
 	       portNum = port;
 	       this.nn = nn;
-	       dataNodeCnt = 0;
 	       running = true;
 	       try {
 	        serverSocket = new ServerSocket(portNum);
@@ -41,14 +39,8 @@ public class HireDataNodeServer implements Runnable{
 	    	   System.out.println("HireDataNodeServer is waiting for new workers on the port: "+this.portNum);
 	           while(running){
 	               Socket dataNodeSocket = serverSocket.accept();
-	               System.out.println("DataNode: "+dataNodeSocket.getInetAddress()+":"+dataNodeSocket.getPort()+" joins in");
-	               //nn.dataNodeSocMap.put(dataNodeCnt, dataNodeSocket); //add the dataNode soc with dataNodeCnt as the ID
-	             
-	               //create the specific manage server for the new worker
-	               DataNodeManagerServer managerServer = new DataNodeManagerServer(nn,dataNodeCnt,dataNodeSocket); 
-	               nn.dataNodeManagerMap.put(dataNodeCnt, managerServer);
+	               DataNodeManagerServer managerServer = new DataNodeManagerServer(nn,dataNodeSocket); 
 	               new Thread(managerServer).start();
-	               dataNodeCnt++;
 	           } 
 	       }catch(IOException e){
 	           e.printStackTrace();

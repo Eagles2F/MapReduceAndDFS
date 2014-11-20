@@ -1,8 +1,6 @@
 package utility;
 
 import java.io.Serializable;
-import mapreduce.Task;
-import mapreduce.WorkerNodeStatus;
 
 /**
 * Message class used to send between manager and worker
@@ -11,12 +9,8 @@ import mapreduce.WorkerNodeStatus;
 * @Author Jian Wang
 */
 public class DFSMessage implements Serializable {
-    /**
-     * 
-     */
-    
-
-    /**
+	private static final long serialVersionUID = -2726196085512165276L;
+	/**
      * 
      */
     
@@ -76,6 +70,7 @@ public class DFSMessage implements Serializable {
     private String localPath;
     private String localFileName;
     
+    private String jobName;
     private int jobId;
     private int taskId;
     
@@ -206,6 +201,12 @@ public class DFSMessage implements Serializable {
     public void setTargetCount(int targetCount) {
         this.targetCount = targetCount;
     }
+	public String getJobName() {
+		return jobName;
+	}
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
 
        
 }

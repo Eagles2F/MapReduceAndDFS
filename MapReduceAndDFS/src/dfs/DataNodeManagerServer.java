@@ -2,22 +2,12 @@ package dfs;
 
 
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import mapreduce.Task;
-import mapreduce.TaskStatus;
-import mapreduce.TaskStatus.taskState;
-import mapreduce.WorkerNodeStatus;
-import utility.ClientMessage;
-import utility.CommandType;
 import utility.DFSMessage;
-import utility.Message;
-import utility.Message.msgResult;
-import utility.Message.msgType;
 
 
 /*
@@ -38,21 +28,24 @@ public class DataNodeManagerServer implements Runnable{
     private ObjectInputStream objInput;
     private ObjectOutputStream objOutput;
 
-    public DataNodeManagerServer(NameNode nn, int id, Socket s) throws IOException {
+    public DataNodeManagerServer(NameNode nn, Socket s) throws IOException {
 
         this.nn = nn;
-        dataNodeId = id;
-        running = true;
-        System.out.println("adding a new dataNode server for worker "+id);
-        
+        running = true; 
         socket = s;
         objOutput = new ObjectOutputStream(socket.getOutputStream());
         objInput = new ObjectInputStream(socket.getInputStream());
-        
-        
      
     }
-
+    
+    
+    private void handleGetfileComplete(DFSMessage msg){
+    	//set the upload task to be completed
+    	System.out.println("DataNode: "+msg.getWorkerID()+"has received the inputfile chunk for job:"+msg.getJobName());
+    	this.nn.JobStatusMap.get(msg.getJobName()).getUploadStatusMap().remove(msg.getWorkerID());
+    	this.nn.JobStatusMap.get(msg.getJobName()).getUploadStatusMap().put(msg.getWorkerID(),true);
+    }
+    
     public void run(){
         try{
         	
@@ -79,9 +72,12 @@ public class DataNodeManagerServer implements Runnable{
                     case JOININ:
                         System.out.println("DFS dataNode "+msg.getWorkerID()+" join in");
                         nn.getDataNodeManagerMap().put(msg.getWorkerID(), this);
+                        this.dataNodeId = msg.getWorkerID();
                         nn.dataNodeSocMap.put(dataNodeId, socket);
                         nn.dataNodeOosMap.put(dataNodeId, objOutput);//add the OOS to the map
                         break;
+                    case GETFILESCOMPLETE:
+                    	handleGetfileComplete(msg);
                     default:
                         System.out.println("unrecagnized DFS indication");
                     }

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
 import dfs.DFSClientRequest.RequestType;
 
 /*
@@ -106,6 +107,8 @@ public class DFSClient {
 		
 		//start the download server to listen to the getfile request from the datanodes.
 		DFSClientDownloadServer server = new DFSClientDownloadServer(this);
+		Thread t1 = new Thread(server);
+        t1.start();
 	}
 	public void startConsole() throws IOException{
         System.out.println("This is DFS client, type help for more information");
