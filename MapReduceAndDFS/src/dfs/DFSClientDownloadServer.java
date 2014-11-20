@@ -107,9 +107,6 @@ public class DFSClientDownloadServer implements Runnable {
 	                    byte[] buffer = new byte[50];
 	                    String inputString;
 	                    fileHdl.readLine();
-	                    int readLength = -1;
-	                    int writeLenth = 0;
-	                    
 	                    for(int i=0;i<msg.getStartIndex()+msg.getChunkLenth();i++){
 	                        inputString = fileHdl.readLine();
 	                        if(i>=msg.getStartIndex()){

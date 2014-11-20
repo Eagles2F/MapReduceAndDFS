@@ -13,7 +13,7 @@ public class NameNode implements Runnable{
 	public ConcurrentHashMap<Integer,Socket> dataNodeSocMap;
 	public ConcurrentHashMap<Integer,ObjectOutputStream> dataNodeOosMap;
 	public ConcurrentHashMap<Integer,DataNodeManagerServer> dataNodeManagerMap;
-	
+	public ConcurrentHashMap<String,DFSJobStatus> JobStatusMap;
 	private DFSDirectory rootDir;
 	private Master master;
 	

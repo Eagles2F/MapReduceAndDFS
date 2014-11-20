@@ -8,6 +8,7 @@ import java.net.Socket;
 import utility.DFSCommandId;
 import utility.DFSMessage;
 import utility.DFSMessage.DownloadType;
+import utility.DFSMessage.nodeType;
 
 public class HandleDFSClientReq implements Runnable{
 
@@ -54,8 +55,9 @@ public class HandleDFSClientReq implements Runnable{
 	public void handleInputUpload(DFSClientRequest req){
 		//Create a DFSInput File
 		DFSInputFile dif = new DFSInputFile(req.getFileName());
-		
 		dif.setNumOfRecords(req.getFileLineNum());
+		
+		nn.JobStatusMap.put(req.getJobName(), new DFSJobStatus(dif));
 		
 		//Chop the DFSInput File off by the number of DataNodes
 		int sumOfAliveDataNodes = 0 ;
@@ -103,6 +105,7 @@ public class HandleDFSClientReq implements Runnable{
 		//tell the destination node to download the chunks from the target client socket and file path
 		for(Range key:dif.getFileChunks().keySet()){
 			DFSFile f = dif.getFileChunks().get(key);
+			
 			DFSMessage msg = new DFSMessage();
 			msg.setMessageType(DFSMessage.msgType.COMMAND);
 			msg.setCmdId(DFSCommandId.GETFILES);
@@ -117,7 +120,10 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setTargetPath(req.getInputFilePath());
 			msg.setTargetFileName(req.getFileName());
 			msg.setDownloadType(DownloadType.TXT);
+			msg.setMessageSource(nodeType.NAMENODE);
+			msg.setJobName(req.getJobName());
 			try {
+				nn.JobStatusMap.get(req.getJobName()).getUploadStatusMap().put(f.getNodeId(), false);
 				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
 			} catch (IOException e) {
 				e.printStackTrace();

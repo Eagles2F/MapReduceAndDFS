@@ -10,7 +10,6 @@
  */
 package dfs;
 
-import java.awt.TrayIcon.MessageType;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,9 +24,6 @@ import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-
 import mapreduce.WorkerNode;
 import utility.DFSMessage;
 import utility.DFSCommandId;
