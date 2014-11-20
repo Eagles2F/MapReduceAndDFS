@@ -48,4 +48,8 @@ public class WorkerConfig extends ConfigurationBase{
         return prop.getProperty("LocalPort");
     }
     
+    public String getDataNodeServerPort() {
+        return prop.getProperty("DataNodeServerPort");
+    }
+    
 }

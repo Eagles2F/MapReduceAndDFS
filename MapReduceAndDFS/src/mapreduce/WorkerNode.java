@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import dfs.DataNode;
 import utility.CombinerRecordWriter;
 import utility.CommandType;
 import utility.IndicationType;
@@ -47,7 +48,10 @@ public class WorkerNode {
 
 	private boolean failure = false; // failure == ture means the process died!
 	private int workerID;
-	// process related properties
+	
+
+
+    // process related properties
 	private Thread t;
 	private HashMap<Integer, TaskInstance> currentTaskMap;
 	private HashMap<Integer, ArrayList<ObjectOutputStream>> mapperOutputStreamMap;
@@ -62,6 +66,8 @@ public class WorkerNode {
     private int freeSlot;
     private int hostPort;
     private CombinerRecordWriter combinerRecordWriter;
+    
+    
     
 	
 // methods
@@ -95,6 +101,14 @@ public class WorkerNode {
         this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
 	}
 	
+	//dataNode need to get the workerId when join in the DFS
+	public int getWorkerID() {
+        return workerID;
+    }
+    public void setWorkerID(int workerID) {
+        this.workerID = workerID;
+    }
+    
 	//command handling methods
 	private void handle_kill(Message msg) {
 		System.out.println("Start to kill the process!");
@@ -129,11 +143,12 @@ public class WorkerNode {
 		if(!mapperOutputStreamMap.containsKey(jobId)){
 		    ArrayList<ObjectOutputStream> mapperOutputList = new ArrayList<ObjectOutputStream>();
 		    for(int i = 0;i<msg.getTask().getReducerNum();i++){
-		        File dir = new File("../Output/Intermediate/");
+		        System.out.println("task outputPath "+msg.getTask().getOutputPath());
+		        File dir = new File(msg.getTask().getOutputPath());
 		        if(!dir.exists()){
 		            dir.mkdirs();
 		        }
-    		    File fileToWrite = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+    		    File fileToWrite = new File(msg.getTask().getOutputPath()+ "/"+"job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
     		    try {
     	          if (fileToWrite.exists() == false) {
     
@@ -231,6 +246,7 @@ public class WorkerNode {
 		//start only when there are two arguments 
 		
 	        WorkerNode worker = new WorkerNode();
+	        DataNode dataNode = new DataNode(worker);
 			String host = worker.getHost();
 			int port = worker.getHostPort();
 			
@@ -260,8 +276,7 @@ public class WorkerNode {
 
 			//worker info backend started
 			System.out.println("Start report!");
-			worker.startreport();
-			worker.startTaskLauncher();
+			
 			
 		
 			
@@ -273,6 +288,12 @@ public class WorkerNode {
 					switch(master_cmd.getCommandId()){
 						case ASSIGNID:// this command assignes the id to the process
 							worker.handle_assignID(master_cmd);
+							worker.startreport();
+				            worker.startTaskLauncher();
+				            
+							
+							Thread dataNodeThread = new Thread(dataNode);
+							dataNodeThread.start();
 							break;
 						case START:// this command tries to start a process on this worker
 						    System.out.println("start task "+master_cmd.getTask().getTaskId()+" "+master_cmd.getTask().getType());
@@ -350,11 +371,11 @@ public class WorkerNode {
     					}
 					taskIns.getTaskStatus().setTaskType(taskIns.getTask().getType());
 					response.getWorkerStatus().getTaskReports().put(taskIns.getTask().getTaskId(), taskIns.getTaskStatus());
-					System.out.println("report put task "+taskIns.getTask().getTaskId());
+					//System.out.println("report put task "+taskIns.getTask().getTaskId());
 				
 				}
 				WorkerNodeStatus ws = response.getWorkerStatus();
-				ws.setMaxTask(5);
+				ws.setMaxTask(2);
 				sendToManager(response);
 				
 				try {

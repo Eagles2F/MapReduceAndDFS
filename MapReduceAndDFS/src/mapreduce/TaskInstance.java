@@ -1,3 +1,14 @@
+/*
+ * TaskInstance class is a representative of the the task received from master. Worker will create a taskInstance object
+ * for every task received from master and use it to track the task.
+ * First, the taskInstatnce will be put into a queue of Task
+ * to receive the downlaod request from other dataNode
+ * @Author: Yifan Li
+ * @Author: Jian Wang
+ * 
+ * @Date: 11/9/2014
+ * @Version:0.00,developing version
+ */
 package mapreduce;
 
 import java.io.EOFException;
@@ -114,12 +125,12 @@ public class TaskInstance implements Runnable{
                         KeyValue<?, ?> keyValuePair = rr.GetNextRecord();
                         
                         if(keyValuePair != null){
-                            System.out.println("key "+keyValuePair.getKey().toString());
+                            //System.out.println("key "+keyValuePair.getKey().toString());
                             
                             process.map(keyValuePair.getKey(), keyValuePair.getValue(), rw,task.getTaskId());
                         }
                         else{
-                            System.out.println("task "+task.getTaskId()+" "+i);
+                            //System.out.println("task "+task.getTaskId()+" "+i);
                             isMapComplete = true;
                         }
                           
@@ -150,7 +161,7 @@ public class TaskInstance implements Runnable{
                             while(!exit && (valueQ != null) && (valueQ.peek() != null)){
                                 Object currentKey = valueQ.peek().getKey();
                                 valueItr = getValueIterator(valueQ);
-                                System.out.println("combine key "+currentKey);
+                                //System.out.println("combine key "+currentKey);
                                 conbiner.reduce(currentKey, valueItr, crw, task.getTaskId());
                                 
                             }
@@ -235,7 +246,7 @@ public class TaskInstance implements Runnable{
                 Constructor<?> constructor;
                 constructor = reduceClass.getConstructor(null);
                 
-                ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath);
+                ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath,jobId);
                 Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
                 
                 

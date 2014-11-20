@@ -1,5 +1,8 @@
 package utility;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -11,38 +14,47 @@ public class Configuration extends ConfigurationBase implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 988346665358020534L;
-	private String master_ip;
-	private int jobSubmission_port;
-	private int hireWorkerServer_port;
 	
-	public Configuration(String master_ip,int jobSub_port,int hireWorker_port){
-		this.master_ip = master_ip;
-		this.jobSubmission_port = jobSub_port;
-		this.hireWorkerServer_port = hireWorker_port;
+	
+	public Configuration(){
+	    prop = new Properties();
+        try {
+            input = new FileInputStream("../masterConfig.properties");
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        try {
+            prop.load(input);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 	}
 	
 	
-	public String getMaster_ip() {
-		return master_ip;
-	}
-	public void setMaster_ip(String master_ip) {
-		this.master_ip = master_ip;
-	}
+	
 	public int getJobSubmission_port() {
-		return jobSubmission_port;
+		return Integer.valueOf(prop.getProperty("JobSubmissionPort"));
 	}
-	public void setJobSubmission_port(int jobSubmission_port) {
-		this.jobSubmission_port = jobSubmission_port;
-	}
+	
 	public int getHireWorkerServer_port() {
-		return hireWorkerServer_port;
+	    return Integer.valueOf(prop.getProperty("WorkerServerPort"));
 	}
-	public void setHireWorkerServer_port(int hireWorkerServer_port) {
-		this.hireWorkerServer_port = hireWorkerServer_port;
-	}
+	
 	
 	public  Properties getProperties(){
 	    return prop;
 	}
+
+
+    public int getNameNodeServer_port() {
+        return Integer.valueOf(prop.getProperty("NameNodePort"));
+    }
+    
+    public int getHireDataNodeServer_port() {
+        return Integer.valueOf(prop.getProperty("DataNodeServerPort"));
+    }
 
 }

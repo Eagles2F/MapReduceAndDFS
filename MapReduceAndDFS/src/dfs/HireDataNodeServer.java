@@ -42,7 +42,7 @@ public class HireDataNodeServer implements Runnable{
 	           while(running){
 	               Socket dataNodeSocket = serverSocket.accept();
 	               System.out.println("DataNode: "+dataNodeSocket.getInetAddress()+":"+dataNodeSocket.getPort()+" joins in");
-	               nn.dataNodeSocMap.put(dataNodeCnt, dataNodeSocket); //add the dataNode soc with dataNodeCnt as the ID
+	               //nn.dataNodeSocMap.put(dataNodeCnt, dataNodeSocket); //add the dataNode soc with dataNodeCnt as the ID
 	             
 	               //create the specific manage server for the new worker
 	               DataNodeManagerServer managerServer = new DataNodeManagerServer(nn,dataNodeCnt,dataNodeSocket); 

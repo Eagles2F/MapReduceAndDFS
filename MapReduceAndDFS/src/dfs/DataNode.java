@@ -11,6 +11,7 @@
 package dfs;
 
 import java.awt.TrayIcon.MessageType;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,39 +28,43 @@ import java.net.UnknownHostException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 
+import mapreduce.WorkerNode;
 import utility.DFSMessage;
 import utility.DFSCommandId;
+import utility.DFSMessage.msgResult;
+import utility.IndicationType;
 import utility.KeyValue;
+import utility.Message;
+import utility.Message.msgType;
 import utility.WorkerConfig;
 
-public class DataNode {
+public class DataNode implements Runnable{
     private String DFSFolder;
     private WorkerConfig config;
     private int hostPort;
     private int localPort;
     private String host;
     private int recordLenth;
+    private WorkerNode worker;
+    private boolean exit;
     
-    public DataNode(int lenth){
+    public DataNode( WorkerNode worker) {
+        this.worker = worker;
         WorkerConfig config = new WorkerConfig();
         DFSFolder = new String("../DFS/");
         
         this.host = config.getMasterAdd();
-        this.hostPort = Integer.valueOf(config.getMasterPort());
+        this.hostPort = Integer.valueOf(config.getDataNodeServerPort());
         this.localPort = Integer.valueOf(config.getLocalPort());
-        recordLenth = lenth;
+
         createDFSDirectory();
-        try {
-            Socket nameNodeSocket = new Socket(host,hostPort);
-            dataNodeThread t = new dataNodeThread(nameNodeSocket);
+        
+            
+            dataNodeDownloadServer t = new dataNodeDownloadServer();
             t.start();
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            System.out.println("starting download server");
+            
+        
         
     }
 
@@ -82,6 +87,14 @@ public class DataNode {
         
     }
     
+    public boolean isExit() {
+        return exit;
+    }
+
+    public void setExit(boolean exit) {
+        this.exit = exit;
+    }
+
     //download server thread, it will create a new thread for every download request
     public class dataNodeDownloadServer extends Thread{
 
@@ -90,7 +103,7 @@ public class DataNode {
             ServerSocket Listener = null;
             try {
                 Listener = new ServerSocket(localPort);
-
+                System.out.println("download server stated");
                 while (true) {
                     //waiting for the download request from other data node
                     Socket downloadSocket = Listener.accept();
@@ -135,26 +148,32 @@ public class DataNode {
                  * create the file and write what the server get from socket into the
                  * file
                  */
+                System.out.println("download server: request  file "+msg.getTargetPath()+"/"
+                        + msg.getTargetFileName());
                 File downloadFile = new File(msg.getTargetPath()+"/"
                         + msg.getTargetFileName());
+                DFSMessage rspMsg = new DFSMessage();
+                rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
+                rspMsg.setResponseId(DFSMessage.rspId.DOWNLOADRSP);
+                rspMsg.setResult(DFSMessage.msgResult.SUCCESS);
                 if(downloadFile.exists() == false){
-                    DFSMessage rspMsg = new DFSMessage();
-                    rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
-                    rspMsg.setResponseId(DFSMessage.rspId.DOWNLOADRSP);
                     rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-                    rspMsg.setCause("file not exists");
+                    rspMsg.setCause("file "+msg.getTargetPath()+"/"
+                            + msg.getTargetFileName()+"not exists");
                     objectOutputStream.writeObject(rspMsg);
                     downloadSocket.close();
                 }
-                FileInputStream fileInput = new FileInputStream(msg.getTargetPath()
+                
+                objectOutputStream.writeObject(rspMsg);
+                FileInputStream fileInput = new FileInputStream(msg.getTargetPath()+"/"
                         + msg.getTargetFileName());
-                File inputFile = new File(msg.getTargetPath()
+                File inputFile = new File(msg.getTargetPath()+"/"
                         + msg.getTargetFileName());
                 RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
                 fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
                 
                 if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
-                    
+                    System.out.println("download Server:Object file downloading ");
                     ObjectInputStream inputStream = new ObjectInputStream(fileInput);
                     KeyValue<Object,Object> pair = null;
                     try {
@@ -166,7 +185,11 @@ public class DataNode {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                         downloadSocket.close();
+                    }catch(EOFException e){
+                        //reach file end, do nothing
+                        System.out.println("download file end");
                     }
+                    System.out.println("server:download finish");
                 } 
                 else{
                     output = downloadSocket.getOutputStream();
@@ -206,6 +229,13 @@ public class DataNode {
                         e1.printStackTrace();
                     }
                 }
+            try {
+                downloadSocket.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
             }
             
             
@@ -213,146 +243,116 @@ public class DataNode {
     }
     
     //the main thread for the dataNode, start when the system boot up
-    public class dataNodeThread extends Thread {
-
-        Socket s;
-
-        public dataNodeThread(Socket socket) {
-            this.s = socket;
-        }
+    
 
         public void run() {
+            Socket s = null;
+            System.out.println("dataNode Thread running");
             try {
-                InputStream inputStream = s.getInputStream();
+                s = new Socket(host,hostPort);
+                System.out.println("socket to nameNode created");
+            } catch (UnknownHostException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                System.out.println("dataNode UnknownHostException");
+                
+                return;
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                
+                System.out.println("dataNode IOException");
+                return;
+            }
+            try {
+                System.out.println("create stream");
                 OutputStream outputStream = s.getOutputStream();
+                InputStream inputStream = s.getInputStream();
+                
+                System.out.println("create object stream");
+                ObjectOutputStream objOutput = new ObjectOutputStream(outputStream);
                 ObjectInputStream objInput = new ObjectInputStream(inputStream);
 
+                System.out.println("createed input object stream");
                 
-                ObjectOutputStream objOutput = new ObjectOutputStream(outputStream);
+                
+                //send the joinIn indication to nameNode with the workerId get from master
+                System.out.println("send join in to NameNode");
+                DFSMessage joinIn = new DFSMessage();
+                joinIn.setMessageType(DFSMessage.msgType.INDICATION);
+                joinIn.setIndicationId(DFSMessage.indId.JOININ);
+                joinIn.setWorkerID(worker.getWorkerID());
+                objOutput.writeObject(joinIn);
                 
                 /* read a message from the other end */
-                DFSMessage msg = (DFSMessage) objInput.readObject();
-                System.out.println("receive message: "+msg.getCmdId());
-                if(msg.getCmdId() == DFSCommandId.GETFILES){
-                    DFSMessage rspMsg = downloadFiles(msg);
-                    objOutput.writeObject(rspMsg);
-                }
+                DFSMessage msg = null;
+                while(!exit){
+                    msg = (DFSMessage) objInput.readObject();
+                    System.out.println("receive message: "+msg.getCmdId()+" task "+msg.getTaskId());
+                    if(msg.getCmdId() == DFSCommandId.GETFILES){
+                        DFSMessage rspMsg = downloadFiles(msg);
+                        objOutput.writeObject(rspMsg);
+                    }
                     
-                    
+                }   
                 }catch(Exception e){
-                    
+                    try {
+                        s.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
                 }
-                
+              try {
+                s.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }  
         }
-        }
+        
 
     /*download files from other dataNode
      * nameNode will send the getFiles request to the target dataNode
      * source dataNode will download the file from the source dataNode
      */
     public DFSMessage downloadFiles(DFSMessage msg) {
-        System.out.println("Start File Transfer from " + msg.getTargetNodeAddr() + " "
-                + msg.getTargetPortNum());
+        System.out.println("Start File Transfer" );
         DFSMessage rspMsg = new DFSMessage();
         rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
         rspMsg.setResponseId(DFSMessage.rspId.GETFILESRSP);
         Socket socket = null;
-        try {
-            socket = new Socket(msg.getTargetNodeAddr(), msg.getTargetPortNum());
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("UnknownHostException");
-            
-            return rspMsg;
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
-            return rspMsg;
-        }
-
-        // send the file name and range
-        OutputStream msgOutput = null;
-        InputStream input = null;
-        try {
-            msgOutput = socket.getOutputStream();
-            input = socket.getInputStream();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
+        for(int k=0;k<msg.getTargetCount();k++){
+            System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
+                    + localPort);
             try {
-                socket.close();
-            } catch (IOException e1) {
+                socket = new Socket(msg.getTargetNodeAddr()[k], localPort);
+            } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            return rspMsg;
-        }
-        ObjectOutputStream objOutput = null;
-        ObjectInputStream objInput = null;
-        try {
-            objOutput = new ObjectOutputStream(msgOutput);
-            objInput = new ObjectInputStream(input);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
-            return rspMsg;
-        }
-        DFSMessage downloadMsg = new DFSMessage();
-        downloadMsg.setMessageType(DFSMessage.msgType.COMMAND);
-        downloadMsg.setCmdId(DFSCommandId.DOWNLOAD);
-        downloadMsg.setTargetFileName(msg.getTargetFileName());
-        downloadMsg.setTargetPath(msg.getTargetPath());
-        downloadMsg.setStartIndex(msg.getStartIndex());
-        downloadMsg.setChunkLenth(msg.getChunkLenth());
-        downloadMsg.setDownloadType(msg.getDownloadType());
-        
-        try {
-            objOutput.writeObject(downloadMsg);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            try {
-                objOutput.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            try {
-                objInput.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            return rspMsg;
-        }
-        try {
-            DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
-            if(downloadMsgRsp.getResult() != DFSMessage.msgResult.SUCCESS){
-                System.out.println("download file "+msg.getTargetFileName()+" failed");
+                e.printStackTrace();
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-                rspMsg.setCause(downloadMsgRsp.getCause());
+                rspMsg.setCause("UnknownHostException");
+                
+                return rspMsg;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("IOException");
+                return rspMsg;
+            }
+    
+            // send the file name and range
+            OutputStream msgOutput = null;
+            InputStream input = null;
+            try {
+                msgOutput = socket.getOutputStream();
+                input = socket.getInputStream();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("IOException");
                 try {
                     socket.close();
                 } catch (IOException e1) {
@@ -361,66 +361,136 @@ public class DataNode {
                 }
                 return rspMsg;
             }
-        } catch (ClassNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            ObjectOutputStream objOutput = null;
+            ObjectInputStream objInput = null;
             try {
-                objOutput.close();
+                objOutput = new ObjectOutputStream(msgOutput);
+                objInput = new ObjectInputStream(input);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e1.printStackTrace();
+                e.printStackTrace();
+                try {
+                    socket.close();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("IOException");
+                return rspMsg;
             }
-            try {
-                objInput.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("ClassNotFoundException");
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            return rspMsg;
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            try {
-                objOutput.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            try {
-                objInput.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            return rspMsg;
-        }
-        
-        
-        
-        try {
+            System.out.println("send download message to target node");
+            DFSMessage downloadMsg = new DFSMessage();
+            downloadMsg.setMessageType(DFSMessage.msgType.COMMAND);
+            downloadMsg.setCmdId(DFSCommandId.DOWNLOAD);
+            downloadMsg.setTargetFileName(msg.getTargetFileName());
+            downloadMsg.setTargetPath(msg.getTargetPath());
+            downloadMsg.setStartIndex(msg.getStartIndex());
+            downloadMsg.setChunkLenth(msg.getChunkLenth());
+            downloadMsg.setDownloadType(msg.getDownloadType());
             
-            /*
-             * create the file and write what the server get from socket into the
-             * file
-             */
-            FileOutputStream fileOutput = null;
             try {
+                objOutput.writeObject(downloadMsg);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                try {
+                    objOutput.close();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                try {
+                    objInput.close();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("IOException");
+                try {
+                    socket.close();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                return rspMsg;
+            }
+            try {
+                DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
+                System.out.println("receive download rsp "+downloadMsgRsp.getResult()+" type "+downloadMsgRsp.getDownloadType());
+                if(downloadMsgRsp.getResult() != DFSMessage.msgResult.SUCCESS){
+                    System.out.println("download file "+msg.getTargetFileName()+" failed");
+                    rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                    rspMsg.setCause(downloadMsgRsp.getCause());
+                    try {
+                        socket.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    return rspMsg;
+                }
+            } catch (ClassNotFoundException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                try {
+                    objOutput.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                try {
+                    objInput.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("ClassNotFoundException");
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                return rspMsg;
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                try {
+                    objOutput.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                try {
+                    objInput.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                rspMsg.setCause("IOException");
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                return rspMsg;
+            }
+            
+            
+            
+            try {
+                FileOutputStream fileOutput = null;
+                
+                File outputDir = new File(msg.getLocalPath());
+                if(!outputDir.exists()){
+                    outputDir.createNewFile();
+                }
+                
                 File outputFile = new File(msg.getLocalPath() + "/" 
                         + msg.getLocalFileName());
                 if(!outputFile.exists()){
@@ -428,51 +498,103 @@ public class DataNode {
                 }
                 fileOutput = new FileOutputStream(msg.getLocalPath() + "/"
                         + msg.getLocalFileName(),true);
-                byte[] buffer = new byte[50];
-                int length = -1;
-                try {
-                    while ((length = input.read(buffer)) > 0) {
+                if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
+                    //ObjectInputStream objectInput = new ObjectInputStream(input);
+                    ObjectOutputStream objectOutput = new ObjectOutputStream(fileOutput);
+                    System.out.println("start receiving object file");
+                    KeyValue<Object,Object> pair = null;
+                    try {
+                        while( (pair = (KeyValue<Object, Object>) objInput.readObject()) != null)
+                            objectOutput.writeObject(pair);
+                        objectOutput.close();
+                    } catch (ClassNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                         
-                        fileOutput.write(buffer, 0, length);
-                        fileOutput.flush();
+                    }catch(EOFException e){
+                        //reach file end, do nothing
+                        System.out.println("receiving file finish");
                     }
-                    fileOutput.close();
-                } catch (IOException e) {
+                    System.out.println("download finished");
+                    if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
+                        System.out.println("send get file complete to master");
+                        Message indMsg = new Message();
+                        indMsg.setMessageType(msgType.INDICATION);
+                        indMsg.setIndicationId(IndicationType.GETFILESCOMPLETE);
+                        indMsg.setJobId(msg.getJobId());
+                        indMsg.setTaskId(msg.getTaskId());
+                        worker.sendToManager(indMsg);
+                        
+                    }
+                    return rspMsg;
+                }
+                
+                /*
+                 * create the file and write what the server get from socket into the
+                 * file
+                 */
+                
+                try {
+                    
+                    byte[] buffer = new byte[50];
+                    int length = -1;
+                    try {
+                        while ((length = input.read(buffer)) > 0) {
+                            
+                            fileOutput.write(buffer, 0, length);
+                            fileOutput.flush();
+                        }
+                        fileOutput.close();
+                        rspMsg.setResult(msgResult.SUCCESS);
+                        System.out.println("download finished");
+                        //if master send this download message, we need send complete indication
+                        //to master
+                        if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
+                            System.out.println("send get file complete to master");
+                            Message indMsg = new Message();
+                            indMsg.setMessageType(msgType.INDICATION);
+                            indMsg.setIndicationId(IndicationType.GETFILESCOMPLETE);
+                            indMsg.setJobId(msg.getJobId());
+                            worker.sendToManager(indMsg);
+                            
+                        }
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        rspMsg.setResult(DFSMessage.msgResult.FAILURE);
+                        rspMsg.setCause("IOException");
+                        fileOutput.close();
+                        return rspMsg;
+                    }
+                } catch (FileNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                     rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-                    rspMsg.setCause("IOException");
-                    fileOutput.close();
+                    rspMsg.setCause("FileNotFoundException");
                     return rspMsg;
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-                rspMsg.setCause("FileNotFoundException");
+                rspMsg.setCause("IOException");
                 return rspMsg;
             }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-            rspMsg.setCause("IOException");
+    
+            
+            
+    
+            System.out.println("Finish File Transfer");
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             return rspMsg;
-        }
-
-        
-        
-
-        System.out.println("Finish File Transfer");
-        try {
-            socket.close();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        return rspMsg;
-        
-        
+            
+            }
+        return rspMsg;    
     }
     
 

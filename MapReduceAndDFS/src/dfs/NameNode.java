@@ -40,7 +40,14 @@ public class NameNode implements Runnable{
 		dataNodeOosMap = new ConcurrentHashMap<Integer,ObjectOutputStream>();
 		dataNodeManagerMap = new ConcurrentHashMap<Integer,DataNodeManagerServer>();
 	}
-	@Override
+	public ConcurrentHashMap<Integer, DataNodeManagerServer> getDataNodeManagerMap() {
+        return dataNodeManagerMap;
+    }
+    public void setDataNodeManagerMap(
+            ConcurrentHashMap<Integer, DataNodeManagerServer> dataNodeManagerMap) {
+        this.dataNodeManagerMap = dataNodeManagerMap;
+    }
+    @Override
 	public void run() {
 		   try{
 	    	   System.out.println("NameNode is waiting for new requests from clients on the port: "+this.port);

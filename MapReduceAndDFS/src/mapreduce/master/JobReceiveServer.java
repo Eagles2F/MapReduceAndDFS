@@ -71,6 +71,7 @@ public class JobReceiveServer implements Runnable{
 					msg.setJobId(job.getJobId());
 					msg.setTaskId(t.getTaskId());
 					msg.setTaskItem(t);
+					msg.setWorkerID(key);
 					master.workerOosMap.get(key).writeObject(msg);
 					//master.workerOosMap.get(key).flush();
 					job.getMapTaskStatus().get(i).setState(taskState.SENT);

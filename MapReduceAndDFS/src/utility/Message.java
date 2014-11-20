@@ -1,5 +1,8 @@
 package utility;
 import java.io.Serializable;
+
+import utility.DFSMessage.indId;
+import utility.DFSMessage.msgType;
 import mapreduce.Task;
 import mapreduce.WorkerNodeStatus;
 
@@ -202,5 +205,8 @@ public class Message implements Serializable {
 	public void setWorkerStatus(WorkerNodeStatus workerStatus) {
 		this.workerStatus = workerStatus;
 	}
-	
+
+    
+
+    
 }

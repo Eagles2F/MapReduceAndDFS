@@ -23,6 +23,7 @@ public class DFSMessage implements Serializable {
     public enum msgType {
         COMMAND,
         RESPONSE,
+        INDICATION
 
     }
     public enum msgResult{
@@ -37,9 +38,15 @@ public class DFSMessage implements Serializable {
         DOWNLOADRSP
     }
     
+    public enum indId{
+        GETFILESCOMPLETE, 
+        JOININ
+    }
+    
     public enum nodeType{
         NAMENODE,
         DATANODE,
+        MASTER,
     }
     
     public enum DownloadType{
@@ -55,18 +62,41 @@ public class DFSMessage implements Serializable {
     
     private String targetFileName;
     private String targetPath;
-    private String targetNodeAddr;
-    private int    targetPortNum;
-    
+    private String[] targetNodeAddr;
+    private int[]    targetPortNum;
+    private int targetCount;
     private DownloadType downloadType;
     private rspId responseId;
+    private indId indicationId;
     
+   
     private nodeType messageSource;
     private msgResult result;
     private DFSCommandId cmdId;
     private String localPath;
     private String localFileName;
     
+    private int jobId;
+    private int taskId;
+    
+    public int getTaskId() {
+        return taskId;
+    }
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
+    }
+    public int getJobId() {
+        return jobId;
+    }
+    public void setJobId(int jobId) {
+        this.jobId = jobId;
+    }
+    public indId getIndicationId() {
+        return indicationId;
+    }
+    public void setIndicationId(indId indicationId) {
+        this.indicationId = indicationId;
+    }
     public String getLocalPath() {
         return localPath;
     }
@@ -100,16 +130,16 @@ public class DFSMessage implements Serializable {
     public void setDownloadType(DownloadType downloadType) {
         this.downloadType = downloadType;
     }
-    public String getTargetNodeAddr() {
+    public String[] getTargetNodeAddr() {
         return targetNodeAddr;
     }
-    public void setTargetNodeAddr(String targetNodeAddr) {
+    public void setTargetNodeAddr(String[] targetNodeAddr) {
         this.targetNodeAddr = targetNodeAddr;
     }
-    public int getTargetPortNum() {
+    public int[] getTargetPortNum() {
         return targetPortNum;
     }
-    public void setTargetPortNum(int targetPortNum) {
+    public void setTargetPortNum(int[] targetPortNum) {
         this.targetPortNum = targetPortNum;
     }
     public DownloadType getDownloadType() {
@@ -170,6 +200,12 @@ public class DFSMessage implements Serializable {
 	public void setWorkerID(int workerID) {
 		this.workerID = workerID;
 	}
+    public int getTargetCount() {
+        return targetCount;
+    }
+    public void setTargetCount(int targetCount) {
+        this.targetCount = targetCount;
+    }
 
        
 }

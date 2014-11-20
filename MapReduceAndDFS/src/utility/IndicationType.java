@@ -11,5 +11,7 @@ public enum IndicationType {
     HEARTBEAT,
     TASKCOMPLETE,
     TASKFAIL,
+    GETFILESCOMPLETE //this is send from the dataNode to comfirm the complete of downloading
+                    //the mapper output
     
 }

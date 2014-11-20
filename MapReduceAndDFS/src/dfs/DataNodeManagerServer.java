@@ -1,6 +1,7 @@
 package dfs;
 
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -42,18 +43,20 @@ public class DataNodeManagerServer implements Runnable{
         this.nn = nn;
         dataNodeId = id;
         running = true;
-        System.out.println("adding a new manager server for worker "+id);
-        socket = nn.dataNodeSocMap.get(id);
-        objInput = new ObjectInputStream(socket.getInputStream());
+        System.out.println("adding a new dataNode server for worker "+id);
+        
+        socket = s;
         objOutput = new ObjectOutputStream(socket.getOutputStream());
-        nn.dataNodeOosMap.put(id, objOutput);//add the OOS to the map
+        objInput = new ObjectInputStream(socket.getInputStream());
+        
+        
      
     }
 
     public void run(){
         try{
         	
-            DFSMessage msg;
+            DFSMessage msg = null;
             System.out.println("managerServer for dataNode "+dataNodeId+" running");
             
             //start to listen to the response from the dataNode
@@ -65,9 +68,24 @@ public class DataNodeManagerServer implements Runnable{
                     System.out.println("receive "+msg.getMessageType());
                 }catch(ClassNotFoundException e){
                     continue;
+                }catch(EOFException e){
+                    //reach file end, do nothing
+                    continue;
                 }   
                 
                 //process the msg
+                if(msg.getMessageType() == DFSMessage.msgType.INDICATION){
+                    switch(msg.getIndicationId()) {
+                    case JOININ:
+                        System.out.println("DFS dataNode "+msg.getWorkerID()+" join in");
+                        nn.getDataNodeManagerMap().put(msg.getWorkerID(), this);
+                        nn.dataNodeSocMap.put(dataNodeId, socket);
+                        nn.dataNodeOosMap.put(dataNodeId, objOutput);//add the OOS to the map
+                        break;
+                    default:
+                        System.out.println("unrecagnized DFS indication");
+                    }
+                }
            
                 if(msg.getMessageType() == DFSMessage.msgType.RESPONSE){
                 	switch(msg.getResponseId()){
@@ -80,7 +98,7 @@ public class DataNodeManagerServer implements Runnable{
                 		case DOWNLOADRSP:
                 			break;
                     	default:
-                    		System.out.println("unrecagnized message");
+                    		System.out.println("unrecagnized DFS message");
                 	}
                 }
             }

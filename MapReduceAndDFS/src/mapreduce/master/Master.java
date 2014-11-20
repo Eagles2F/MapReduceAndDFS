@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.*;
 
+import dfs.HireDataNodeServer;
+import dfs.NameNode;
 import mapreduce.WorkerNodeStatus;
 import utility.Configuration;
 
@@ -28,11 +30,14 @@ public class Master{
 		
 		private HireWorkerServer hireWorkerServer;
 		private JobReceiveServer jobReceiverServer;
+		private NameNode         nameNodeServer;
 		
-		private Configuration conf;
+		
+        private Configuration conf;
 		
 		private BufferedReader console;
 		private boolean running;
+        private HireDataNodeServer hireDataNodeServer;
 		 
 		public Master(Configuration conf){
 			this.conf = conf;
@@ -46,6 +51,8 @@ public class Master{
 			running = true;
 			hireWorkerServer = new HireWorkerServer(conf.getHireWorkerServer_port(),this);
 			jobReceiverServer = new JobReceiveServer(conf.getJobSubmission_port(),this);
+			nameNodeServer = new NameNode(conf.getNameNodeServer_port(),this);
+			hireDataNodeServer = new HireDataNodeServer(conf.getHireDataNodeServer_port(),nameNodeServer);
 		}
 		
 	//methods
@@ -90,9 +97,29 @@ public class Master{
 		        }
 	}
 		 
+	public NameNode getNameNodeServer() {
+        return nameNodeServer;
+    }
+
+    public void setNameNodeServer(NameNode nameNodeServer) {
+        this.nameNodeServer = nameNodeServer;
+    }
+    
     private void startHireWokerServer(){
 
         Thread t1 = new Thread(hireWorkerServer);
+        t1.start();
+    }
+    
+    private void startHireDataNodeServer(){
+
+        Thread t1 = new Thread(hireDataNodeServer);
+        t1.start();
+    }
+    
+    private void startNameNodeServer(){
+
+        Thread t1 = new Thread(nameNodeServer);
         t1.start();
     }
     
@@ -144,10 +171,13 @@ public class Master{
 	//main process
 	public static void main(String[] args){
 		//initialization
-		 Master master =  new Master(new Configuration("128.237.196.248",11111,11112));
+	    Configuration conf = new Configuration();
+		 Master master =  new Master(conf);
 		 
 		//start the JobReceiveServer thread
 		master.startHireWokerServer();
+		master.startNameNodeServer();
+		master.startHireDataNodeServer();
 		//start the HireWorkerServer thread
 		master.startJobReceiverServer();
 		//start the management shell

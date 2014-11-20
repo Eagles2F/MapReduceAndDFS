@@ -1,10 +1,12 @@
 package mapreduce.master;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 
 import mapreduce.Task;
 import mapreduce.TaskStatus;
@@ -12,6 +14,9 @@ import mapreduce.TaskStatus.taskState;
 import mapreduce.WorkerNodeStatus;
 import utility.ClientMessage;
 import utility.CommandType;
+import utility.DFSCommandId;
+import utility.DFSMessage;
+import utility.DFSMessage.nodeType;
 import utility.Message;
 import utility.Message.msgResult;
 import utility.Message.msgType;
@@ -50,7 +55,7 @@ public class WorkerManagerServer implements Runnable{
     }
     
     //This method will send the reduce tasks
-    private boolean sendReduceTasks(MapReduceJob job) throws IOException{
+    private boolean sendGetFileRequest(MapReduceJob job) throws IOException{
 		//Simple Scheduling: send the ReducerTask to the worker as long as it is not full.
 		// this is a best effort sending, we do not ensure all the tasks must be sent.
 			for(int i=0;i<job.getReduceTasks().size();i++){
@@ -58,22 +63,69 @@ public class WorkerManagerServer implements Runnable{
 				for(int key: master.workerStatusMap.keySet()){
 				if(master.workerStatusMap.get(key).getMaxTask() >
 					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-					//send the task the worker with id key
-					System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
-					Message msg = new Message();
-					msg.setMessageType(msgType.COMMAND);
-					msg.setCommandId(CommandType.START);
-					msg.setJobId(job.getJobId());
-					msg.setTaskId(t.getTaskId());
-					msg.setTaskItem(t);
-					master.workerOosMap.get(key).writeObject(msg);					
-					job.getReduceTaskStatus().get(i).setState(taskState.SENT);
+				  //need to tell the reducer to fetch the file chunk on the mapper
+				    DFSMessage dfsMsg = new DFSMessage();
+                    dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
+                    dfsMsg.setCmdId(DFSCommandId.GETFILES);
+                    dfsMsg.setDownloadType(DFSMessage.DownloadType.OBJECT);
+                    
+                    dfsMsg.setTargetPath(job.getMapTasks().get(0).getOutputPath());
+                    dfsMsg.setTargetFileName("job"+job.getJobId()+"combiner" + i+ ".output");
+                    dfsMsg.setLocalPath(job.getMapTasks().get(0).getOutputPath());
+                    dfsMsg.setLocalFileName("job"+job.getJobId()+"partitioner" + i+ ".output");
+                    dfsMsg.setMessageSource(nodeType.MASTER);
+                    dfsMsg.setTaskId(t.getTaskId()); //need send this back when complete. master need this id to track the task
+                    t.setReducerInputFileName("job"+job.getJobId()+"partitioner" + i+ ".output");
+                    
+                    String[] ipAddr = new String[job.getMapTasks().size()];
+                    HashMap<Integer,String> addr = new HashMap<Integer,String>();
+                    
+                    int[] ports = new int[job.getMapTasks().size()];
+                    
+                    //need send the worker address and port to the worker run reduce
+                    int index =0 ;
+		            for(int j =0;j< job.getMapTasks().size();j++){
+		                //there maybe several mapper tasks on one worker, so only count once for the same worker
+		                int workerId = job.getMapTasks().get(j).getWorkerId();
+		                System.out.println("task "+job.getMapTasks().get(j).getTaskId()+" workerId"+workerId);
+		                if(!addr.containsKey(workerId)){
+		                    System.out.println("target address "+master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
+		                    addr.put(workerId, master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
+		                    index++;
+		                    //ports[index++] = master.workerSocMap.get(workerId).getPort();
+		                }
+		            }
+		            dfsMsg.setTargetCount(index);
+		            dfsMsg.setTargetNodeAddr(addr.values().toArray(ipAddr));
+                    dfsMsg.setTargetPortNum(ports);
+		            master.getNameNodeServer().getDataNodeManagerMap().get(key).sendToDataNode(dfsMsg);
+                    System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort()
+                            +"task "+ t.getTaskId());
 					//goes to the next worker
 					break;
 				}
 				}
 		}
     	return true;
+    }
+    private void sendReduceTask(Message msg){
+        
+      //send the task the worker with id key
+        MapReduceJob job = master.jobMap.get(msg.getJobId());
+        Message taskMsg = new Message();
+        taskMsg.setMessageType(msgType.COMMAND);
+        taskMsg.setCommandId(CommandType.START);
+        taskMsg.setJobId(job.getJobId());
+        taskMsg.setTaskId(msg.getTaskId());
+        
+        taskMsg.setTaskItem(job.getReduceTasks().get(msg.getTaskId()));
+        try {
+            sendToWorker(taskMsg);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }                  
+        job.getReduceTaskStatus().get(msg.getTaskId()).setState(taskState.SENT);
     }
     //This method will generate the ReduceTasks
     private boolean genReduceTasks(MapReduceJob job){
@@ -91,12 +143,14 @@ public class WorkerManagerServer implements Runnable{
 			task.setReduceClass(job.getJob().getReducerClass());
 			//set file IO
 			task.setUserOutputPath(job.getJob().getFof().getPath());
-			task.setReducerInputFileName(listOfFiles[i].getName());
+			
 			task.setOutputPath(job.getMapTasks().get(0).getOutputPath());
+			
 			job.getReduceTasks().add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			taskStatus.setTaskType(Task.REDUCE);
 			job.getReduceTaskStatus().add(taskStatus);
+			
     	}
     	return true;
     }
@@ -162,9 +216,8 @@ public class WorkerManagerServer implements Runnable{
     		if(!genReduceTasks(master.jobMap.get(msg.getJobId()))){
     			System.out.println("Fail to Gen Reduce tasks!");
     		}
-    		if(!sendReduceTasks(master.jobMap.get(msg.getJobId()))){
-    			System.out.println("Fail to Send Reduce tasks!");
-    		}
+    		sendGetFileRequest(master.jobMap.get(msg.getJobId()));
+    		
     	}
     	}else{ // ReduceTask finished
         	//update the task status
@@ -196,7 +249,7 @@ public class WorkerManagerServer implements Runnable{
         	assignIDmsg.setWorkerID(workerId);
         	sendToWorker(assignIDmsg);
         	
-            Message workerMessage;
+            Message workerMessage = null;
             System.out.println("managerServer for worker "+workerId+" running");
             
             //start to listen to the response from the worker
@@ -207,6 +260,9 @@ public class WorkerManagerServer implements Runnable{
                     workerMessage = (Message) objInput.readObject();
                     System.out.println("receive "+workerMessage.getMessageType()+" "+workerMessage.getResponseId()+" "+workerMessage.getIndicationId());
                 }catch(ClassNotFoundException e){
+                    continue;
+                }catch(EOFException e){
+                    //reach file end, do nothing
                     continue;
                 }   
                 
@@ -229,6 +285,10 @@ public class WorkerManagerServer implements Runnable{
                 		case TASKCOMPLETE:
                 			handleTaskcomplete(workerMessage);
                 			break;
+                		case GETFILESCOMPLETE:
+                		    System.out.println("workerManagerServer "+workerId+" receive GetFilesComplete Indication"+
+                		"task "+workerMessage.getTaskId());
+                		    sendReduceTask(workerMessage);
                 		default:
                 			System.out.println("unrecagnized message");
                 	}

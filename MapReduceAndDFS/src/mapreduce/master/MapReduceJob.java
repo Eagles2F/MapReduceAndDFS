@@ -21,6 +21,7 @@ public class MapReduceJob {
 	private ArrayList<Task> ReduceTasks;
 	private ArrayList<TaskStatus> ReduceTaskStatus;
 	private ArrayList<SplitFile> SplitList;
+    private String mapperOutputPath;
 	public MapReduceJob(ObjectOutputStream oos,Job job,int jobid){
 		this.setClientOOS(oos);
 		this.job = job;
@@ -30,6 +31,7 @@ public class MapReduceJob {
 		this.ReduceTasks = new ArrayList<Task>();
 		this.ReduceTaskStatus = new ArrayList<TaskStatus>();
 		this.MapTaskStatus = new ArrayList<TaskStatus>();
+		this.mapperOutputPath = "../DFS/temp";
 	}
 	
 	
@@ -46,7 +48,7 @@ public class MapReduceJob {
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());
 			
-			task.setOutputPath("../Output/Intermediate");
+			task.setOutputPath(mapperOutputPath);
 			this.MapTasks.add(task);
 			TaskStatus taskStatus = new TaskStatus(task.getTaskId());
 			taskStatus.setTaskType(Task.MAP);
