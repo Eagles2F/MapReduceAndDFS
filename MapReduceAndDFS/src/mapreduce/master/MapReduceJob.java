@@ -6,7 +6,9 @@ package mapreduce.master;
 
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
+import utility.DFSMessage;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.fileIO.SplitFile;
@@ -22,6 +24,7 @@ public class MapReduceJob {
 	private ArrayList<TaskStatus> ReduceTaskStatus;
 	private ArrayList<SplitFile> SplitList;
     private String mapperOutputPath;
+    private ConcurrentHashMap<Integer,DFSMessage> dfsMsgConcurrentHashMap;
 	public MapReduceJob(ObjectOutputStream oos,Job job,int jobid){
 		this.setClientOOS(oos);
 		this.job = job;
@@ -32,6 +35,7 @@ public class MapReduceJob {
 		this.ReduceTaskStatus = new ArrayList<TaskStatus>();
 		this.MapTaskStatus = new ArrayList<TaskStatus>();
 		this.mapperOutputPath = "../DFS/temp";
+		this.dfsMsgConcurrentHashMap = new ConcurrentHashMap<Integer,DFSMessage>();
 	}
 	
 	
@@ -126,5 +130,13 @@ public class MapReduceJob {
 	public void setClientOOS(ObjectOutputStream clientOOS) {
 		this.clientOOS = clientOOS;
 	}
+
+
+    public ConcurrentHashMap<Integer,DFSMessage> getDfsMsgConcurrentHashMap() {
+        return dfsMsgConcurrentHashMap;
+        
+    }
+    
+    
 
 }
