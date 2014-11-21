@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import dfs.DataNode;
 import utility.CombinerRecordWriter;
@@ -53,8 +54,8 @@ public class WorkerNode {
 
     // process related properties
 	private Thread t;
-	private HashMap<Integer, TaskInstance> currentTaskMap;
-	private HashMap<Integer, ArrayList<ObjectOutputStream>> mapperOutputStreamMap;
+	private ConcurrentHashMap<runningTaskId, TaskInstance> currentTaskMap;
+	private ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>> mapperOutputStreamMap;
 	
 	//worker information report 
 	WorkerNodeStatus trackStatus;
@@ -82,13 +83,13 @@ public class WorkerNode {
 	    
 		this.workerID = 0;
 		this.freeSlot = 5;
-		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
+		this.currentTaskMap = new ConcurrentHashMap<runningTaskId, TaskInstance>();
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
 		this.tempDfsDir = new String("../DFS/tepm");
 		
-		this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
+		this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
 		
 	}
 	public WorkerNode(String host, int port){
@@ -96,13 +97,25 @@ public class WorkerNode {
 		this.hostPort = port;
 		this.workerID = 0;
 		this.freeSlot = 5;
-		this.currentTaskMap = new HashMap<Integer, TaskInstance>();
+		this.currentTaskMap = new ConcurrentHashMap<runningTaskId, TaskInstance>();
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
         this.workerInfo = new WorkerInfoReport();
         
-        this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
+        this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
 	}
+	
+	public class runningTaskId{
+	    int jobId;
+	    int taskType;
+	    int taskId;
+	    public runningTaskId(int jobId,int taskType,int taskId){
+	        this.jobId = jobId;
+	        this.taskType = taskType;
+	        this.taskId = taskId;
+	    }
+	}
+	
 	
 	//dataNode need to get the workerId when join in the DFS
 	public int getWorkerID() {
@@ -115,11 +128,13 @@ public class WorkerNode {
 	//command handling methods
 	private void handle_kill(Message msg) {
 		System.out.println("Start to kill the process!");
+		runningTaskId index = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskId());
+		
 		//response message prepared!
 		Message response = new Message(msgType.RESPONSE);
 		
 		response.setResponseId(ResponseType.KILLTASKRES);
-		TaskInstance taskIns = currentTaskMap.get(msg.getTaskId());
+		TaskInstance taskIns = currentTaskMap.get(index);
 		taskIns.setExit(true);
 		
 		
@@ -128,7 +143,7 @@ public class WorkerNode {
 		
 		//send the response back
 		sendToManager(response);		
-		System.out.println("Killing process finished!");
+		System.out.println("process killed!");
 	}
 	
 	
@@ -179,7 +194,8 @@ public class WorkerNode {
 		
 		TaskInstance taskIns = new TaskInstance(msg.getTask(),this);
 		taskIns.setRunState(TaskStatus.taskState.QUEUING);
-		currentTaskMap.put(msg.getTaskId(), taskIns);
+		runningTaskId taskIndex = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskItem().getTaskId());
+		currentTaskMap.put(taskIndex, taskIns);
 		
 		
 		taskLauncher.addToTaskQueue(taskIns);
@@ -363,7 +379,7 @@ public class WorkerNode {
 				
 				response.setWorkerID(workerID);
 				
-				for(int i:currentTaskMap.keySet()){
+				for(runningTaskId i:currentTaskMap.keySet()){
 					TaskInstance taskIns = currentTaskMap.get(i);
 					//for all running task, query the thread status
 					if(taskIns.getThread() != null){
