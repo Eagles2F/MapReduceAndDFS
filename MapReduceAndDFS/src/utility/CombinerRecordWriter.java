@@ -42,7 +42,7 @@ public class CombinerRecordWriter extends RecordWriter{
       
       String strTaskID = Long.toString(taskId);
       
-      int fileNum = key.hashCode()%reducerNum;
+      int fileNum = Math.abs(key.hashCode())%reducerNum;
       //System.out.println("combiner file num "+fileNum+"key "+key.toString());
       
           KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
