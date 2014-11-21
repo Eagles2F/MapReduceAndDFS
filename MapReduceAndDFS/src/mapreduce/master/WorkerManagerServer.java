@@ -63,7 +63,9 @@ public class WorkerManagerServer implements Runnable{
 				for(int key: master.workerStatusMap.keySet()){
 				if(master.workerStatusMap.get(key).getMaxTask() >
 					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-				  //need to tell the reducer to fetch the file chunk on the mapper
+				  
+					job.getReduceTaskStatus().get(i).setWorkerId(key);
+					//need to tell the reducer to fetch the file chunk on the mapper
 				    DFSMessage dfsMsg = new DFSMessage();
                     dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
                     dfsMsg.setCmdId(DFSCommandId.GETFILES);

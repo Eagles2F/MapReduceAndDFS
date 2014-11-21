@@ -238,7 +238,7 @@ public class TaskInstance implements Runnable{
         }
         else{
             Class<?> reduceClass;
-            System.out.println("run rudcer task "+task.getTaskId());
+            System.out.println("run reducer task "+task.getTaskId());
             taskStatus.setPhase(TaskStatus.taskPhase.REDUCE);
             try {
                 reduceClass = task.getReduceClass();

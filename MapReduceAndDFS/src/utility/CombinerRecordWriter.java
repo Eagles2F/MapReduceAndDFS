@@ -48,7 +48,7 @@ public class CombinerRecordWriter extends RecordWriter{
           KeyValue<Object,Object> pair = new KeyValue<Object,Object>();
           pair.setKey(key);
           pair.setValue(value);
-          
+          System.out.println("Filenum:"+fileNum+"List length:"+outputStreamArrayList.size());
           ObjectOutputStream outputStream = outputStreamArrayList.get(fileNum);
           //outputStream.writeObject(pair);
           worker.writeToOutputStream(outputStream, pair);

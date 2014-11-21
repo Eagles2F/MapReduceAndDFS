@@ -1,8 +1,6 @@
 package utility;
 import java.io.Serializable;
 
-import utility.DFSMessage.indId;
-import utility.DFSMessage.msgType;
 import mapreduce.Task;
 import mapreduce.WorkerNodeStatus;
 

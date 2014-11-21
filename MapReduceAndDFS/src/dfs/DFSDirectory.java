@@ -23,8 +23,14 @@ public class DFSDirectory extends DFSFileEntry{
 	}
 	
 	//method to remove a file entry in the current directory
-	public boolean removeSubEntry(){
-		return true;
+	public boolean removeSubEntry(String name){
+		if(subEntries.containsKey(name)){
+			this.subEntries.remove(name);
+			return true;
+		}else{
+			System.out.println("Sorry! FileEntry not existed!");
+			return false;
+		}
 	}
 	
 	//method to get the fileEntry
@@ -37,6 +43,13 @@ public class DFSDirectory extends DFSFileEntry{
 		}
 	}
 	
+	//method to list all the file entries in this directory
+	public void ls(){
+		for(String key:subEntries.keySet()){
+			System.out.println("File: "+subEntries.get(key).getName()+" Type: "+subEntries.get(key).getType());			
+		}
+		
+	}
 	
 	@Override
 	public String getName() {

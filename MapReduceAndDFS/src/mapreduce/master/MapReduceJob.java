@@ -4,13 +4,18 @@ package mapreduce.master;
  */
 
 
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import utility.CommandType;
 import utility.DFSMessage;
+import utility.Message;
+import utility.Message.msgType;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
+import mapreduce.TaskStatus.taskState;
 import mapreduce.fileIO.SplitFile;
 import mapreduce.userlib.Job;
 
@@ -25,7 +30,9 @@ public class MapReduceJob {
 	private ArrayList<SplitFile> SplitList;
     private String mapperOutputPath;
     private ConcurrentHashMap<Integer,DFSMessage> dfsMsgConcurrentHashMap;
-	public MapReduceJob(ObjectOutputStream oos,Job job,int jobid){
+    private Master master;
+    
+	public MapReduceJob(ObjectOutputStream oos,Job job,int jobid,Master master){
 		this.setClientOOS(oos);
 		this.job = job;
 		this.jobId = jobid;
@@ -36,6 +43,7 @@ public class MapReduceJob {
 		this.MapTaskStatus = new ArrayList<TaskStatus>();
 		this.mapperOutputPath = "../DFS/temp";
 		this.dfsMsgConcurrentHashMap = new ConcurrentHashMap<Integer,DFSMessage>();
+		this.master = master;
 	}
 	
 	
@@ -47,6 +55,7 @@ public class MapReduceJob {
 			task.setType(0);
 			task.setSplit(sf);
 			task.setReducerNum(job.getReducerNum());
+			System.out.println("ReducerNum:"+job.getReducerNum());
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());
@@ -59,6 +68,73 @@ public class MapReduceJob {
 		}
 		System.out.println("Number of MapTasks:"+this.MapTasks.size());
 	} 
+	
+	//Node failure lead to all the tasks running on that node to be FAILED
+	public void NodeFail(int nodeId){
+		for(TaskStatus ts:this.MapTaskStatus){
+			if(ts.getWorkerId() == nodeId){
+				ts.setState(taskState.FAILED);
+			}
+		}
+		for(TaskStatus ts:this.ReduceTaskStatus){
+			if(ts.getWorkerId() == nodeId){
+				ts.setState(taskState.FAILED);
+			}
+		}
+	}
+	
+	//Task Status report
+	public void TaskReport(){
+		for(TaskStatus ts:this.MapTaskStatus){
+			
+			System.out.println("MapTask Id: "+ts.getTaskId()+" Task status: "+ts.getState());
+		
+		}
+		for(TaskStatus ts:this.ReduceTaskStatus){
+		
+			System.out.println("ReduceTask Id: "+ts.getTaskId()+" Task status: "+ts.getState());
+			
+		}
+	}
+	
+	//kill all the tasks which are running on the workers
+	public void KillTasks(){
+		for(TaskStatus ts:this.MapTaskStatus){
+			if(ts.getState() == taskState.RECEIVED || 
+					ts.getState() == taskState.QUEUING ||
+							ts.getState() == taskState.RUNNING){
+				//all these tasks inside these three states should be killed
+				Message msg= new Message(msgType.COMMAND);
+				msg.setCmdId(CommandType.KILLTASK);
+				msg.setTaskItem(this.MapTasks.get(ts.getTaskId()));// reduce and map???????????????
+				
+				try {
+					master.workerMangerServerMap.get(ts.getWorkerId()).sendToWorker(msg);
+					System.out.println(" Kill Task Id: "+ts.getTaskId()+" On worker: "+ts.getWorkerId());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+					
+		}
+		for(TaskStatus ts:this.ReduceTaskStatus){
+			if(ts.getState() == taskState.RECEIVED || 
+					ts.getState() == taskState.QUEUING ||
+							ts.getState() == taskState.RUNNING){
+				//all these tasks inside these three states should be killed
+				Message msg= new Message(msgType.COMMAND);
+				msg.setCmdId(CommandType.KILLTASK);
+				msg.setTaskItem(this.MapTasks.get(ts.getTaskId()));// reduce and map???????????????
+				
+				try {
+					master.workerMangerServerMap.get(ts.getWorkerId()).sendToWorker(msg);
+					System.out.println(" Kill Task Id: "+ts.getTaskId()+" On worker: "+ts.getWorkerId());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}			
+		}
+	}
 	
 	public ArrayList<TaskStatus> getMapTaskStatus() {
 		return MapTaskStatus;

@@ -73,6 +73,9 @@ public class JobReceiveServer implements Runnable{
 				msg.setTaskId(t.getTaskId());
 				msg.setTaskItem(t);
 				msg.setWorkerID(nodeId);
+				
+				job.getMapTaskStatus().get(i).setWorkerId(nodeId);
+				
 				master.workerOosMap.get(nodeId).writeObject(msg);
 				job.getMapTaskStatus().get(i).setState(taskState.SENT);		
 				System.out.println("MapTask to worker "+nodeId+" has been sent!");
@@ -145,7 +148,7 @@ public class JobReceiveServer implements Runnable{
 	   			   //read the job from the input stream
 				   Job received_job = (Job)ois.readObject();
 	   			   
-	               MapReduceJob job = new MapReduceJob(oos,received_job,jobCnt);
+	               MapReduceJob job = new MapReduceJob(oos,received_job,jobCnt,master);
 	               
 	               //Split the job
 	               Split(job);

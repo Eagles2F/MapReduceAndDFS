@@ -51,7 +51,9 @@ public class HireWorkerServer implements Runnable{
 	               //create the specific manage server for the new worker
 	               WorkerManagerServer managerServer = new WorkerManagerServer(master,workerCnt,workerSocket); 
 	               master.workerMangerServerMap.put(workerCnt, managerServer);
-	               new Thread(managerServer).start();
+	               Thread t =  new Thread(managerServer);
+	               t.start();
+	               master.workerManagerThreadMap.put(workerCnt,t);
 	               workerCnt++;
 	           } 
 	       }catch(IOException e){

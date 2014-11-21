@@ -24,10 +24,18 @@ public class TaskStatus implements Serializable{
     private String stateString;
     private String taskTracker;
     private int taskType;
-
+    private int workerId;
       
     
-    public TaskStatus(int taskid){
+    public int getWorkerId() {
+		return workerId;
+	}
+
+	public void setWorkerId(int workerId) {
+		this.workerId = workerId;
+	}
+
+	public TaskStatus(int taskid){
         taskId = taskid;
         runState = taskState.UNSENT;
     }

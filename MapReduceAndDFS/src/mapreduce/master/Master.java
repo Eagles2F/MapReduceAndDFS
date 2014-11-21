@@ -24,6 +24,8 @@ public class Master{
 		public ConcurrentHashMap<Integer,ObjectOutputStream> workerOosMap;
 		//The HashMap for each worker's manager server 
 		public ConcurrentHashMap<Integer,WorkerManagerServer> workerMangerServerMap;
+		//The HashMap for each worker's manager thread
+	    public ConcurrentHashMap<Integer,Thread> workerManagerThreadMap;
 		
 		//The HashMap for worker status
 		public ConcurrentHashMap<Integer,WorkerNodeStatus> workerStatusMap;
@@ -84,7 +86,7 @@ public class Master{
 		            		handleJs();
 		            		break;
 		            	case "kill":
-		            		handleKill();
+		            		handleKill(inputLine);
 		            		break;
 		            	case "quit":
 		            		handleQuit();
@@ -150,12 +152,24 @@ public class Master{
     
     /*list all the jobs and their related tasks status*/
     private void handleJs(){
-    	
+    	for(int key:this.jobMap.keySet()){
+    		System.out.println("Job Status Report for Job: "+jobMap.get(key).getJob().getJobname() + "JobId: "+key);
+    		//report each job's task status here
+    		this.jobMap.get(key).TaskReport();
+    	}
     }
     
     /*kill a specified job*/
-    private void handleKill(){
+    private void handleKill(String[] cmd){
+    	if(cmd.length != 2){
+    		System.out.println("Usage:kill <job-id>");
+    		return ;
+    	}
+    	//kill the job
+    	this.jobMap.get(String.valueOf(cmd[1])).KillTasks();
     	
+    	//remove the job form the map
+    	this.jobMap.remove(String.valueOf(cmd[1]));
     }
     
     /*quit the whole system including dsf and mapreduce master*/
@@ -163,9 +177,9 @@ public class Master{
     	
     }
     
-    /*Show all the files in the NameNode FileSystem*/
+    /*Show all the files in the NameNode FileSystem RootDir*/
     private void handleLs(){
-    	
+    	this.nameNodeServer.getRootDir().ls();
     }
     
     /*show the file's content*/
@@ -209,7 +223,18 @@ public class Master{
             int id = idIterator.next();
            if(workerStatusMap.get(id).getNoReportCnt() > 2){
         	   workerStatusMap.get(id).setAlive(false);
-                System.out.println("worker "+id+" is not alive. do recovery");               
+        	   //one worker down
+                System.out.println("worker "+id+" is not alive. do reconnect");
+                this.workerManagerThreadMap.remove(id);
+                this.workerMangerServerMap.remove(id);
+                this.workerOosMap.remove(id);
+                this.workerSocMap.remove(id);
+                this.workerStatusMap.remove(id);
+                
+               //set all the tasks still running on this worker to be failed
+               for(int i:jobMap.keySet()){
+            	   jobMap.get(i).NodeFail(id);
+               }
             }
             else{
                 workerStatusMap.get(id).incrementNoReportCnt();
