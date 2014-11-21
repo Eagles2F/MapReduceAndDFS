@@ -104,7 +104,7 @@ public class JobReceiveServer implements Runnable{
 						
 						//setup the filechunk
 						UserInputFiles uif = new UserInputFiles(fileChunks.get(r),r.startId,size);
-						
+					
 						//do the splitting, assuming size is far bigger than splitNum
 						int start =r.startId;
 						if(size%splitNum == 0){ 
@@ -112,6 +112,7 @@ public class JobReceiveServer implements Runnable{
 								SplitFile sf = new SplitFile(start,size/splitNum,uif);
 								start = start+size/splitNum;
 								job.getSplitList().add(sf);
+								System.out.println("SSSSSSSSSSSSSSSSSSS"+sf.getUserInputFiles().fileChunk.getName());
 							}
 						}else{
 							for(int i=0;i<splitNum-1;i++){
@@ -121,8 +122,10 @@ public class JobReceiveServer implements Runnable{
 							}
 							SplitFile sf = new SplitFile(start,size/splitNum+size%splitNum,uif);
 							job.getSplitList().add(sf);
+							
 						}
 					}
+						
 				System.out.println("number of splits:"+job.getSplitList().size());	
 	}
 	
