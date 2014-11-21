@@ -8,6 +8,7 @@ public class DFSJobStatus {
 	
 	public DFSJobStatus(DFSInputFile input){
 		this.input = input;
+		this.uploadStatusMap = new ConcurrentHashMap<Integer,Boolean>();
 	}
 	
 	public DFSInputFile getInput() {

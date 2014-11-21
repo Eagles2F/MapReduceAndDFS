@@ -75,20 +75,20 @@ public class HandleDFSClientReq implements Runnable{
 		int sizePerChunk =req.getFileLineNum() / sumOfAliveDataNodes;
 		if(req.getFileLineNum()%sumOfAliveDataNodes == 0){
 			for(int i=0; i<sumOfAliveDataNodes; i++){
-				Range r = new Range(start_id,start_id+sizePerChunk);
+				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
 				f.setPortNum(11114); ////data node communication port ,should be from the conf file
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 				f.setNodeId(i);
 				// set duplication here unfinished
-			
+				System.out.println("SSSSSSSSSSSSSS");
 				dif.getFileChunks().put(r,f);
-				start_id = start_id+sizePerChunk;
+				start_id = start_id+sizePerChunk+1;
 			}
 		}else{
 			for(int i=0; i<sumOfAliveDataNodes-1; i++){
-				Range r = new Range(start_id,start_id+sizePerChunk);
+				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
 				f.setPortNum(11114); ////data node communication port ,should be from the conf file
@@ -97,9 +97,9 @@ public class HandleDFSClientReq implements Runnable{
 				// set duplication here unfinished
 			
 				dif.getFileChunks().put(r,f);
-				start_id = start_id+sizePerChunk;
+				start_id = start_id+sizePerChunk+1;
 			}
-			Range r = new Range(start_id,req.getFileLineNum()-1);
+			Range r = new Range(start_id,req.getFileLineNum());
 			DFSFile f = new DFSFile(req.getFileName());
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
 			f.setPortNum(11114); ////data node communication port ,should be from the conf file
@@ -117,13 +117,16 @@ public class HandleDFSClientReq implements Runnable{
 		for(Range key:dif.getFileChunks().keySet()){
 			DFSFile f = dif.getFileChunks().get(key);
 			
+			System.out.println("File Chunk "+f.getNodeId()+" Chunk Size:"+(key.endId-key.startId));
+			
 			DFSMessage msg = new DFSMessage();
 			msg.setMessageType(DFSMessage.msgType.COMMAND);
 			msg.setCmdId(DFSCommandId.GETFILES);
 			msg.setStartIndex(key.startId);
 			msg.setChunkLenth(key.endId-key.startId);
-			String[] ipAddr = {soc.getInetAddress().toString()};
+			String[] ipAddr = {soc.getInetAddress().getHostAddress()};
 			int[] prot = {req.getDownloadServerPort()};
+			msg.setTargetCount(1);
 			msg.setTargetNodeAddr(ipAddr);
 			msg.setTargetPortNum(prot);  // set by the system configuration
 			msg.setLocalFileName(f.getName());
@@ -135,6 +138,7 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setJobName(req.getJobName());
 			try {
 				nn.JobStatusMap.get(req.getJobName()).getUploadStatusMap().put(f.getNodeId(), false);
+				System.out.println(f.getNodeId());
 				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
 			} catch (IOException e) {
 				e.printStackTrace();

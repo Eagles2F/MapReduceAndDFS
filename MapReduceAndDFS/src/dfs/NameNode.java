@@ -39,6 +39,7 @@ public class NameNode implements Runnable{
 		dataNodeSocMap = new ConcurrentHashMap<Integer,Socket>();
 		dataNodeOosMap = new ConcurrentHashMap<Integer,ObjectOutputStream>();
 		dataNodeManagerMap = new ConcurrentHashMap<Integer,DataNodeManagerServer>();
+		JobStatusMap = new ConcurrentHashMap<String,DFSJobStatus>();
 	}
 	public ConcurrentHashMap<Integer, DataNodeManagerServer> getDataNodeManagerMap() {
         return dataNodeManagerMap;

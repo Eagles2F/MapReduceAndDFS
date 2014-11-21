@@ -1,15 +1,19 @@
 package dfs;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
 
 import utility.DFSMessage;
 import utility.KeyValue;
@@ -19,6 +23,7 @@ public class DFSClientDownloadServer implements Runnable {
 	
 	public DFSClientDownloadServer(DFSClient client){
 		this.client = client;
+		System.out.println("Start the download server!");
 	}
 	
 	public void run() {
@@ -40,10 +45,7 @@ public class DFSClientDownloadServer implements Runnable {
          }
      }
 	 
-	 
-	 
-	  //the acutual working thread for any download request
-	    public class dataNodeDownloadThread extends Thread{
+	  public class dataNodeDownloadThread extends Thread{
 	        private Socket downloadSocket;
 
 	        public dataNodeDownloadThread(Socket s){
@@ -69,26 +71,28 @@ public class DFSClientDownloadServer implements Runnable {
 	                 * create the file and write what the server get from socket into the
 	                 * file
 	                 */
+	                System.out.println("download server: request  file "+msg.getTargetPath()+"/"
+	                        + msg.getTargetFileName());
 	                File downloadFile = new File(msg.getTargetPath()+"/"
 	                        + msg.getTargetFileName());
+	                DFSMessage rspMsg = new DFSMessage();
+	                rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
+	                rspMsg.setResponseId(DFSMessage.rspId.DOWNLOADRSP);
+	                rspMsg.setResult(DFSMessage.msgResult.SUCCESS);
 	                if(downloadFile.exists() == false){
-	                    DFSMessage rspMsg = new DFSMessage();
-	                    rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
-	                    rspMsg.setResponseId(DFSMessage.rspId.DOWNLOADRSP);
 	                    rspMsg.setResult(DFSMessage.msgResult.FAILURE);
-	                    rspMsg.setCause("file not exists");
+	                    rspMsg.setCause("file "+msg.getTargetPath()+"/"
+	                            + msg.getTargetFileName()+"not exists");
 	                    objectOutputStream.writeObject(rspMsg);
 	                    downloadSocket.close();
 	                }
-	                FileInputStream fileInput = new FileInputStream(msg.getTargetPath()
-	                        + msg.getTargetFileName());
-	                File inputFile = new File(msg.getTargetPath()
-	                        + msg.getTargetFileName());
-	                RandomAccessFile fileHdl = new RandomAccessFile(inputFile,"r");
-	                fileHdl.seek(msg.getRecordLenth()*msg.getStartIndex());
 	                
+	                objectOutputStream.writeObject(rspMsg);
+	                FileInputStream fileInput = new FileInputStream(msg.getTargetPath()+"/"
+	                        + msg.getTargetFileName());
+	                     
 	                if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
-	                    
+	                    System.out.println("download Server:Object file downloading ");
 	                    ObjectInputStream inputStream = new ObjectInputStream(fileInput);
 	                    KeyValue<Object,Object> pair = null;
 	                    try {
@@ -100,17 +104,22 @@ public class DFSClientDownloadServer implements Runnable {
 	                        // TODO Auto-generated catch block
 	                        e.printStackTrace();
 	                        downloadSocket.close();
+	                    }catch(EOFException e){
+	                        //reach file end, do nothing
+	                        System.out.println("download file end");
 	                    }
+	                    System.out.println("server:download finish");
 	                } 
 	                else{
 	                    output = downloadSocket.getOutputStream();
-	                    byte[] buffer = new byte[50];
+	                    byte[] buffer ;
 	                    String inputString;
-	                    fileHdl.readLine();
+	                    BufferedReader br = new BufferedReader(new InputStreamReader(fileInput,Charset.forName("UTF-8")));
+	                     
 	                    for(int i=0;i<msg.getStartIndex()+msg.getChunkLenth();i++){
-	                        inputString = fileHdl.readLine();
+	                        inputString = br.readLine();
 	                        if(i>=msg.getStartIndex()){
-	                            
+	                            inputString += '\n';
 	                            buffer = inputString.getBytes();
 	                            
 	                            if(inputString.length() <= 50)
@@ -137,10 +146,14 @@ public class DFSClientDownloadServer implements Runnable {
 	                        e1.printStackTrace();
 	                    }
 	                }
+	            try {
+	                downloadSocket.close();
+	            } catch (IOException e) {
+	                // TODO Auto-generated catch block
+	                e.printStackTrace();
 	            }
 	            
-	            
-	        
-	    }
+	            }
+        }
 }
 

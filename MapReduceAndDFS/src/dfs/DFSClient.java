@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -35,19 +36,11 @@ public class DFSClient {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		running = true;
+		console = new BufferedReader(new InputStreamReader(System.in));
+		downloadServerPort = 21112;
 	}
 	
-	public  static void main(String[] args) throws IOException{
-		if(args.length != 2){
-			System.out.println("The usage should be: java dfs.DFSClient <NameNode IP> <NameNode port>");
-		}
-		
-		DFSClient dfsNN = new DFSClient(args[0],Integer.valueOf(args[1]));
-		
-		dfsNN.startConsole();
-		
-	}
-
 	public String getDFSNameNodeIpAddr() {
 		return DFSNameNodeIpAddr;
 	}
@@ -95,20 +88,22 @@ public class DFSClient {
 		}
 		
 		DFSClientRequest req = new DFSClientRequest(RequestType.InputUpload);
-		req.setInputFilePath(cmd[1]);
+		String[] temp = cmd[1].split("/");
+		
+		String path = "";
+		for(int i=0;i<temp.length -1;i++){
+			path += temp[i];
+		}
+		req.setInputFilePath(path);
+		
 		req.setDesDFSDir(cmd[2]);
 		req.setJobName(cmd[3]);
 		req.setFileLineNum(countLines(cmd[1]));//set the line number of the file
-		req.setDownloadServerPort(12345); // set in the conf file
-		String[] temp = cmd[1].split("/");
+		req.setDownloadServerPort(21111); // set in the conf file
+		
 		req.setFileName(temp[temp.length-1]);
 		sendToNN(req);
 		System.out.println("Send upload request");
-		
-		//start the download server to listen to the getfile request from the datanodes.
-		DFSClientDownloadServer server = new DFSClientDownloadServer(this);
-		Thread t1 = new Thread(server);
-        t1.start();
 	}
 	public void startConsole() throws IOException{
         System.out.println("This is DFS client, type help for more information");
@@ -142,7 +137,13 @@ public class DFSClient {
             }
         }
 	}
-	
+	public void startDownloadServer(){
+		//start the download server to listen to the getfile request from the datanodes.
+		DFSClientDownloadServer server = new DFSClientDownloadServer(this);
+		Thread t1 = new Thread(server);
+        t1.start();
+
+	}
 	//the method to send the message
 	public void sendToNN(DFSClientRequest req){
 		try {
@@ -160,4 +161,14 @@ public class DFSClient {
 		this.downloadServerPort = downloadServerPort;
 	}
 	
+	public  static void main(String[] args) throws IOException{
+		if(args.length != 2){
+			System.out.println("The usage should be: java dfs.DFSClient <NameNode IP> <NameNode port>");
+		}
+		
+		DFSClient dfsNN = new DFSClient(args[0],Integer.valueOf(args[1]));
+		dfsNN.startDownloadServer();
+		dfsNN.startConsole();
+		
+	}
 }

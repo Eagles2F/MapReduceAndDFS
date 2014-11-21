@@ -207,16 +207,12 @@ public class Master{
         Iterator<Integer> idIterator = workerIdSet.iterator();
         while(idIterator.hasNext()){
             int id = idIterator.next();
-            if(workerStatusMap.get(id).isAlive()){
-                workerStatusMap.get(id).setAlive(false);
-                
-            }
-            else if(workerStatusMap.get(id).getNoReportCnt() > 1){
-                System.out.println("worker "+id+" is not alive. do recovery");
-                
+           if(workerStatusMap.get(id).getNoReportCnt() > 2){
+        	   workerStatusMap.get(id).setAlive(false);
+                System.out.println("worker "+id+" is not alive. do recovery");               
             }
             else{
-                workerStatusMap.get(id).incrementNoReportCnt();;
+                workerStatusMap.get(id).incrementNoReportCnt();
             }
                 
         }
