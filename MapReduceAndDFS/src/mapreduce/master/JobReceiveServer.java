@@ -5,12 +5,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
+import dfs.DFSFile;
+import dfs.DFSInputFile;
+import dfs.Range;
 import utility.CommandType;
 import utility.Message;
 import utility.Message.msgType;
 import mapreduce.Task;
 import mapreduce.TaskStatus.taskState;
+import mapreduce.WorkerNodeStatus;
 import mapreduce.fileIO.SplitFile;
 import mapreduce.fileIO.UserInputFiles;
 import mapreduce.userlib.Job;
@@ -54,77 +59,85 @@ public class JobReceiveServer implements Runnable{
 	
 	//send the mapTask method
 	private void sendMapTasks(MapReduceJob job) throws IOException{
-		//Simple Scheduling: send the MapTask to the worker as long as it is not full.
-		// this is a best effort sending, we do not ensure all the tasks must be sent.
+		//Send the task to the node where the split files are located
 			for(int i=0;i<job.getMapTasks().size();i++){
 				Task t=job.getMapTasks().get(i);
-				for(int key: master.workerStatusMap.keySet()){
-				    System.out.println("scheduler "+master.workerStatusMap.get(key).getMaxTask()+" "
-				            + master.workerStatusMap.get(key).getTaskReports().size());
-				if(master.workerStatusMap.get(key).getMaxTask() * 2 >    //2* max
-					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
-					//send the task the worker with id key
-					System.out.println(master.workerSocMap.get(key).getInetAddress()+"  "+master.workerSocMap.get(key).getPort());
-					Message msg = new Message();
-					msg.setMessageType(msgType.COMMAND);
-					msg.setCommandId(CommandType.START);
-					msg.setJobId(job.getJobId());
-					msg.setTaskId(t.getTaskId());
-					msg.setTaskItem(t);
-					msg.setWorkerID(key);
-					master.workerOosMap.get(key).writeObject(msg);
-					//master.workerOosMap.get(key).flush();
-					job.getMapTaskStatus().get(i).setState(taskState.SENT);
-					//goes to the next worker
-					break;
-				}
-				}
-		}
+				
+				//get the nodeId where files are located
+				int nodeId =t.getSplit().getUserInputFiles().fileChunk.getNodeId();
+				
+				Message msg = new Message();
+				msg.setMessageType(msgType.COMMAND);
+				msg.setCommandId(CommandType.START);
+				msg.setJobId(job.getJobId());
+				msg.setTaskId(t.getTaskId());
+				msg.setTaskItem(t);
+				msg.setWorkerID(nodeId);
+				master.workerOosMap.get(nodeId).writeObject(msg);
+				job.getMapTaskStatus().get(i).setState(taskState.SENT);		
+				System.out.println("MapTask to worker "+nodeId+" has been sent!");
+			}
 	}
 	
 	/*
 	 * This method serves to split the job into MapTasks.
 	 */	
 	public void Split(MapReduceJob job) throws IOException{
-		//get the inputfiles which offers the access to the user input data
-		UserInputFiles uif = new UserInputFiles(job.getJob().getFif());
-		
-		//compute the block_size for each split file
-		
-		/* Scheduling 1:
-			  a.get the number of available MapTask computing ability  --  num
-			  b.set the block_size as num_record / num
-		*/
-		/* Scheduling 2:
-		 * 	  just set the block_size as some magic number 
+		/*
+		 * 	  split the input file based on each file chunk and MaxTask on each node
 		 */
-		int block_size = 10;
-		/* Scheduling 3:
-		 * 	  a.sum the max_mapper_num on each worker node as sum
-		 *    b.set the block_size as num_record/ sum
-		 */
-	/*	int sum = 0;
-		if(master.workerStatusMap.size() ==0){ // if there is no worker in the server , we will refuse the job
-			ObjectOutputStream oos = new ObjectOutputStream(job.getClientSocket().getOutputStream()); //something wrong here
-			oos.write(-1);//return failure information to the client
-		}
-		for(int i:master.workerStatusMap.keySet()){
-			sum += master.workerStatusMap.get(i).getMaxTask();
-		}			
-		int block_size = Math.max(5,job.getJob().getReducerNum()/sum); // 5 is the minimum block_size to maintain some global view. 
-	*/	
-		//do the actual splitting
-		int size_file=job.getJob().getFif().getSize_file();
-		for(int i=0;i<=(size_file-block_size);i = i+block_size){
-			SplitFile sf = new SplitFile(i,block_size,uif);
-			job.getSplitList().add(sf);
-		}
-		//split the final file differently
-		if(size_file%block_size != 0){
-			SplitFile sf = new SplitFile(size_file-(size_file%block_size),size_file%block_size,uif);
-			job.getSplitList().add(sf);
-		}		
-		System.out.println("number of splits:"+job.getSplitList().size());
+		
+				//check if all the input files are uploaded
+				boolean uploaded = true;
+				
+				for(int k:master.getNameNodeServer().JobStatusMap.get(job.getJob().getJobname()).getUploadStatusMap().keySet()){
+					if(master.getNameNodeServer().JobStatusMap.get(job.getJob().getJobname()).getUploadStatusMap().get(k) == false){
+						uploaded = false;//if any uploaded work hasn't been finished
+						System.out.println("The user input file hasn't been uploaded yet!  Pls wait untill uploaded and redo the submiting!");
+						return;
+					}
+				}
+				
+				if(uploaded){
+					//get the DFSInputFile 
+					DFSInputFile userInput = (DFSInputFile)master.getNameNodeServer().getRootDir().getEntry(job.getJob().getFif().getPath());
+					
+					//get the file chunks
+					HashMap<Range,DFSFile> fileChunks = userInput.getFileChunks();
+					
+					//split each chunk and add to the split list
+					for(Range r:fileChunks.keySet()){
+						int size = r.endId - r.startId; //size of the chunk
+						
+						//get the worker status where this chunk is located
+						WorkerNodeStatus nodeStatus = master.workerStatusMap.get(fileChunks.get(r).getNodeId());
+						
+						//split the chunk to the number of max task numbers which a node can support 
+						int splitNum = nodeStatus.getMaxTask();
+						
+						//setup the filechunk
+						UserInputFiles uif = new UserInputFiles(fileChunks.get(r),r.startId,size);
+						
+						//do the splitting, assuming size is far bigger than splitNum
+						int start =r.startId;
+						if(size%splitNum == 0){ 
+							for(int i=0;i<splitNum;i++){
+								SplitFile sf = new SplitFile(start,size/splitNum,uif);
+								start = start+size/splitNum;
+								job.getSplitList().add(sf);
+							}
+						}else{
+							for(int i=0;i<splitNum-1;i++){
+								SplitFile sf = new SplitFile(start,size/splitNum,uif);
+								start = start+size/splitNum;
+								job.getSplitList().add(sf);
+							}
+							SplitFile sf = new SplitFile(start,size/splitNum+size%splitNum,uif);
+							job.getSplitList().add(sf);
+						}
+					}
+				}
+				System.out.println("number of splits:"+job.getSplitList().size());	
 	}
 	
 	

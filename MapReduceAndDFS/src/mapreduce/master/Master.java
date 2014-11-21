@@ -176,8 +176,13 @@ public class Master{
 		 
 		//start the JobReceiveServer thread
 		master.startHireWokerServer();
+		
+		//start the NameNode thread
 		master.startNameNodeServer();
+		
+		//start the HireDataNodeServer thread
 		master.startHireDataNodeServer();
+		
 		//start the HireWorkerServer thread
 		master.startJobReceiverServer();
 		//start the management shell

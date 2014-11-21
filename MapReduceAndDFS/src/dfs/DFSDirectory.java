@@ -18,7 +18,7 @@ public class DFSDirectory extends DFSFileEntry{
 	//method to create a file entry in the current directory
 	public boolean createSubEntry(DFSFileEntry f){
 		if(f.getType() != "Directory")
-		this.subEntries.put(f.getName(), f);
+			this.subEntries.put(f.getName(), f);
 		return true;
 	}
 	
@@ -28,8 +28,13 @@ public class DFSDirectory extends DFSFileEntry{
 	}
 	
 	//method to get the fileEntry
-	public DFSFileEntry getEntry(){
-		return null;
+	public DFSFileEntry getEntry(String name){
+		if(subEntries.contains(name)){
+			return this.subEntries.get(name);
+		}else{
+			System.out.println("Sorry! FileEntry not existed!");
+			return null;
+		}
 	}
 	
 	

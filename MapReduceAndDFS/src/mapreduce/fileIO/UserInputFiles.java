@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+
+import dfs.DFSFile;
 import mapreduce.userlib.FileInputFormat;
 import utility.KeyValue;
 /*
@@ -21,19 +23,26 @@ public class UserInputFiles implements Serializable{
 	 */
 	private static final long serialVersionUID = 3507871942167548213L;
 	//ordered user files array
-	public FileInputFormat fileInputFormat;
-	
-	public UserInputFiles(FileInputFormat fif){
-		fileInputFormat = fif;
+	public DFSFile fileChunk;
+	public int startId;//the startId of this fileChunk
+	public int length;//the length of this fileChunk
+	public UserInputFiles(DFSFile file,int start,int len){
+		fileChunk = file;
+		this.startId = start;
+		this.length = len;
 	}
-	public KeyValue<Object,Object> GetRecordById(int id){
-		//Read the number lineNum from the file file_id
+	public KeyValue<Object,Object> GetRecordById(int idAbs){
+		//transfer the absolute id in the whole input file to the relative id in this file chunk
+		int id = idAbs - startId;
+		if(id >length){
+			return null;
+		}
 		
 		// send the read record request to the NameNode with the DFS path in the fileinputformat.
 		
 		int count =0;
 		String line ="";
-		try(BufferedReader in = new BufferedReader( new FileReader(this.fileInputFormat.getPath()) )){
+		try(BufferedReader in = new BufferedReader( new FileReader(this.fileChunk.getNodeLocalFilePath()+"/"+this.fileChunk.getName()) )){
 			while(true){
 				line = in.readLine();
 				if(line != null){
