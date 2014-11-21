@@ -76,7 +76,8 @@ public class WorkerManagerServer implements Runnable{
                     dfsMsg.setMessageSource(nodeType.MASTER);
                     dfsMsg.setTaskId(t.getTaskId()); //need send this back when complete. master need this id to track the task
                     t.setReducerInputFileName("job"+job.getJobId()+"partitioner" + i+ ".output");
-                    
+                    //add the dfs message to a hashMap, in case the worker failure, master could use this def message to recovery
+                    job.getDfsMsgConcurrentHashMap().put(t.getTaskId(), dfsMsg);
                     String[] ipAddr = new String[job.getMapTasks().size()];
                     HashMap<Integer,String> addr = new HashMap<Integer,String>();
                     
@@ -159,6 +160,7 @@ public class WorkerManagerServer implements Runnable{
     private void handleHeartbeat(WorkerNodeStatus ws){
     	//update the worker status
     	this.master.workerStatusMap.get(ws.getWorkerId()).setAlive(true);
+    	this.master.workerStatusMap.get(ws.getWorkerId()).resetNoReportCnt();
     	this.master.workerStatusMap.get(ws.getWorkerId()).setMaxTask(ws.getMaxTask());
     	this.master.workerStatusMap.get(ws.getWorkerId()).setTaskReports(ws.getTaskReports());
     	//update the tasks status

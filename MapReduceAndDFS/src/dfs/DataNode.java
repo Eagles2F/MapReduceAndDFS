@@ -43,6 +43,9 @@ public class DataNode implements Runnable{
     private int recordLenth;
     private WorkerNode worker;
     private boolean exit;
+    private ObjectOutputStream objOutput;
+    private ObjectInputStream objInput;
+    
     
     public DataNode( WorkerNode worker) {
         this.worker = worker;
@@ -59,8 +62,35 @@ public class DataNode implements Runnable{
             dataNodeDownloadServer t = new dataNodeDownloadServer();
             t.start();
             System.out.println("starting download server");
+            //create the socket with the managerServer
+            Socket s = null;
+            System.out.println("dataNode Thread running");
+            try {
+                s = new Socket(host,hostPort);
+                System.out.println("socket to nameNode created");
+                OutputStream outputStream = s.getOutputStream();
+                InputStream inputStream = s.getInputStream();
+                
+                System.out.println("create object stream");
+                objOutput = new ObjectOutputStream(outputStream);
+                objInput = new ObjectInputStream(inputStream);
+
+                System.out.println("createed input object stream");
+            } catch (UnknownHostException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                System.out.println("dataNode UnknownHostException");
+                
+                return;
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                
+                System.out.println("dataNode IOException");
+                return;
+            }
+            System.out.println("create stream");
             
-        
         
     }
 
@@ -242,34 +272,9 @@ public class DataNode implements Runnable{
     
 
         public void run() {
-            Socket s = null;
-            System.out.println("dataNode Thread running");
+            
             try {
-                s = new Socket(host,hostPort);
-                System.out.println("socket to nameNode created");
-            } catch (UnknownHostException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-                System.out.println("dataNode UnknownHostException");
                 
-                return;
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-                
-                System.out.println("dataNode IOException");
-                return;
-            }
-            try {
-                System.out.println("create stream");
-                OutputStream outputStream = s.getOutputStream();
-                InputStream inputStream = s.getInputStream();
-                
-                System.out.println("create object stream");
-                ObjectOutputStream objOutput = new ObjectOutputStream(outputStream);
-                ObjectInputStream objInput = new ObjectInputStream(inputStream);
-
-                System.out.println("createed input object stream");
                 
                 
                 //send the joinIn indication to nameNode with the workerId get from master
@@ -286,25 +291,15 @@ public class DataNode implements Runnable{
                     msg = (DFSMessage) objInput.readObject();
                     System.out.println("receive message: "+msg.getCmdId()+" task "+msg.getTaskId());
                     if(msg.getCmdId() == DFSCommandId.GETFILES){
-                        DFSMessage rspMsg = downloadFiles(msg);
-                        objOutput.writeObject(rspMsg);
+                        downloadFiles(msg);
+                        //objOutput.writeObject(rspMsg);
                     }
                     
                 }   
                 }catch(Exception e){
-                    try {
-                        s.close();
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
+                    
                 }
-              try {
-                s.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }  
+               
         }
         
 
@@ -317,11 +312,12 @@ public class DataNode implements Runnable{
         DFSMessage rspMsg = new DFSMessage();
         rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
         rspMsg.setResponseId(DFSMessage.rspId.GETFILESRSP);
-        Socket socket = null;
+        Socket socket = null; //socket with the target dataNode to download
         for(int k=0;k<msg.getTargetCount();k++){
             System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
                     + localPort);
             try {
+                //create socket with target node
                 socket = new Socket(msg.getTargetNodeAddr()[k], localPort);
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
@@ -553,6 +549,15 @@ public class DataNode implements Runnable{
                             indMsg.setJobId(msg.getJobId());
                             worker.sendToManager(indMsg);
                             
+                        }else if(msg.getMessageSource() == DFSMessage.nodeType.NAMENODE){
+                            System.out.println("send get file complete to namenode");
+                            DFSMessage indMsg = new DFSMessage();
+                            indMsg.setMessageType(DFSMessage.msgType.INDICATION);
+                            indMsg.setIndicationId(DFSMessage.indId.GETFILESCOMPLETE);
+                            indMsg.setJobName(msg.getJobName());
+                            //send to dataNodeManagerServer
+                            sendToDataNodeManager(indMsg);
+                            
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -591,6 +596,17 @@ public class DataNode implements Runnable{
             
             }
         return rspMsg;    
+    }
+
+    synchronized private void sendToDataNodeManager(DFSMessage indMsg) {
+        try {
+            System.out.println("send "+indMsg.getMessageType()+" "+indMsg.getResponseId()+" "+indMsg.getIndicationId());
+            objOutput.writeObject(indMsg);
+        } catch (IOException e) {
+            
+            System.err.println("fail to send dataNode manager");
+        }
+        
     }
     
 
