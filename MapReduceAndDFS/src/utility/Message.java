@@ -41,6 +41,7 @@ public class Message implements Serializable {
     private String cause;
     private int workerID;
     private WorkerNodeStatus workerStatus;
+    private String reducerOutputFile;
     
     public Message(){
         workerStatus = new WorkerNodeStatus();
@@ -203,6 +204,14 @@ public class Message implements Serializable {
 	public void setWorkerStatus(WorkerNodeStatus workerStatus) {
 		this.workerStatus = workerStatus;
 	}
+
+    public String getReducerOutputFile() {
+        return reducerOutputFile;
+    }
+
+    public void setReducerOutputFile(String reducerOutputFile) {
+        this.reducerOutputFile = reducerOutputFile;
+    }
 
     
 
