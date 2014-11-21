@@ -30,9 +30,11 @@ public  class ReducerRecordWriter extends RecordWriter {
   
 
     private String ReducerOutputPath;
+    private File fileToWrite;
 private int jobId;
-    public ReducerRecordWriter(String outputPath,int jobId){
+    public ReducerRecordWriter(String outputPath,int jobId, File fileToWrite){
         ReducerOutputPath = outputPath;
+        this.fileToWrite = fileToWrite;
         this.jobId = jobId;
     }
   @Override
@@ -47,7 +49,7 @@ private int jobId;
       }
       
       
-      File fileToWrite = new File(ReducerOutputPath+"/" + "job"+jobId+"reducer_" + "task" + strTaskID +".output");
+      
       try {
           if (fileToWrite.exists() == false) {
 

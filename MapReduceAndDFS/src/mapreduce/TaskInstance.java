@@ -12,6 +12,7 @@
 package mapreduce;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class TaskInstance implements Runnable{
     private String ReducerInputFileName;
     private String ReducerOutputPath;
     private String mapperOutputPath;
+    private String reducerOutputFile;
     public TaskInstance(Task taskToRun, WorkerNode w){
         task = taskToRun;
         exit = false;
@@ -245,8 +247,10 @@ public class TaskInstance implements Runnable{
             
                 Constructor<?> constructor;
                 constructor = reduceClass.getConstructor(null);
+                reducerOutputFile = "job"+jobId+"reducer_" + task.getTaskId() +".output";
+                File fileToWrite = new File(ReducerOutputPath+"/" + reducerOutputFile);
                 
-                ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath,jobId);
+                ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath,jobId,fileToWrite);
                 Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
                 
                 
@@ -351,6 +355,8 @@ public class TaskInstance implements Runnable{
         completeMsg.setTaskId(task.getTaskId());
         completeMsg.setWorkerID(task.getWorkerId());
         completeMsg.setTaskItem(task);
+        completeMsg.setReducerOutputFile(reducerOutputFile);
+        
         
         worker.sendToManager(completeMsg);
         
