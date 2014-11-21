@@ -376,6 +376,8 @@ public class WorkerNode {
 				}
 				WorkerNodeStatus ws = response.getWorkerStatus();
 				ws.setMaxTask(2);
+				response.getWorkerStatus().setWorkerId(workerID);
+				
 				sendToManager(response);
 				
 				try {
