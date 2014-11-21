@@ -10,6 +10,8 @@ public class WorkerNodeStatus implements Serializable{
     private static final long serialVersionUID = -4950825013774155452L;
     private int workerId;
     private boolean alive;
+    private int noReportCnt;//this count will increment in the monitor task, and will be reset by the statusReport
+                            // if this count is large than 2, that means there has been more than 15 seconds not status report
     private HashMap<Integer,TaskStatus> taskReports;
     private int maxTasks;
     private boolean dataNode_alive;
@@ -62,6 +64,16 @@ public class WorkerNodeStatus implements Serializable{
 	public void setDataNode_alive(boolean dataNode_alive) {
 		this.dataNode_alive = dataNode_alive;
 	}
+    public void resetNoReportCnt() {
+        noReportCnt = 0;
+    }
+    public void incrementNoReportCnt() {
+        this.noReportCnt++;
+    }
+    public int getNoReportCnt() {
+        
+        return noReportCnt;
+    }
 	
     
 }

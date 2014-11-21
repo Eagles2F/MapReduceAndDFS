@@ -160,6 +160,7 @@ public class WorkerManagerServer implements Runnable{
     private void handleHeartbeat(WorkerNodeStatus ws){
     	//update the worker status
     	this.master.workerStatusMap.get(ws.getWorkerId()).setAlive(true);
+    	this.master.workerStatusMap.get(ws.getWorkerId()).resetNoReportCnt();
     	this.master.workerStatusMap.get(ws.getWorkerId()).setMaxTask(ws.getMaxTask());
     	this.master.workerStatusMap.get(ws.getWorkerId()).setTaskReports(ws.getTaskReports());
     	//update the tasks status

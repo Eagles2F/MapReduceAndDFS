@@ -1,5 +1,9 @@
 package mapreduce.master;
 
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -180,7 +184,48 @@ public class Master{
 		master.startHireDataNodeServer();
 		//start the HireWorkerServer thread
 		master.startJobReceiverServer();
+		master.startMoniterTimer();
 		//start the management shell
 		master.startConsole();
 	}
+	
+	/*this function is called by the monitor thread every 5 seconds.
+     * it check the status of every worker and increment 
+     * the status 1 every time. The ManagerServer will set the status
+     * to 0 every time it receive the status report from worker.
+     * so when the status number is bigger than 1, it means worker has not
+     * update for at least 5 seconds and consider the worker is Failed*/
+    private void checkWorkerLiveness(){
+        //System.out.println("monitor timer expire!");
+        
+        Set<Integer> workerIdSet = workerStatusMap.keySet();
+        Iterator<Integer> idIterator = workerIdSet.iterator();
+        while(idIterator.hasNext()){
+            int id = idIterator.next();
+            if(workerStatusMap.get(id).isAlive()){
+                workerStatusMap.get(id).setAlive(false);
+                
+            }
+            else if(workerStatusMap.get(id).getNoReportCnt() > 1){
+                System.out.println("worker "+id+" is not alive. do recovery");
+                
+            }
+            else{
+                workerStatusMap.get(id).incrementNoReportCnt();;
+            }
+                
+        }
+    }
+    /*start a moniter timer which is set to 5 seconds*/
+    public void startMoniterTimer(){
+        Timer timer = new Timer(true);
+        TimerTask task = new TimerTask(){
+            public void run(){
+                checkWorkerLiveness();
+            }
+        };
+        timer.schedule(task, 0, 5*1000);
+        System.out.println("start the monitor timer");
+        
+    }
 }
