@@ -78,7 +78,6 @@ public class HandleDFSClientReq implements Runnable{
 				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
-				f.setPortNum(11114); ////data node communication port ,should be from the conf file
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 				f.setNodeId(i);
 				// set duplication here unfinished
@@ -90,7 +89,6 @@ public class HandleDFSClientReq implements Runnable{
 				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
-				f.setPortNum(11114); ////data node communication port ,should be from the conf file
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 				f.setNodeId(i);
 				// set duplication here unfinished
@@ -101,7 +99,6 @@ public class HandleDFSClientReq implements Runnable{
 			Range r = new Range(start_id-1,req.getFileLineNum());
 			DFSFile f = new DFSFile(req.getFileName());
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
-			f.setPortNum(11114); ////data node communication port ,should be from the conf file
 			f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 			f.setNodeId(sumOfAliveDataNodes-1);
 			// set duplication here unfinished

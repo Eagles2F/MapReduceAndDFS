@@ -10,8 +10,6 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	private static final long serialVersionUID = 1057718551556472988L;
 	private String nodeAddress = null;
 	private String dupNodeAddress = null;
-	private int portNum;
-	private int dupPortNum;
 	private int nodeId;
 	private int dupId;
 	
@@ -53,22 +51,6 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 
 	public void setDupNodeAddress(String dupNodeAddress) {
 		this.dupNodeAddress = dupNodeAddress;
-	}
-
-	public int getPortNum() {
-		return portNum;
-	}
-
-	public void setPortNum(int portNum) {
-		this.portNum = portNum;
-	}
-
-	public int getDupPortNum() {
-		return dupPortNum;
-	}
-
-	public void setDupPortNum(int dupPortNum) {
-		this.dupPortNum = dupPortNum;
 	}
 
 	public String getNodeLocalFilePath() {

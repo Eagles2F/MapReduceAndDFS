@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 
+import dfs.DFSFile;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.TaskStatus.taskState;
@@ -145,7 +146,7 @@ public class WorkerManagerServer implements Runnable{
 			task.setTaskId(job.getReduceTasks().size());
 			task.setReduceClass(job.getJob().getReducerClass());
 			//set file IO
-			task.setUserOutputPath(job.getJob().getFof().getPath());
+			task.setUserOutputPath("../DFS/Output");
 			
 			task.setOutputPath(job.getMapTasks().get(0).getOutputPath());
 			
@@ -226,7 +227,14 @@ public class WorkerManagerServer implements Runnable{
     	}else{ // ReduceTask finished
         	//update the task status
         	master.jobMap.get(msg.getJobId()).getReduceTaskStatus().get(msg.getTaskId()).setState(taskState.COMPLETE);
-     
+        	
+        	//Create the Output File in the Root directory,the real file is stored on the node
+        	String outputFileName = "";
+        	DFSFile outputFile = new DFSFile(outputFileName);
+        	outputFile.setNodeId(msg.getWorkerID());
+        	outputFile.setNodeLocalFilePath(msg.getTaskItem().getUserOutputPath());
+        	master.getNameNodeServer().getRootDir().createSubEntry(outputFile);
+        	
         	//check whether all the tasks in the same job has finished
         	boolean finished = true;
         	for(TaskStatus ts:master.jobMap.get(msg.getJobId()).getReduceTaskStatus()){
