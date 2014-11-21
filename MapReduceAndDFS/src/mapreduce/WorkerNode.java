@@ -67,6 +67,8 @@ public class WorkerNode {
     private int hostPort;
     private CombinerRecordWriter combinerRecordWriter;
     
+    private String tempDfsDir;
+    
     
     
 	
@@ -84,6 +86,7 @@ public class WorkerNode {
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
+		this.tempDfsDir = new String("../DFS/tepm");
 		
 		this.mapperOutputStreamMap = new HashMap<Integer, ArrayList<ObjectOutputStream>>();
 		
@@ -196,7 +199,7 @@ public class WorkerNode {
 	// clean all the resources and temp files related with the job
 	private void  handle_clear(Message msg){
 	    for(int i=0;i<msg.getTask().getReducerNum();i++){
-	        File fileToClear = new File("../Output/Intermediate/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
 	            fileToClear.delete();
 	        }

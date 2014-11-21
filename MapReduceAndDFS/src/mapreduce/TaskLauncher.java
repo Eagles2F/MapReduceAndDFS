@@ -69,6 +69,7 @@ public class TaskLauncher extends Thread{
           localizeJob(taskIns);
           taskIns.setRunState(TaskStatus.taskState.RUNNING);
           Thread t = new Thread(taskIns);
+         
           taskIns.setThread(t);
           t.setName("task"+taskIns.getTask().getTaskId());
           t.start();
