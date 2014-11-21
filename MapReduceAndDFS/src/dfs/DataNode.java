@@ -36,11 +36,11 @@ import utility.WorkerConfig;
 
 public class DataNode implements Runnable{
     private String DFSFolder;
-    private WorkerConfig config;
+    
     private int hostPort;
     private int localPort;
     private String host;
-    private int recordLenth;
+    
     private WorkerNode worker;
     private boolean exit;
     private ObjectOutputStream objOutput;
@@ -222,8 +222,7 @@ public class DataNode implements Runnable{
                     byte[] buffer ;
                     String inputString;
                     fileHdl.readLine();
-                    int readLength = -1;
-                    int writeLenth = 0;
+                    
                     
                     for(int i=0;i<msg.getStartIndex()+msg.getChunkLenth();i++){
                         inputString = fileHdl.readLine();
@@ -315,10 +314,10 @@ public class DataNode implements Runnable{
         Socket socket = null; //socket with the target dataNode to download
         for(int k=0;k<msg.getTargetCount();k++){
             System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
-                    + localPort);
+                    + msg.getTargetPortNum()[k]);
             try {
                 //create socket with target node
-                socket = new Socket(msg.getTargetNodeAddr()[k], localPort);
+                socket = new Socket(msg.getTargetNodeAddr()[k], msg.getTargetPortNum()[k]);
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -356,6 +355,7 @@ public class DataNode implements Runnable{
             ObjectOutputStream objOutput = null;
             ObjectInputStream objInput = null;
             try {
+                System.out.println("setup the output input stream with download server");
                 objOutput = new ObjectOutputStream(msgOutput);
                 objInput = new ObjectInputStream(input);
             } catch (IOException e) {
@@ -477,13 +477,17 @@ public class DataNode implements Runnable{
             
             try {
                 FileOutputStream fileOutput = null;
-                
+                System.out.println("write to path"+msg.getLocalPath());
                 File outputDir = new File(msg.getLocalPath());
                 if(!outputDir.exists()){
-                    outputDir.createNewFile();
+                    System.out.println("create path");
+                    outputDir.mkdir();
+                    
                 }
                 
                 File outputFile = new File(msg.getLocalPath() + "/" 
+                        + msg.getLocalFileName());
+                System.out.println("write to "+msg.getLocalPath() + "/" 
                         + msg.getLocalFileName());
                 if(!outputFile.exists()){
                     outputFile.createNewFile();

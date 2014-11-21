@@ -93,7 +93,7 @@ public class WorkerManagerServer implements Runnable{
 		                    System.out.println("target address "+master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
 		                    addr.put(workerId, master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
 		                    index++;
-		                    //ports[index++] = master.workerSocMap.get(workerId).getPort();
+		                    ports[index++] = 21111;
 		                }
 		            }
 		            dfsMsg.setTargetCount(index);
