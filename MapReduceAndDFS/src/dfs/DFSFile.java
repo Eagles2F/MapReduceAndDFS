@@ -1,7 +1,13 @@
 package dfs;
 
-public class DFSFile extends DFSFileEntry{
+import java.io.Serializable;
+
+public class DFSFile extends DFSFileEntry implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1057718551556472988L;
 	private String nodeAddress = null;
 	private String dupNodeAddress = null;
 	private int portNum;

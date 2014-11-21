@@ -47,7 +47,6 @@ public class MapReduceJob {
 			task.setType(0);
 			task.setSplit(sf);
 			task.setReducerNum(job.getReducerNum());
-			System.out.println("Reducer Num:"+job.getReducerNum());
 			task.setTaskId(this.MapTasks.size());
 			task.setMapClass(this.job.getMapperClass());
 			task.setReduceClass(this.job.getReducerClass());

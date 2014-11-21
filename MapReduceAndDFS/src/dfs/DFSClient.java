@@ -99,7 +99,7 @@ public class DFSClient {
 		req.setDesDFSDir(cmd[2]);
 		req.setJobName(cmd[3]);
 		req.setFileLineNum(countLines(cmd[1]));//set the line number of the file
-		req.setDownloadServerPort(21111); // set in the conf file
+		req.setDownloadServerPort(this.downloadServerPort); // set in the conf file
 		
 		req.setFileName(temp[temp.length-1]);
 		sendToNN(req);

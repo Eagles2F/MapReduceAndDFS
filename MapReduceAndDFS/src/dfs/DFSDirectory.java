@@ -29,7 +29,7 @@ public class DFSDirectory extends DFSFileEntry{
 	
 	//method to get the fileEntry
 	public DFSFileEntry getEntry(String name){
-		if(subEntries.contains(name)){
+		if(subEntries.containsKey(name)){
 			return this.subEntries.get(name);
 		}else{
 			System.out.println("Sorry! FileEntry not existed!");

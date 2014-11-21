@@ -86,19 +86,6 @@ public class JobReceiveServer implements Runnable{
 		/*
 		 * 	  split the input file based on each file chunk and MaxTask on each node
 		 */
-		
-				//check if all the input files are uploaded
-				boolean uploaded = true;
-				
-				for(int k:master.getNameNodeServer().JobStatusMap.get(job.getJob().getJobname()).getUploadStatusMap().keySet()){
-					if(master.getNameNodeServer().JobStatusMap.get(job.getJob().getJobname()).getUploadStatusMap().get(k) == false){
-						uploaded = false;//if any uploaded work hasn't been finished
-						System.out.println("The user input file hasn't been uploaded yet!  Pls wait untill uploaded and redo the submiting!");
-						return;
-					}
-				}
-				
-				if(uploaded){
 					//get the DFSInputFile 
 					DFSInputFile userInput = (DFSInputFile)master.getNameNodeServer().getRootDir().getEntry(job.getJob().getFif().getPath());
 					
@@ -136,7 +123,6 @@ public class JobReceiveServer implements Runnable{
 							job.getSplitList().add(sf);
 						}
 					}
-				}
 				System.out.println("number of splits:"+job.getSplitList().size());	
 	}
 	
