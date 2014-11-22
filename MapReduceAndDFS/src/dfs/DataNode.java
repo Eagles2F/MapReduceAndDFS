@@ -182,6 +182,8 @@ public class DataNode implements Runnable{
 	                        + msg.getTargetFileName());
 	                File downloadFile = new File(msg.getTargetPath()+"/"
 	                        + msg.getTargetFileName());
+	                
+	                //send dfs download msg
 	                DFSMessage rspMsg = new DFSMessage();
 	                rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
 	                rspMsg.setResponseId(DFSMessage.rspId.DOWNLOADRSP);
