@@ -77,10 +77,21 @@ public class HandleDFSClientReq implements Runnable{
 			for(int i=0; i<sumOfAliveDataNodes; i++){
 				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
-				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
+				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().getHostAddress());
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 				f.setNodeId(i);
-				// set duplication here unfinished
+			
+				if(sumOfAliveDataNodes != 1){ //set replication file chunk when DataNode number is more than 1 
+					f.setDupLocalFilePath("../DFS/InputChunk");
+					if(i != sumOfAliveDataNodes-1){
+						f.setDupId(i+1);
+						f.setDupNodeAddress(nn.dataNodeSocMap.get(i+1).getInetAddress().getHostAddress());
+					}else{
+						f.setDupId(0);
+						f.setDupNodeAddress(nn.dataNodeSocMap.get(0).getInetAddress().getHostAddress());
+					}
+				}
+				
 				dif.getFileChunks().put(r,f);
 				start_id = start_id+sizePerChunk+1;
 			}
@@ -88,11 +99,16 @@ public class HandleDFSClientReq implements Runnable{
 			for(int i=0; i<sumOfAliveDataNodes-1; i++){
 				Range r = new Range(start_id,start_id+sizePerChunk+1);
 				DFSFile f = new DFSFile(req.getFileName());
-				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().toString());
+				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().getHostAddress());
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 				f.setNodeId(i);
-				// set duplication here unfinished
-			
+
+				if(sumOfAliveDataNodes != 1){ //set replication file chunk when DataNode number is more than 1 
+					f.setDupLocalFilePath("../DFS/InputChunk");
+					f.setDupId(i+1);
+					f.setDupNodeAddress(nn.dataNodeSocMap.get(i+1).getInetAddress().getHostAddress());
+				}
+				
 				dif.getFileChunks().put(r,f);
 				start_id = start_id+sizePerChunk+1;
 			}
@@ -101,7 +117,12 @@ public class HandleDFSClientReq implements Runnable{
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
 			f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
 			f.setNodeId(sumOfAliveDataNodes-1);
-			// set duplication here unfinished
+			// set duplication here
+			if(sumOfAliveDataNodes != 1){ //set replication file chunk when DataNode number is more than 1
+				f.setDupLocalFilePath("../DFS/InputChunk");
+				f.setDupId(0);
+				f.setDupNodeAddress(nn.dataNodeSocMap.get(0).getInetAddress().getHostAddress());
+			}
 			
 			dif.getFileChunks().put(r,f);
 		}
@@ -111,6 +132,7 @@ public class HandleDFSClientReq implements Runnable{
 		
 		//tell the destination node to download the chunks from the target client socket and file path
 		for(Range key:dif.getFileChunks().keySet()){
+			//tell the node to download the file chunk
 			DFSFile f = dif.getFileChunks().get(key);
 			
 			System.out.println("File Chunk "+f.getNodeId()+" Chunk Size:"+(key.endId-key.startId));
@@ -136,6 +158,30 @@ public class HandleDFSClientReq implements Runnable{
 				nn.JobStatusMap.get(req.getJobName()).getUploadStatusMap().put(f.getNodeId(), false);
 				System.out.println(f.getNodeId());
 				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			//tell the node to download the replication of the chunk
+			DFSMessage msg1 = new DFSMessage();
+			msg1.setMessageType(DFSMessage.msgType.COMMAND);
+			msg1.setCmdId(DFSCommandId.GETFILES);
+			msg1.setStartIndex(key.startId);
+			msg1.setChunkLenth(key.endId-key.startId);
+			String[] ipAddr1 = {soc.getInetAddress().getHostAddress()};
+			int[] prot1 = {req.getDownloadServerPort()};
+			msg1.setTargetCount(1);
+			msg1.setTargetNodeAddr(ipAddr1);
+			msg1.setTargetPortNum(prot1);  // set by the system configuration
+			msg1.setLocalFileName(f.getDuplicationName());
+			msg1.setLocalPath(f.getDuplicationName());
+			msg1.setTargetPath(req.getInputFilePath());
+			msg1.setTargetFileName(req.getFileName());
+			msg1.setDownloadType(DownloadType.TXT);
+			msg1.setMessageSource(nodeType.NAMENODE);
+			msg1.setJobName(req.getJobName());
+			try {
+				nn.dataNodeManagerMap.get(f.getDupId()).sendToDataNode(msg1);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
