@@ -109,7 +109,8 @@ public class NameNode implements Runnable{
             	dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.OBJECT);
-            
+            	
+            	dfsMsg.setTargetCount(1);
             	dfsMsg.setTargetPath(file.getNodeLocalFilePath());
             	dfsMsg.setTargetFileName(file.getName());
             	dfsMsg.setLocalPath(file.getDupLocalFilePath());
@@ -119,7 +120,8 @@ public class NameNode implements Runnable{
             	dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.TXT);
-            
+            	
+            	dfsMsg.setTargetCount(1);
             	dfsMsg.setTargetPath(file.getNodeLocalFilePath());
             	dfsMsg.setTargetFileName(file.getName());
             	dfsMsg.setLocalPath(file.getDupLocalFilePath());

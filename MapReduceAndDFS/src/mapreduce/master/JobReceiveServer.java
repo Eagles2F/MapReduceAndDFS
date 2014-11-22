@@ -115,18 +115,21 @@ public class JobReceiveServer implements Runnable{
 								SplitFile sf = new SplitFile(start,size/splitNum,uif);
 								start = start+size/splitNum;
 								job.getSplitList().add(sf);
-								System.out.println("SSSSSSSSSSSSSSSSSSS"+sf.getUserInputFiles().fileChunk.getName());
+								System.out.println("start: "+sf.getStartId()+" length: "+sf.getLength());
 							}
 						}else{
 							for(int i=0;i<splitNum-1;i++){
 								SplitFile sf = new SplitFile(start,size/splitNum,uif);
 								start = start+size/splitNum;
 								job.getSplitList().add(sf);
+								System.out.println("start: "+sf.getStartId()+" length: "+sf.getLength());
 							}
 							SplitFile sf = new SplitFile(start,size/splitNum+size%splitNum,uif);
 							job.getSplitList().add(sf);
-							
+							System.out.println("start: "+sf.getStartId()+" length: "+sf.getLength());
 						}
+						
+						
 					}
 						
 				System.out.println("number of splits:"+job.getSplitList().size());	
