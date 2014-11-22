@@ -21,7 +21,9 @@ public class HireWorkerServer implements Runnable{
 		private Master master;
 	    private int portNum;//the port number which is used by this server thread
 	    private int workerCnt;
-	    private volatile boolean running;
+	    
+
+        private volatile boolean running;
 	    ServerSocket serverSocket;
 	    
 	    public HireWorkerServer(int port,Master master){
@@ -39,6 +41,13 @@ public class HireWorkerServer implements Runnable{
 	       System.out.println("create HireWorkerServer");
 	    }
 	    
+	    public int getWorkerCnt() {
+            return workerCnt;
+        }
+
+        public void setWorkerCnt(int workerCnt) {
+            this.workerCnt = workerCnt;
+        }
 	    @Override
 	    public void run(){   
 	       try{
