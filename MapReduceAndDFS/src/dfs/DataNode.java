@@ -539,16 +539,7 @@ public class DataNode implements Runnable{
                         System.out.println("receiving file finish");
                     }
                     System.out.println("download finished");
-                    if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
-                        System.out.println("send get file complete to master");
-                        Message indMsg = new Message();
-                        indMsg.setMessageType(msgType.INDICATION);
-                        indMsg.setIndicationId(IndicationType.GETFILESCOMPLETE);
-                        indMsg.setJobId(msg.getJobId());
-                        indMsg.setTaskId(msg.getTaskId());
-                        worker.sendToManager(indMsg);
-                        
-                    }
+                    
                 }
                 else{
                 /*
@@ -566,29 +557,10 @@ public class DataNode implements Runnable{
                             fileOutput.write(buffer, 0, length);
                             fileOutput.flush();
                         }
-                        fileOutput.close();
+                        
                         rspMsg.setResult(msgResult.SUCCESS);
                         System.out.println("download finished");
-                        //if master send this download message, we need send complete indication
-                        //to master
-                        if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
-                            System.out.println("send get file complete to master");
-                            Message indMsg = new Message();
-                            indMsg.setMessageType(msgType.INDICATION);
-                            indMsg.setIndicationId(IndicationType.GETFILESCOMPLETE);
-                            indMsg.setJobId(msg.getJobId());
-                            worker.sendToManager(indMsg);
-                            
-                        }else if(msg.getMessageSource() == DFSMessage.nodeType.NAMENODE){
-                            System.out.println("send get file complete to namenode");
-                            DFSMessage indMsg = new DFSMessage();
-                            indMsg.setMessageType(DFSMessage.msgType.INDICATION);
-                            indMsg.setIndicationId(DFSMessage.indId.GETFILESCOMPLETE);
-                            indMsg.setJobName(msg.getJobName());
-                            //send to dataNodeManagerServer
-                            sendToDataNodeManager(indMsg);
-                            
-                        }
+                        
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -626,6 +598,28 @@ public class DataNode implements Runnable{
             
             
             }
+        if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
+            System.out.println("send get file complete to master");
+            Message indMsg = new Message();
+            indMsg.setMessageType(msgType.INDICATION);
+            indMsg.setIndicationId(IndicationType.GETFILESCOMPLETE);
+            indMsg.setJobId(msg.getJobId());
+            indMsg.setTaskId(msg.getTaskId());
+            worker.sendToManager(indMsg);
+            
+        }
+      //if master send this download message, we need send complete indication
+        //to master
+        else if(msg.getMessageSource() == DFSMessage.nodeType.NAMENODE){
+            System.out.println("send get file complete to namenode");
+            DFSMessage indMsg = new DFSMessage();
+            indMsg.setMessageType(DFSMessage.msgType.INDICATION);
+            indMsg.setIndicationId(DFSMessage.indId.GETFILESCOMPLETE);
+            indMsg.setJobName(msg.getJobName());
+            //send to dataNodeManagerServer
+            sendToDataNodeManager(indMsg);
+            
+        }
         return rspMsg;    
     }
 
