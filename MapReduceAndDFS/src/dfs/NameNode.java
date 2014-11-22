@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dfs.DFSFile.fileType;
@@ -184,6 +185,46 @@ public class NameNode implements Runnable{
     }
     //Handle dataNode failure
     public boolean handleDataNodeFailure(int NodeId){
+    	for(String name:this.rootDir.getSubEntries().keySet()){
+    		if(this.rootDir.getSubEntries().get(name).getType() =="File"){//if the data node is file
+    			DFSFile file =(DFSFile)this.rootDir.getSubEntries().get(name);
+    			this.rootDir.getSubEntries().remove(name);
+    			if(file.getNodeId() == NodeId){//if the file is located on the failed Node
+    				//set the duplicate as the new location for the file
+    				file.setNodeId(file.getDupId());
+    				file.setNodeAddress(file.getDupNodeAddress());
+    				file.setNodeLocalFilePath(file.getDupLocalFilePath());
+    				this.genDup(file);
+    				this.rootDir.getSubEntries().put(name, file);
+    			}else if(file.getDupId() == NodeId){
+    				//update the duplicate
+    				this.genDup(file);
+    				this.rootDir.getSubEntries().put(name, file);
+    			}
+    		}else if(this.rootDir.getSubEntries().get(name).getType() =="InputFile"){//if the data node is input file
+    			DFSInputFile inputFile=(DFSInputFile)this.rootDir.getSubEntries().get(name);
+    			this.rootDir.getSubEntries().remove(name);
+    			HashMap<Range,DFSFile> fileChunks = inputFile.getFileChunks();
+    			for(Range r:fileChunks.keySet()){
+    				DFSFile file = fileChunks.get(r);
+    				fileChunks.remove(r);
+    				if(file.getNodeId() == NodeId){//if the file is located on the failed Node
+        				//set the duplicate as the new location for the file
+        				file.setNodeId(file.getDupId());
+        				file.setNodeAddress(file.getDupNodeAddress());
+        				file.setNodeLocalFilePath(file.getDupLocalFilePath());
+        				this.genDup(file);
+        				fileChunks.put(r, file);
+        			}else if(file.getDupId() == NodeId){
+        				//update the duplicate
+        				this.genDup(file);
+        				fileChunks.put(r, file);
+        			}
+    			}
+    			inputFile.setFileChunks(fileChunks);
+    			this.rootDir.getSubEntries().put(name, inputFile);
+    		}
+    	}
     	return true;
     }
     

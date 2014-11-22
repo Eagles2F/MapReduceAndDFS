@@ -25,7 +25,7 @@ public class DFSInputFile extends DFSFileEntry{
 	@Override
 	public String getType() {
 		
-		return "File";
+		return "InputFile";
 	}
 
 	public int getNumOfRecords() {
