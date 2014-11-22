@@ -341,12 +341,6 @@ public class DataNode implements Runnable{
             e2.printStackTrace();
         }
         ObjectOutputStream objectOutput = null;
-        try {
-            objectOutput = new ObjectOutputStream(fileOutput);
-        } catch (IOException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-        }
         for(int k=0;k<msg.getTargetCount();k++){
             System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
                     + msg.getTargetPortNum()[k]);
@@ -516,6 +510,14 @@ public class DataNode implements Runnable{
                 
                 if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
                     //ObjectInputStream objectInput = new ObjectInputStream(input);
+                    if(objectOutput == null){
+                        try {
+                            objectOutput = new ObjectOutputStream(fileOutput);
+                        } catch (IOException e2) {
+                            // TODO Auto-generated catch block
+                            e2.printStackTrace();
+                        }
+                    }
                     
                     System.out.println("start receiving object file");
                     KeyValue<Object,Object> pair = null;
@@ -524,6 +526,7 @@ public class DataNode implements Runnable{
                             System.out.println("key "+pair.getKey()+" value"+pair.getValue());
                             objectOutput.writeObject(pair);
                         }
+                        
                         
                     } catch (ClassNotFoundException e) {
                         // TODO Auto-generated catch block
