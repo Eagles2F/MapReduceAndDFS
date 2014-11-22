@@ -11,6 +11,7 @@ import dfs.DFSFile.fileType;
 import utility.DFSCommandId;
 import utility.DFSMessage;
 import utility.DFSMessage.DownloadType;
+import utility.DFSMessage.msgType;
 import utility.DFSMessage.nodeType;
 import mapreduce.master.Master;
 
@@ -191,6 +192,7 @@ public class NameNode implements Runnable{
     			this.rootDir.getSubEntries().remove(name);
     			if(file.getNodeId() == NodeId){//if the file is located on the failed Node
     				//set the duplicate as the new location for the file
+    				this.Rename(file, file.getName());
     				file.setNodeId(file.getDupId());
     				file.setNodeAddress(file.getDupNodeAddress());
     				file.setNodeLocalFilePath(file.getDupLocalFilePath());
@@ -210,6 +212,7 @@ public class NameNode implements Runnable{
     				fileChunks.remove(r);
     				if(file.getNodeId() == NodeId){//if the file is located on the failed Node
         				//set the duplicate as the new location for the file
+    					this.Rename(file, file.getName());
         				file.setNodeId(file.getDupId());
         				file.setNodeAddress(file.getDupNodeAddress());
         				file.setNodeLocalFilePath(file.getDupLocalFilePath());
@@ -227,7 +230,22 @@ public class NameNode implements Runnable{
     	}
     	return true;
     }
-    
+    //Rename a dup file
+    public void Rename(DFSFile file,String newFileName){
+    	DFSMessage msg = new DFSMessage();
+    	msg.setMessageType(msgType.COMMAND);
+    	msg.setCmdId(DFSCommandId.RENAME);
+    	msg.setLocalFileName(file.getDuplicationName());
+    	msg.setLocalPath(file.getDupLocalFilePath());
+    	msg.setTargetFileName(newFileName);
+    	
+    	try {
+			this.dataNodeManagerMap.get(file.getDupId()).sendToDataNode(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	
+    }
 	public Master getMaster() {
 		return master;
 	}
