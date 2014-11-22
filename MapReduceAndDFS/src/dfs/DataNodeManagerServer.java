@@ -39,13 +39,6 @@ public class DataNodeManagerServer implements Runnable{
     }
     
     
-    private void handleGetfileComplete(DFSMessage msg){
-    	//set the upload task to be completed
-    	System.out.println("DataNode: "+msg.getWorkerID()+"has received the inputfile chunk for job:"+msg.getJobName());
-    	this.nn.JobStatusMap.get(msg.getJobName()).getUploadStatusMap().remove(msg.getWorkerID());
-    	this.nn.JobStatusMap.get(msg.getJobName()).getUploadStatusMap().put(msg.getWorkerID(),true);
-    }
-    
     public void run(){
         try{
         	
@@ -76,8 +69,6 @@ public class DataNodeManagerServer implements Runnable{
                         nn.dataNodeSocMap.put(dataNodeId, socket);
                         nn.dataNodeOosMap.put(dataNodeId, objOutput);//add the OOS to the map
                         break;
-                    case GETFILESCOMPLETE:
-                    	handleGetfileComplete(msg);
                     default:
                         System.out.println("unrecagnized DFS indication");
                     }
