@@ -174,7 +174,7 @@ public class MapReduceJob {
 							ts.getState() == taskState.RUNNING){
 				//all these tasks inside these three states should be killed
 				Message msg= new Message(msgType.COMMAND);
-				msg.setCmdId(CommandType.KILLTASK);
+				msg.setCommandId(CommandType.KILLTASK);
 				msg.setTaskItem(this.MapTasks.get(ts.getTaskId()));// reduce and map???????????????
 				
 				try {
@@ -192,7 +192,7 @@ public class MapReduceJob {
 							ts.getState() == taskState.RUNNING){
 				//all these tasks inside these three states should be killed
 				Message msg= new Message(msgType.COMMAND);
-				msg.setCmdId(CommandType.KILLTASK);
+				msg.setCommandId(CommandType.KILLTASK);
 				msg.setTaskItem(this.MapTasks.get(ts.getTaskId()));// reduce and map???????????????
 				
 				try {
