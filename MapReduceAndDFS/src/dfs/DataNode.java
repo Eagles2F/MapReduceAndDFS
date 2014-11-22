@@ -520,8 +520,10 @@ public class DataNode implements Runnable{
                     System.out.println("start receiving object file");
                     KeyValue<Object,Object> pair = null;
                     try {
-                        while( (pair = (KeyValue<Object, Object>) objInput.readObject()) != null)
+                        while( (pair = (KeyValue<Object, Object>) objInput.readObject()) != null){
+                            System.out.println("key "+pair.getKey()+" value"+pair.getValue());
                             objectOutput.writeObject(pair);
+                        }
                         
                     } catch (ClassNotFoundException e) {
                         // TODO Auto-generated catch block
