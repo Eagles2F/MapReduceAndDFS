@@ -550,7 +550,7 @@ public class DataNode implements Runnable{
                         
                     }
                 }
-                
+                else{
                 /*
                  * create the file and write what the server get from socket into the
                  * file
@@ -603,6 +603,7 @@ public class DataNode implements Runnable{
                     rspMsg.setResult(DFSMessage.msgResult.FAILURE);
                     rspMsg.setCause("FileNotFoundException");
                     return rspMsg;
+                }
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
