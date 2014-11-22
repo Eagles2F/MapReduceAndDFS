@@ -312,6 +312,40 @@ public class DataNode implements Runnable{
         rspMsg.setMessageType(DFSMessage.msgType.RESPONSE);
         rspMsg.setResponseId(DFSMessage.rspId.GETFILESRSP);
         Socket socket = null; //socket with the target dataNode to download
+        File outputFile = new File(msg.getLocalPath() + "/" 
+                + msg.getLocalFileName());
+        System.out.println("write to "+msg.getLocalPath() + "/" 
+                + msg.getLocalFileName());
+        if(!outputFile.exists()){
+            try {
+                outputFile.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        FileOutputStream fileOutput = null;
+        System.out.println("write to path"+msg.getLocalPath());
+        File outputDir = new File(msg.getLocalPath());
+        if(!outputDir.exists()){
+            System.out.println("create path");
+            outputDir.mkdir();
+            
+        }
+        try {
+            fileOutput = new FileOutputStream(msg.getLocalPath() + "/"
+                    + msg.getLocalFileName(),true);
+        } catch (FileNotFoundException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        ObjectOutputStream objectOutput = null;
+        try {
+            objectOutput = new ObjectOutputStream(fileOutput);
+        } catch (IOException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
         for(int k=0;k<msg.getTargetCount();k++){
             System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
                     + msg.getTargetPortNum()[k]);
@@ -476,27 +510,12 @@ public class DataNode implements Runnable{
             
             
             try {
-                FileOutputStream fileOutput = null;
-                System.out.println("write to path"+msg.getLocalPath());
-                File outputDir = new File(msg.getLocalPath());
-                if(!outputDir.exists()){
-                    System.out.println("create path");
-                    outputDir.mkdir();
-                    
-                }
                 
-                File outputFile = new File(msg.getLocalPath() + "/" 
-                        + msg.getLocalFileName());
-                System.out.println("write to "+msg.getLocalPath() + "/" 
-                        + msg.getLocalFileName());
-                if(!outputFile.exists()){
-                    outputFile.createNewFile();
-                }
-                fileOutput = new FileOutputStream(msg.getLocalPath() + "/"
-                        + msg.getLocalFileName(),true);
+                
+                
                 if(msg.getDownloadType() == DFSMessage.DownloadType.OBJECT){
                     //ObjectInputStream objectInput = new ObjectInputStream(input);
-                    ObjectOutputStream objectOutput = new ObjectOutputStream(fileOutput);
+                    
                     System.out.println("start receiving object file");
                     KeyValue<Object,Object> pair = null;
                     try {
