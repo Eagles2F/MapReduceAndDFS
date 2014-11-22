@@ -68,6 +68,9 @@ public class Master{
 		}
 		
 	//methods
+	public HireWorkerServer getHireWorkerServer() {
+			return hireWorkerServer;
+	}
 	
 	public void startConsole(){
 		        System.out.println("This is mapreduce master, type help for more information");

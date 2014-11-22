@@ -266,7 +266,7 @@ public class WorkerManagerServer implements Runnable{
         	master.getNameNodeServer().getRootDir().createSubEntry(outputFile);
         	
         	//create the replication for the file
-        	//outputFile.setDupId();
+        	master.getNameNodeServer().genDup(outputFile);
         	
         	//check whether all the tasks in the same job has finished
         	boolean finished = true;

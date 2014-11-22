@@ -72,6 +72,34 @@ public class NameNode implements Runnable{
 	        System.out.println("socket Server failed to close");
 	    }		
 	}
+    
+    //generate a duplication for the dfs file
+    public void genDup(DFSFile file){
+    	
+    	if(master.workerMangerServerMap.size() != 1){
+    		//choose the node to store the dup file
+    		
+    		int dupId = (file+1)%master.getHireWorkerServer().getWorkerCnt();
+    		while(true){
+    			if(master.workerMangerServerMap.containsKey(dupId)){
+    				break;
+    			}else{
+    				dupId = (dupId+1)%master.getHireWorkerServer().getWorkerCnt();
+    			}
+    		}
+    		
+    		outputFile.setDupId(dupId);
+    		outputFile.setDupLocalFilePath(msg.getTaskItem().getUserOutputPath());
+    		outputFile.setDupNodeAddress(dupNodeAddress);
+    	}
+    	
+    }
+    
+    //Handle dataNode failure
+    public boolean handleDataNodeFailure(int NodeId){
+    	return true;
+    }
+    
 	public Master getMaster() {
 		return master;
 	}
