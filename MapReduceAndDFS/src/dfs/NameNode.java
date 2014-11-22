@@ -127,7 +127,7 @@ public class NameNode implements Runnable{
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.TXT);
             	
-    			String[] ipAddr1 = {master.workerSocMap.get(dupId).getInetAddress().getHostAddress()};
+    			String[] ipAddr1 = {file.getNodeAddress()};
     			int[] port1 = {21111};
 
             	dfsMsg.setTargetPortNum(port1);
