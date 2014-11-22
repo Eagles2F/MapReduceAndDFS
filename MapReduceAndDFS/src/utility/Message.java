@@ -153,13 +153,6 @@ public class Message implements Serializable {
         return indId;
     }
 
-	public CommandType getCmdId() {
-		return cmdId;
-	}
-
-	public void setCmdId(CommandType cmdId) {
-		this.cmdId = cmdId;
-	}
 
 	public ResponseType getResId() {
 		return resId;
