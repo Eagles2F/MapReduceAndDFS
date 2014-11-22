@@ -341,8 +341,9 @@ public class DataNode implements Runnable{
             e2.printStackTrace();
         }
         ObjectOutputStream objectOutput = null;
+        System.out.println("download "+msg.getTargetCount()+" files");
         for(int k=0;k<msg.getTargetCount();k++){
-            System.out.println("Start File Transfer from " + msg.getTargetNodeAddr()[k] + " "
+            System.out.println("Start File"+k+" Transfer from " + msg.getTargetNodeAddr()[k] + " "
                     + msg.getTargetPortNum()[k]);
             try {
                 //create socket with target node
