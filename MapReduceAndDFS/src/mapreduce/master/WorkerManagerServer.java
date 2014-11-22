@@ -96,7 +96,7 @@ public class WorkerManagerServer implements Runnable{
 		                if(!addr.containsKey(workerId)){
 		                    System.out.println("target address "+master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
 		                    addr.put(workerId, master.workerSocMap.get(workerId).getInetAddress().getHostAddress());
-		                    index++;
+		                    
 		                    ports[index++] = 21111;
 		                }
 		            }
@@ -221,7 +221,7 @@ public class WorkerManagerServer implements Runnable{
                 }
     		}
     	}
-    	System.out.println("HB:"+ws.getWorkerId());
+    	//System.out.println("HB:"+ws.getWorkerId());
     }
     
     //This method will handle the worker response to the task start command
@@ -299,6 +299,12 @@ public class WorkerManagerServer implements Runnable{
         		//send the message to the job client with a success
         	   
         		master.jobMap.get(msg.getJobId()).getClientOOS().writeObject(new ClientMessage(1));//succeed!
+        		master.jobMap.remove(msg.getJobId());
+        		Message clean = new Message();
+        		clean.setMessageType(msgType.COMMAND);
+        		clean.setCommandId(CommandType.CLEAN);
+        		clean.setJobId(msg.getJobId());
+        		this.sendToWorker(clean);
         	}
     	}   	
     }
@@ -320,7 +326,7 @@ public class WorkerManagerServer implements Runnable{
             	//receive the msg
                 try{
                     workerMessage = (Message) objInput.readObject();
-                    System.out.println("receive "+workerMessage.getMessageType()+" "+workerMessage.getResponseId()+" "+workerMessage.getIndicationId());
+                    //System.out.println("receive "+workerMessage.getMessageType()+" "+workerMessage.getResponseId()+" "+workerMessage.getIndicationId());
                 }catch(ClassNotFoundException e){
                     continue;
                 }catch(EOFException e){

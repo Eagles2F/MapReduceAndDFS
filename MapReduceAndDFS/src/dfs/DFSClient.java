@@ -73,7 +73,8 @@ public class DFSClient {
 	                }
 	            }
 	        }
-	        return (count == 0 && !empty) ? 1 : count;
+	        int result = ((count == 0 && !empty) ? 1 : count) +1;
+	        return result;
 	    } finally {
 	        is.close();
 	    }

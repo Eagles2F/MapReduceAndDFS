@@ -74,9 +74,11 @@ public class HandleDFSClientReq implements Runnable{
 		
 		int start_id = 0;
 		int sizePerChunk =req.getFileLineNum() / sumOfAliveDataNodes;
+		System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSSSS"+req.getFileLineNum());
 		if(req.getFileLineNum()%sumOfAliveDataNodes == 0){
 			for(int i=0; i<sumOfAliveDataNodes; i++){
-				Range r = new Range(start_id,start_id+sizePerChunk+1);
+				Range r = new Range(start_id,start_id+sizePerChunk);
+				System.out.println(start_id+"          "+start_id+sizePerChunk);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().getHostAddress());
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
@@ -85,11 +87,11 @@ public class HandleDFSClientReq implements Runnable{
 				nn.genDup(f, r, soc, req);
 				
 				dif.getFileChunks().put(r,f);
-				start_id = start_id+sizePerChunk+1;
+				start_id = start_id+sizePerChunk;
 			}
 		}else{
 			for(int i=0; i<sumOfAliveDataNodes-1; i++){
-				Range r = new Range(start_id,start_id+sizePerChunk+1);
+				Range r = new Range(start_id,start_id+sizePerChunk);
 				DFSFile f = new DFSFile(req.getFileName());
 				f.setNodeAddress(nn.getMaster().workerSocMap.get(i).getInetAddress().getHostAddress());
 				f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
@@ -98,9 +100,9 @@ public class HandleDFSClientReq implements Runnable{
 				nn.genDup(f, r, soc, req);
 				
 				dif.getFileChunks().put(r,f);
-				start_id = start_id+sizePerChunk+1;
+				start_id = start_id+sizePerChunk;
 			}
-			Range r = new Range(start_id-1,req.getFileLineNum());
+			Range r = new Range(start_id,req.getFileLineNum());
 			DFSFile f = new DFSFile(req.getFileName());
 			f.setNodeAddress(nn.getMaster().workerSocMap.get(sumOfAliveDataNodes-1).getInetAddress().toString());
 			f.setNodeLocalFilePath("../DFS/InputChunk"); // should be up to conf
