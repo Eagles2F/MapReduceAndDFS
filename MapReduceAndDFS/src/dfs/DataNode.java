@@ -431,13 +431,7 @@ public class DataNode implements Runnable{
                 }
                 rspMsg.setResult(DFSMessage.msgResult.FAILURE);
                 rspMsg.setCause("IOException");
-                try {
-                    socket.close();
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                return rspMsg;
+                
             }
             try {
                 DFSMessage downloadMsgRsp = (DFSMessage)objInput.readObject();
