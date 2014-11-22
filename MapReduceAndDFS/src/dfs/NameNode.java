@@ -170,7 +170,7 @@ public class NameNode implements Runnable{
 			msg1.setTargetNodeAddr(ipAddr1);
 			msg1.setTargetPortNum(prot1);  // set by the system configuration
 			msg1.setLocalFileName(file.getDuplicationName());
-			msg1.setLocalPath(file.getDuplicationName());
+			msg1.setLocalPath(file.getDupLocalFilePath());
 			msg1.setTargetPath(req.getInputFilePath());
 			msg1.setTargetFileName(req.getFileName());
 			msg1.setDownloadType(DownloadType.TXT);

@@ -66,6 +66,7 @@ public class Master{
 			jobReceiverServer = new JobReceiveServer(conf.getJobSubmission_port(),this);
 			nameNodeServer = new NameNode(conf.getNameNodeServer_port(),this);
 			hireDataNodeServer = new HireDataNodeServer(conf.getHireDataNodeServer_port(),nameNodeServer);
+			workerManagerThreadMap = new ConcurrentHashMap<Integer,Thread>();
 		}
 		
 	//methods
@@ -92,7 +93,7 @@ public class Master{
 		            	case "ws":
 		            		handleWs();
 		            		break;
-		            	case "Js":
+		            	case "js":
 		            		handleJs();
 		            		break;
 		            	case "kill":
@@ -162,6 +163,9 @@ public class Master{
     
     /*list all the jobs and their related tasks status*/
     private void handleJs(){
+    	if(this.jobMap.size() == 0){
+    		System.out.println("No Job in the system!");
+    	}
     	for(int key:this.jobMap.keySet()){
     		System.out.println("Job Status Report for Job: "+jobMap.get(key).getJob().getJobname() + "JobId: "+key);
     		//report each job's task status here
@@ -176,10 +180,15 @@ public class Master{
     		return ;
     	}
     	//kill the job
-    	this.jobMap.get(String.valueOf(cmd[1])).KillTasks();
+    	int jobid=Integer.valueOf(cmd[1]);
+    	if(!this.jobMap.containsKey(jobid)){
+    		System.out.println("No such job!");
+    	}else{
+    		this.jobMap.get(jobid).KillTasks();
     	
-    	//remove the job form the map
-    	this.jobMap.remove(String.valueOf(cmd[1]));
+    		//remove the job form the map
+    		this.jobMap.remove(jobid);
+    	}
     }
     
     /*quit the whole system including dsf and mapreduce master*/
