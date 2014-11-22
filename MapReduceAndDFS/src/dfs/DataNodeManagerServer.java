@@ -106,6 +106,7 @@ public class DataNodeManagerServer implements Runnable{
     }
     // the send msg method
     public int sendToDataNode(DFSMessage msg) throws IOException{
+    	System.out.println(this.socket.getInetAddress().getHostAddress());
         objOutput.writeObject(msg);
         objOutput.flush();
         return 0;

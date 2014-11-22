@@ -279,6 +279,7 @@ public class WorkerManagerServer implements Runnable{
         	DFSFile outputFile = new DFSFile(outputFileName);
         	outputFile.setNodeId(msg.getWorkerID());
         	outputFile.setNodeLocalFilePath(msg.getTaskItem().getUserOutputPath());
+        	outputFile.setNodeAddress(master.workerSocMap.get(msg.getWorkerID()).getInetAddress().getHostAddress());
         	outputFile.setTypeFile(fileType.TXT);
         	master.getNameNodeServer().getRootDir().createSubEntry(outputFile);
         	
