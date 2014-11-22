@@ -192,7 +192,7 @@ public class DataNode implements Runnable{
 	                    rspMsg.setCause("file "+msg.getTargetPath()+"/"
 	                            + msg.getTargetFileName()+"not exists");
 	                    objectOutputStream.writeObject(rspMsg);
-	                    downloadSocket.close();
+	                    
 	                }
 	                
 	                objectOutputStream.writeObject(rspMsg);
@@ -584,22 +584,19 @@ public class DataNode implements Runnable{
                 rspMsg.setCause("IOException");
                 return rspMsg;
             }
-    
-            
-            
-    
-            
-            
-            
-            
-            }
+        
+        }//end of for loop
         System.out.println("Finish File Transfer");
         try {
             socket.close();
+            objectOutput.close();
+            
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+      //if master send this download message, we need send complete indication
+        //to master
         if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
             System.out.println("send get file complete to master");
             Message indMsg = new Message();
@@ -610,8 +607,7 @@ public class DataNode implements Runnable{
             worker.sendToManager(indMsg);
             
         }
-      //if master send this download message, we need send complete indication
-        //to master
+      
         else if(msg.getMessageSource() == DFSMessage.nodeType.NAMENODE){
             System.out.println("send get file complete to namenode");
             DFSMessage indMsg = new DFSMessage();
