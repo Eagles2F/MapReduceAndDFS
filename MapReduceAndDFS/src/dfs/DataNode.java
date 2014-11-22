@@ -284,6 +284,7 @@ public class DataNode implements Runnable{
                 /* read a message from the other end */
                 DFSMessage msg = null;
                 while(!exit){
+                    System.out.println("wait for dataNode request");
                     msg = (DFSMessage) objInput.readObject();
                     System.out.println("receive message: "+msg.getCmdId()+" task "+msg.getTaskId());
                     if(msg.getCmdId() == DFSCommandId.GETFILES){
@@ -581,14 +582,14 @@ public class DataNode implements Runnable{
         
         }//end of for loop
         System.out.println("Finish File Transfer");
-        try {
+        /*try {
             socket.close();
             objectOutput.close();
             
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
-        }
+        }*/
       //if master send this download message, we need send complete indication
         //to master
         if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
