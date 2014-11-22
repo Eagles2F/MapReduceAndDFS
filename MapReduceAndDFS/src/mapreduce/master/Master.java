@@ -17,6 +17,7 @@ import dfs.NameNode;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.WorkerNodeStatus;
+import mapreduce.fileIO.SplitFile;
 import utility.CommandType;
 import utility.Configuration;
 import utility.DFSMessage;
@@ -239,7 +240,8 @@ public class Master{
                 this.workerOosMap.remove(id);
                 this.workerSocMap.remove(id);
                 this.workerStatusMap.remove(id);
-                
+                //need replica the dfs files on this worker
+                nameNodeServer.handleDataNodeFailure(id);
                //set all the tasks still running on this worker to be failed
                for(int i:jobMap.keySet()){
             	   jobMap.get(i).NodeFail(id);
@@ -253,7 +255,7 @@ public class Master{
                            
                            
                            
-                           
+                           mapTask.setSplit(new SplitFile(i, i, null));
                            Message recoveryMsg = new Message();
                            recoveryMsg.setTaskItem(mapTask);
                            recoveryMsg.setMessageType(Message.msgType.COMMAND);
@@ -270,8 +272,18 @@ public class Master{
                            //send the download message first to the replica node
                            DFSMessage recoveryMsg = new DFSMessage();
                            recoveryMsg = jobMap.get(i).getDfsMsgConcurrentHashMap().get(reduceTask.getTaskId());
+                           //find a worker to do the reduce task
+                           int index = id+1;
+                           int backUpId = 0;
+                           int counter=0;
+                           while(true){
+                               backUpId = index%hireWorkerServer.getWorkerCnt();
+                               if((workerStatusMap.contains(backUpId)) || counter > hireWorkerServer.getWorkerCnt())
+                                   break;
+                               counter++;
+                           }
                            try {
-                            getNameNodeServer().getDataNodeManagerMap().get(id).sendToDataNode(recoveryMsg);
+                            getNameNodeServer().getDataNodeManagerMap().get(backUpId).sendToDataNode(recoveryMsg);
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
