@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dfs.DataNode;
@@ -69,6 +70,7 @@ public class WorkerNode {
     private CombinerRecordWriter combinerRecordWriter;
     
     private String tempDfsDir;
+    private String inputChunkDir;
     
     
     
@@ -88,6 +90,7 @@ public class WorkerNode {
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
 		this.tempDfsDir = new String("../DFS/tepm");
+		this.inputChunkDir = new String("../DFS/InputChunk");
 		
 		this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
 		
@@ -101,6 +104,7 @@ public class WorkerNode {
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
         this.workerInfo = new WorkerInfoReport();
+        this.inputChunkDir = new String("../DFS/InputChunk");
         
         this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
 	}
@@ -247,12 +251,22 @@ public class WorkerNode {
         
         response.setResponseId(ResponseType.CLEANRSP);
         
-	    for(int i=0;i<msg.getTask().getReducerNum();i++){
-	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
-	        if(fileToClear.exists()){
-	            fileToClear.delete();
-	        }
-	    }
+        File f = null;  
+        f = new File(tempDfsDir);  
+        File[] files = f.listFiles(); // 得到f文件夹下面的所有文件。  
+        
+        for (File file : files) {  
+            file.delete(); 
+        }  
+        
+        f = new File(inputChunkDir);  
+        File[] chunkFiles = f.listFiles(); // 得到f文件夹下面的所有文件。  
+        
+        for (File file : chunkFiles) {  
+            file.delete(); 
+        } 
+        
+	    
 	    mapperOutputStreamMap.remove(msg.getJobId());
 	    
 	}
