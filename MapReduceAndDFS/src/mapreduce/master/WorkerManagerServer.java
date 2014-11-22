@@ -259,7 +259,7 @@ public class WorkerManagerServer implements Runnable{
         	master.jobMap.get(msg.getJobId()).getReduceTaskStatus().get(msg.getTaskId()).setState(taskState.COMPLETE);
         	
         	//Create the Output File in the Root directory,the real file is stored on the node
-        	String outputFileName = "";
+        	String outputFileName = msg.getReducerOutputFile();
         	DFSFile outputFile = new DFSFile(outputFileName);
         	outputFile.setNodeId(msg.getWorkerID());
         	outputFile.setNodeLocalFilePath(msg.getTaskItem().getUserOutputPath());
