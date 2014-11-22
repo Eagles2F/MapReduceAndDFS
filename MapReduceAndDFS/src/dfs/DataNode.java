@@ -316,6 +316,12 @@ public class DataNode implements Runnable{
                 + msg.getLocalFileName());
         System.out.println("write to "+msg.getLocalPath() + "/" 
                 + msg.getLocalFileName());
+        File outputDir = new File(msg.getLocalPath());
+        if(!outputDir.exists()){
+            System.out.println("create path");
+            outputDir.mkdir();
+            
+        }
         if(!outputFile.exists()){
             try {
                 outputFile.createNewFile();
@@ -326,12 +332,7 @@ public class DataNode implements Runnable{
         }
         FileOutputStream fileOutput = null;
         System.out.println("write to path"+msg.getLocalPath());
-        File outputDir = new File(msg.getLocalPath());
-        if(!outputDir.exists()){
-            System.out.println("create path");
-            outputDir.mkdir();
-            
-        }
+        
         try {
             fileOutput = new FileOutputStream(msg.getLocalPath() + "/"
                     + msg.getLocalFileName(),true);
