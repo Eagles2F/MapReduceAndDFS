@@ -7,13 +7,18 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	/**
 	 * 
 	 */
+	public enum fileType{
+		TXT,
+		OBJECT
+	}
+	
 	private static final long serialVersionUID = 1057718551556472988L;
 	private String duplicationName;
 	private String nodeAddress = null;
 	private String dupNodeAddress = null;
 	private int nodeId;
 	private int dupId;
-	
+	private fileType typeFile; 
 	private String nodeLocalFilePath;
 	private String dupLocalFilePath;
 	
@@ -94,5 +99,14 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	public void setDuplicationName(String duplicationName) {
 		this.duplicationName = duplicationName;
 	}
+
+	public fileType getTypeFile() {
+		return typeFile;
+	}
+
+	public void setTypeFile(fileType typeFile) {
+		this.typeFile = typeFile;
+	}
+
 
 }
