@@ -40,7 +40,9 @@ public class ClientConfig extends ConfigurationBase implements Serializable{
         return prop.getProperty("MasterPort");
     }
     
-    
+    public String getRecordNum(){
+        return prop.getProperty("RecordNum");
+    }
 
     @Override
     public Properties getProperties() {

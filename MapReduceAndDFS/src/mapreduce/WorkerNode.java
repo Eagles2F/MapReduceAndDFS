@@ -239,9 +239,9 @@ public class WorkerNode {
 	private void  handle_clear(Message msg){
 	    for(runningTaskId index:currentTaskMap.keySet()){
 	        if((index.getJobId() == msg.getJobId()) && (index.getTaskType() == Task.MAP)){
-	            TaskInstance taskIns = currentTaskMap.get(index.getTaskId());
+	            TaskInstance taskIns = currentTaskMap.get(index);
 	            taskIns.setExit(true);
-	            currentTaskMap.remove(index.getTaskId());
+	            currentTaskMap.remove(index);
 	            
 	        }
 	    }
