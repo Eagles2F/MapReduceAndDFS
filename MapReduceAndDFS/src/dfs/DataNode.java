@@ -288,6 +288,10 @@ public class DataNode implements Runnable{
                     if(msg.getCmdId() == DFSCommandId.GETFILES){
                         downloadFiles(msg);
                         //objOutput.writeObject(rspMsg);
+                    }else if(msg.getCmdId() == DFSCommandId.RENAME){
+                        File oldFile = new File(msg.getLocalPath()+"/"+msg.getLocalFileName());
+                        File newFile = new File(msg.getLocalPath()+"/"+msg.getTargetFileName());
+                        oldFile.renameTo(newFile);
                     }
                     
                 }   
