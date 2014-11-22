@@ -588,16 +588,18 @@ public class DataNode implements Runnable{
             
             
     
-            System.out.println("Finish File Transfer");
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+            
+            
             
             
             }
+        System.out.println("Finish File Transfer");
+        try {
+            socket.close();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         if(msg.getMessageSource() == DFSMessage.nodeType.MASTER){
             System.out.println("send get file complete to master");
             Message indMsg = new Message();
