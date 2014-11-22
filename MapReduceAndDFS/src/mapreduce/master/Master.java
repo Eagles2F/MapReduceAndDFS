@@ -1,5 +1,6 @@
 package mapreduce.master;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Timer;
@@ -13,8 +14,13 @@ import java.net.*;
 
 import dfs.HireDataNodeServer;
 import dfs.NameNode;
+import mapreduce.Task;
+import mapreduce.TaskStatus;
 import mapreduce.WorkerNodeStatus;
+import utility.CommandType;
 import utility.Configuration;
+import utility.DFSMessage;
+import utility.Message;
 
 public class Master{
 	//properties
@@ -234,7 +240,41 @@ public class Master{
                //set all the tasks still running on this worker to be failed
                for(int i:jobMap.keySet()){
             	   jobMap.get(i).NodeFail(id);
+               //send all the tasks on this failed worker to the replica worker
+               for(int j:jobMap.keySet()){
+                   ArrayList<Task> mapTaskList = jobMap.get(j).getMapTasks();
+                   for(int k=0;k<mapTaskList.size();k++){
+                       Task mapTask = mapTaskList.get(k);
+                       if(mapTask.getWorkerId() == id){
+                           //send the task on the failure node to the replica node
+                           Message recoveryMsg = new Message();
+                           recoveryMsg.setTaskItem(mapTask);
+                           recoveryMsg.setMessageType(Message.msgType.COMMAND);
+                           recoveryMsg.setCommandId(CommandType.START);
+                           jobMap.get(i).getMapTaskStatus().get(mapTask.getTaskId()).setState(TaskStatus.taskState.SENT);
+                           
+                       }
+                   }
+                   //for reducer task, need to let the recover node to download the mapper output
+                   ArrayList<Task> reduceTaskList = jobMap.get(j).getReduceTasks();
+                   for(int k=0;k<reduceTaskList.size();k++){
+                       Task reduceTask = reduceTaskList.get(k);
+                       if(reduceTask.getWorkerId() == id){
+                           //send the download message first to the replica node
+                           DFSMessage recoveryMsg = new DFSMessage();
+                           recoveryMsg = jobMap.get(i).getDfsMsgConcurrentHashMap().get(reduceTask.getTaskId());
+                           try {
+                            getNameNodeServer().getDataNodeManagerMap().get(id).sendToDataNode(recoveryMsg);
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                           
+                       }
+                   }
                }
+               }
+               
             }
             else{
                 workerStatusMap.get(id).incrementNoReportCnt();
