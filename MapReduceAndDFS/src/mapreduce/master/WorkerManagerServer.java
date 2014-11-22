@@ -301,11 +301,11 @@ public class WorkerManagerServer implements Runnable{
         	   
         		master.jobMap.get(msg.getJobId()).getClientOOS().writeObject(new ClientMessage(1));//succeed!
         		//master.jobMap.remove(msg.getJobId());
-//        		Message clean = new Message();
-//        		clean.setMessageType(msgType.COMMAND);
-//        		clean.setCommandId(CommandType.CLEAN);
-//        		clean.setJobId(msg.getJobId());
-//        		this.sendToWorker(clean);
+        		Message clean = new Message();
+        		clean.setMessageType(msgType.COMMAND);
+        		clean.setCommandId(CommandType.CLEAN);
+        		clean.setJobId(msg.getJobId());
+        		this.sendToWorker(clean);
         	}
     	}   	
     }
