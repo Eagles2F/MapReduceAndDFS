@@ -142,7 +142,7 @@ public class WorkerNode {
 		response.setResult(Message.msgResult.SUCCESS);
 		
 		//send the response back
-		sendToManager(response);		
+		//sendToManager(response);		
 		System.out.println("process killed!");
 	}
 	
