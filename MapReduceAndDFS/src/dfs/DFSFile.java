@@ -21,6 +21,7 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	private fileType typeFile; 
 	private String nodeLocalFilePath;
 	private String dupLocalFilePath;
+	private int length;
 	
 	public DFSFile(String newName){
 		this.name = newName;

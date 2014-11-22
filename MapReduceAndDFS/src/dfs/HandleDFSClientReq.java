@@ -142,7 +142,7 @@ public class HandleDFSClientReq implements Runnable{
 			msg.setJobName(req.getJobName());
 			try {
 				nn.JobStatusMap.get(req.getJobName()).getUploadStatusMap().put(f.getNodeId(), false);
-				System.out.println(f.getNodeId());
+				System.out.println(f.getName()+"ssssssssssssssssssssssss "+f.getNodeId());
 				nn.dataNodeManagerMap.get(f.getNodeId()).sendToDataNode(msg);
 			} catch (IOException e) {
 				e.printStackTrace();

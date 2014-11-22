@@ -121,12 +121,13 @@ public class NameNode implements Runnable{
             	dfsMsg.setTargetFileName(file.getName());
             	dfsMsg.setLocalPath(file.getDupLocalFilePath());
             	dfsMsg.setLocalFileName(file.getDuplicationName());
-            	dfsMsg.setMessageSource(nodeType.MASTER);
+            	dfsMsg.setMessageSource(nodeType.NAMENODE);
+            	
     		}else if(file.getTypeFile() == fileType.TXT){
             	dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.TXT);
-            	
+            	System.out.println("adsfasdf"+file.getNodeAddress());
     			String[] ipAddr1 = {file.getNodeAddress()};
     			int[] port1 = {21111};
 
@@ -138,7 +139,8 @@ public class NameNode implements Runnable{
             	dfsMsg.setTargetFileName(file.getName());
             	dfsMsg.setLocalPath(file.getDupLocalFilePath());
             	dfsMsg.setLocalFileName(file.getDuplicationName());
-            	dfsMsg.setMessageSource(nodeType.MASTER);
+            	dfsMsg.setMessageSource(nodeType.NAMENODE);
+            	dfsMsg.setChunkLenth(-1);     	
     		}
     		
     		try {
