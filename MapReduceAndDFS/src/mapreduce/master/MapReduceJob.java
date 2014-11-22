@@ -7,8 +7,13 @@ package mapreduce.master;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import dfs.DFSFile;
+import dfs.DFSInputFile;
+import dfs.Range;
+import utility.ClientMessage;
 import utility.CommandType;
 import utility.DFSMessage;
 import utility.Message;
@@ -82,6 +87,70 @@ public class MapReduceJob {
 			}
 		}
 	}
+	
+	//recover each map task that is running on this node
+	public void NodeFailMapTaskRecover(int nodeId){  
+		System.out.println("Map Task failed due to node failure, started to recover the map tasks!!");
+    		for(int i=0;i<this.getMapTasks().size();i++){
+    			Task mapTask = this.getMapTasks().get(i);
+    			if(mapTask.getWorkerId() == nodeId){ // if node failed, resent all the maptasks
+    				
+    				//update the splitFile in each task since data node has also failed.
+    				//get the DFSInputFile 
+					DFSInputFile userInput = (DFSInputFile)master.getNameNodeServer().getRootDir().getEntry(job.getFif().getPath());
+					
+					//get the file chunks
+					HashMap<Range,DFSFile> fileChunks = userInput.getFileChunks();
+
+					//retrieve the new file chunk by range
+					Range r = new Range(mapTask.getSplit().getStartId(),mapTask.getSplit().getStartId()+mapTask.getSplit().getLength());
+					DFSFile newFileChunk = fileChunks.get(r);
+	                
+					//update the file chunk
+    				mapTask.getSplit().getUserInputFiles().fileChunk = newFileChunk;
+    				
+    				//get the nodeId where files are located
+    				int newNodeId =mapTask.getSplit().getUserInputFiles().fileChunk.getNodeId();
+    				
+    				//send the recovery message to the newNodeId
+    				Message msg = new Message();
+    				msg.setMessageType(msgType.COMMAND);
+    				msg.setCommandId(CommandType.START);
+    				msg.setJobId(this.jobId);
+    				msg.setTaskId(mapTask.getTaskId());
+    				msg.setTaskItem(mapTask);
+    				msg.setWorkerID(newNodeId);
+    				
+    				this.getMapTaskStatus().get(i).setWorkerId(newNodeId);
+    				
+    				try {
+						master.workerOosMap.get(newNodeId).writeObject(msg);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+    				this.getMapTaskStatus().get(i).setState(taskState.SENT);		
+    				System.out.println("MapTask: "+mapTask.getTaskId()+" for Job: "+this.getJobId()+" has been recovered on Node:"+newNodeId);
+               	}
+    		}
+	}
+	
+	//recover each reduce task that is running on this node
+	public void NodeFailReduceTaskRecover(int nodeId){
+        for(int k=0;k<this.ReduceTasks.size();k++){
+           if(this.getReduceTaskStatus().get(k).getState() == taskState.FAILED){
+        	   System.out.println("Reduce Task failed due to node failure, pls resubmit your job!!");
+        	   this.KillTasks();
+        	   master.jobMap.remove(this.jobId);
+        	   try {
+				this.clientOOS.writeObject(new ClientMessage(-1)); //job failed
+			} catch (IOException e){
+				e.printStackTrace();
+			}//succeed!
+        	   return;
+           }
+        }
+	}
+	
 	
 	//Task Status report
 	public void TaskReport(){

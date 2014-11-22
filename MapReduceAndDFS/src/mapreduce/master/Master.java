@@ -240,62 +240,21 @@ public class Master{
                 this.workerOosMap.remove(id);
                 this.workerSocMap.remove(id);
                 this.workerStatusMap.remove(id);
-                //need replica the dfs files on this worker
+                
+                //recover the dataNode on this worker node
                 nameNodeServer.handleDataNodeFailure(id);
-               //set all the tasks still running on this worker to be failed
-               for(int i:jobMap.keySet()){
-            	   jobMap.get(i).NodeFail(id);
-               //send all the tasks on this failed worker to the replica worker
-               for(int j:jobMap.keySet()){
-                   ArrayList<Task> mapTaskList = jobMap.get(j).getMapTasks();
-                   for(int k=0;k<mapTaskList.size();k++){
-                       Task mapTask = mapTaskList.get(k);
-                       if(mapTask.getWorkerId() == id){
-                           
-                           
-                           
-                           
-                           mapTask.setSplit(new SplitFile(i, i, null));
-                           Message recoveryMsg = new Message();
-                           recoveryMsg.setTaskItem(mapTask);
-                           recoveryMsg.setMessageType(Message.msgType.COMMAND);
-                           recoveryMsg.setCommandId(CommandType.START);
-                           jobMap.get(i).getMapTaskStatus().get(mapTask.getTaskId()).setState(TaskStatus.taskState.SENT);
-                           
-                       }
-                   }
-                   //for reducer task, need to let the recover node to download the mapper output
-                   ArrayList<Task> reduceTaskList = jobMap.get(j).getReduceTasks();
-                   for(int k=0;k<reduceTaskList.size();k++){
-                       Task reduceTask = reduceTaskList.get(k);
-                       if(reduceTask.getWorkerId() == id){
-                           //send the download message first to the replica node
-                           DFSMessage recoveryMsg = new DFSMessage();
-                           recoveryMsg = jobMap.get(i).getDfsMsgConcurrentHashMap().get(reduceTask.getTaskId());
-                           //find a worker to do the reduce task
-                           int index = id+1;
-                           int backUpId = 0;
-                           int counter=0;
-                           while(true){
-                               backUpId = index%hireWorkerServer.getWorkerCnt();
-                               if((workerStatusMap.contains(backUpId)) || counter > hireWorkerServer.getWorkerCnt())
-                                   break;
-                               counter++;
-                           }
-                           try {
-                            getNameNodeServer().getDataNodeManagerMap().get(backUpId).sendToDataNode(recoveryMsg);
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                           
-                       }
-                   }
-               }
-               }
-               
-            }
-            else{
+                
+                //recover the mapreduce tasks on this worker node              
+                //loop through each job
+                for(int i:jobMap.keySet()){
+                	jobMap.get(i).NodeFail(id);
+                	
+                	//recover mapTasks
+                	jobMap.get(i).NodeFailMapTaskRecover(id);
+                    //recover reduceTasks
+                	jobMap.get(i).NodeFailReduceTaskRecover(id);
+                } 
+            }else{
                 workerStatusMap.get(id).incrementNoReportCnt();
             }
                 

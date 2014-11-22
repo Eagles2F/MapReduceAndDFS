@@ -9,6 +9,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DFSDirectory extends DFSFileEntry{
 	private ConcurrentHashMap<String, DFSFileEntry> subEntries; 
 	
+	public ConcurrentHashMap<String, DFSFileEntry> getSubEntries() {
+		return subEntries;
+	}
+
+
+	public void setSubEntries(ConcurrentHashMap<String, DFSFileEntry> subEntries) {
+		this.subEntries = subEntries;
+	}
+
+
 	public DFSDirectory(String name){
 		this.name = name;
 		subEntries =new ConcurrentHashMap<String, DFSFileEntry>();
