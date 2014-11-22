@@ -95,7 +95,7 @@ public class NameNode implements Runnable{
     				dupId = (dupId+1)%master.getHireWorkerServer().getWorkerCnt();
     			}
     		}
-    		
+    		System.out.println("Dup                           "+dupId);
     		file.setDupId(dupId);
     		file.setDupLocalFilePath(file.getNodeLocalFilePath());
     		file.setDupNodeAddress(this.dataNodeSocMap.get(dupId).getInetAddress().getHostAddress());
@@ -110,6 +110,12 @@ public class NameNode implements Runnable{
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.OBJECT);
             	
+    			String[] ipAddr1 = {file.getNodeAddress()};
+    			int[] port1 = {21111};
+
+            	dfsMsg.setTargetPortNum(port1);
+            	dfsMsg.setTargetNodeAddr(ipAddr1);
+            	
             	dfsMsg.setTargetCount(1);
             	dfsMsg.setTargetPath(file.getNodeLocalFilePath());
             	dfsMsg.setTargetFileName(file.getName());
@@ -120,6 +126,12 @@ public class NameNode implements Runnable{
             	dfsMsg.setMessageType(DFSMessage.msgType.COMMAND);
             	dfsMsg.setCmdId(DFSCommandId.GETFILES);
             	dfsMsg.setDownloadType(DFSMessage.DownloadType.TXT);
+            	
+    			String[] ipAddr1 = {master.workerSocMap.get(dupId).getInetAddress().getHostAddress()};
+    			int[] port1 = {21111};
+
+            	dfsMsg.setTargetPortNum(port1);
+            	dfsMsg.setTargetNodeAddr(ipAddr1);
             	
             	dfsMsg.setTargetCount(1);
             	dfsMsg.setTargetPath(file.getNodeLocalFilePath());
