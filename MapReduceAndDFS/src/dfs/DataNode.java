@@ -521,7 +521,7 @@ public class DataNode implements Runnable{
                     try {
                         while( (pair = (KeyValue<Object, Object>) objInput.readObject()) != null)
                             objectOutput.writeObject(pair);
-                        objectOutput.close();
+                        
                     } catch (ClassNotFoundException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
