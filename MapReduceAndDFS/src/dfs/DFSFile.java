@@ -8,6 +8,7 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1057718551556472988L;
+	private String duplicationName;
 	private String nodeAddress = null;
 	private String dupNodeAddress = null;
 	private int nodeId;
@@ -18,6 +19,7 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 	
 	public DFSFile(String newName){
 		this.name = newName;
+		this.duplicationName = newName+".dup";
 	}
 		
 	@Override
@@ -83,6 +85,14 @@ public class DFSFile extends DFSFileEntry implements Serializable{
 
 	public void setDupId(int dupId) {
 		this.dupId = dupId;
+	}
+
+	public String getDuplicationName() {
+		return duplicationName;
+	}
+
+	public void setDuplicationName(String duplicationName) {
+		this.duplicationName = duplicationName;
 	}
 
 }
