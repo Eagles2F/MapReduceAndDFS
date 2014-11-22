@@ -246,15 +246,11 @@ public class Master{
                    for(int k=0;k<mapTaskList.size();k++){
                        Task mapTask = mapTaskList.get(k);
                        if(mapTask.getWorkerId() == id){
-                           //send the task on the failure node to the replica node
-                           //find the replica
-                           int index = id+1;
-                           int replicaId = 0;
-                           while(true){
-                               replicaId = index++ % hireWorkerServer.getWorkerCnt();
-                              if(workerStatusMap.contains(replicaId))
-                                  break;
-                           }
+                           
+                           
+                           
+                           
+                           
                            Message recoveryMsg = new Message();
                            recoveryMsg.setTaskItem(mapTask);
                            recoveryMsg.setMessageType(Message.msgType.COMMAND);
