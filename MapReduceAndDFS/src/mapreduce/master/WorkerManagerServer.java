@@ -172,18 +172,35 @@ public class WorkerManagerServer implements Runnable{
     			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
     			//if task failed, send it again
     			if(ts.getState() == TaskStatus.taskState.FAILED){
-        			Message recoveryMsg = new Message();
-        			recoveryMsg.setMessageType(Message.msgType.COMMAND);
-        			recoveryMsg.setCommandId(CommandType.START);
-        			recoveryMsg.setTaskItem(master.jobMap.get(ts.getJobId()).getMapTasks().get(ts.getTaskId()));
-        			ts.setState(TaskStatus.taskState.SENT);
-        			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
-        			try {
-                        this.sendToWorker(recoveryMsg);
-                    } catch (IOException e) {
+    			    //clean all the tasks for this job on this worker and resend all the tasks
+    			    Message cleanMsg = new Message();
+    			    cleanMsg.setMessageType(Message.msgType.COMMAND);
+    			    cleanMsg.setCommandId(CommandType.CLEAN);
+    			    cleanMsg.setJobId(ts.getJobId());
+    			    try {
+                        this.sendToWorker(cleanMsg);
+                    } catch (IOException e1) {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        e1.printStackTrace();
                     }
+    			    //send all tha task on this worker again
+    			    for(int k=0;k<master.jobMap.get(ts.getJobId()).getMapTasks().size();k++){
+    			        Task mapTask = master.jobMap.get(ts.getJobId()).getMapTasks().get(k);
+    			        if(mapTask.getWorkerId() == ts.getWorkerId()){
+                			Message recoveryMsg = new Message();
+                			recoveryMsg.setMessageType(Message.msgType.COMMAND);
+                			recoveryMsg.setCommandId(CommandType.START);
+                			recoveryMsg.setTaskItem(mapTask);
+                			
+                			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+                			try {
+                                this.sendToWorker(recoveryMsg);
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+    			        }
+    			    }
     			}
     			
     		}else{

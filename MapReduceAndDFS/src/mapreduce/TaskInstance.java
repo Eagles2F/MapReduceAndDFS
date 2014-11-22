@@ -247,8 +247,36 @@ public class TaskInstance implements Runnable{
             
                 Constructor<?> constructor;
                 constructor = reduceClass.getConstructor(null);
+                File dir = new File(ReducerOutputPath);
+                
+                if(!dir.exists()){
+                    dir.mkdirs();
+                }
+                
                 reducerOutputFile = "job"+jobId+"reducer_" + task.getTaskId() +".output";
                 File fileToWrite = new File(ReducerOutputPath+"/" + reducerOutputFile);
+                
+                try{
+                    if (fileToWrite.exists() == false) {
+
+                       
+                            
+                                fileToWrite.createNewFile();
+                            
+                        
+
+                    }
+                    else{
+                        fileToWrite.delete();
+                        fileToWrite.createNewFile();
+                    }
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                
+                
                 
                 ReducerRecordWriter rw = new ReducerRecordWriter(ReducerOutputPath,jobId,fileToWrite);
                 Reducer<Object, Object,Object, Object> process = (Reducer<Object, Object, Object, Object>) constructor.newInstance();
@@ -335,6 +363,7 @@ public class TaskInstance implements Runnable{
         }
         
     }
+    
     private void taskFail(Message indication) {
         worker.addFreeSlot();
         indication.setIndicationId(IndicationType.TASKFAIL);

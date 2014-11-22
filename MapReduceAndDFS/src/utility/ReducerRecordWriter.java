@@ -42,24 +42,7 @@ private int jobId;
       
       String strTaskID = Long.toString(taskId);
       
-      File dir = new File(ReducerOutputPath);
       
-      if(!dir.exists()){
-          dir.mkdirs();
-      }
-      
-      
-      
-      try {
-          if (fileToWrite.exists() == false) {
-
-              fileToWrite.createNewFile();
-
-          }
-          else{
-              fileToWrite.delete();
-              fileToWrite.createNewFile();
-          }
           
          
           FileOutputStream fileStream = new FileOutputStream(fileToWrite, true);

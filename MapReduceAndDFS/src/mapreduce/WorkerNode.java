@@ -107,13 +107,32 @@ public class WorkerNode {
 	
 	public class runningTaskId{
 	    int jobId;
-	    int taskType;
+	    public int getJobId() {
+            return jobId;
+        }
+        public void setJobId(int jobId) {
+            this.jobId = jobId;
+        }
+        public int getTaskType() {
+            return taskType;
+        }
+        public void setTaskType(int taskType) {
+            this.taskType = taskType;
+        }
+        public int getTaskId() {
+            return taskId;
+        }
+        public void setTaskId(int taskId) {
+            this.taskId = taskId;
+        }
+        int taskType;
 	    int taskId;
 	    public runningTaskId(int jobId,int taskType,int taskId){
 	        this.jobId = jobId;
 	        this.taskType = taskType;
 	        this.taskId = taskId;
 	    }
+	    
 	}
 	
 	
@@ -214,6 +233,20 @@ public class WorkerNode {
 	
 	// clean all the resources and temp files related with the job
 	private void  handle_clear(Message msg){
+	    for(runningTaskId index:currentTaskMap.keySet()){
+	        if((index.getJobId() == msg.getJobId()) && (index.getTaskType() == Task.MAP)){
+	            TaskInstance taskIns = currentTaskMap.get(index.getTaskId());
+	            taskIns.setExit(true);
+	            currentTaskMap.remove(index.getTaskId());
+	            
+	        }
+	    }
+        
+        //response message prepared!
+        Message response = new Message(msgType.RESPONSE);
+        
+        response.setResponseId(ResponseType.CLEANRSP);
+        
 	    for(int i=0;i<msg.getTask().getReducerNum();i++){
 	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
