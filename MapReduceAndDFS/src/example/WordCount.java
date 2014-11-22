@@ -45,12 +45,14 @@ public class WordCount {
 	    		RecordWriter output,int taskId    
 	                       ) throws IOException{
 	      int sum = 0;
+	      
 	       while(values.hasNext()) {
 	           int i = values.next();
-	           System.out.println("key "+key+" "+i);
+	           
 	        //sum += values.next();
 	           sum += i;
 	      }
+	       System.out.println("workd count reducer key "+key+" "+sum);
 	      result = sum;
 	      output.write(key, result, taskId);
 	    }
