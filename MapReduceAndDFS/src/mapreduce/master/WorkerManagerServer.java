@@ -235,6 +235,9 @@ public class WorkerManagerServer implements Runnable{
         	outputFile.setNodeLocalFilePath(msg.getTaskItem().getUserOutputPath());
         	master.getNameNodeServer().getRootDir().createSubEntry(outputFile);
         	
+        	//create the replication for the file
+        	//outputFile.setDupId();
+        	
         	//check whether all the tasks in the same job has finished
         	boolean finished = true;
         	for(TaskStatus ts:master.jobMap.get(msg.getJobId()).getReduceTaskStatus()){
