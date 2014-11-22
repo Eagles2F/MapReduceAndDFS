@@ -627,16 +627,7 @@ public class DataNode implements Runnable{
             
         }
       
-        else if(msg.getMessageSource() == DFSMessage.nodeType.NAMENODE){
-            System.out.println("send get file complete to namenode");
-            DFSMessage indMsg = new DFSMessage();
-            indMsg.setMessageType(DFSMessage.msgType.INDICATION);
-            indMsg.setIndicationId(DFSMessage.indId.GETFILESCOMPLETE);
-            indMsg.setJobName(msg.getJobName());
-            //send to dataNodeManagerServer
-            sendToDataNodeManager(indMsg);
-            
-        }
+        
         return rspMsg;    
     }
 
