@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.HashMap;
 
 import dfs.DFSFile;
+import dfs.DFSFile.fileType;
 import mapreduce.Task;
 import mapreduce.TaskStatus;
 import mapreduce.TaskStatus.taskState;
@@ -62,7 +63,7 @@ public class WorkerManagerServer implements Runnable{
 			for(int i=0;i<job.getReduceTasks().size();i++){
 				Task t=job.getReduceTasks().get(i);
 				for(int key: master.workerStatusMap.keySet()){
-				if(master.workerStatusMap.get(key).getMaxTask() >
+				if(master.workerStatusMap.get(key).getMaxTask()*2 >
 					master.workerStatusMap.get(key).getTaskReports().size()){ //if there is still extra computing ability in the worker node
 				  
 					job.getReduceTaskStatus().get(i).setWorkerId(key);
@@ -135,17 +136,15 @@ public class WorkerManagerServer implements Runnable{
     private boolean genReduceTasks(MapReduceJob job){
     	
     	//Scan the intermediate output path of the job,Get the File List
-    	File folder = new File(job.getMapTasks().get(0).getOutputPath());
     	System.out.println("outPut path "+job.getMapTasks().get(0).getOutputPath());
-    	File[] listOfFiles = folder.listFiles();
-    	for (int i = 0; i < listOfFiles.length; i++) {
+    	for (int i = 0; i < job.getJob().getReducerNum(); i++) {
 			Task task = new Task();
 			task.setJobId(job.getJobId());
 			task.setType(Task.REDUCE);//reducer type
 			task.setReducerNum(job.getJob().getReducerNum());
 			task.setTaskId(job.getReduceTasks().size());
 			task.setReduceClass(job.getJob().getReducerClass());
-			//set file IO
+			//set local output path
 			task.setUserOutputPath("../DFS/Output");
 			
 			task.setOutputPath(job.getMapTasks().get(0).getOutputPath());
@@ -263,6 +262,7 @@ public class WorkerManagerServer implements Runnable{
         	DFSFile outputFile = new DFSFile(outputFileName);
         	outputFile.setNodeId(msg.getWorkerID());
         	outputFile.setNodeLocalFilePath(msg.getTaskItem().getUserOutputPath());
+        	outputFile.setTypeFile(fileType.TXT);
         	master.getNameNodeServer().getRootDir().createSubEntry(outputFile);
         	
         	//create the replication for the file
