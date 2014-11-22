@@ -223,7 +223,30 @@ public class DataNode implements Runnable{
 	                    byte[] buffer ;
 	                    String inputString;
 	                    BufferedReader br = new BufferedReader(new InputStreamReader(fileInput,Charset.forName("UTF-8")));
-	                     
+	                    //read the whole file
+	                    if(msg.getChunkLenth() == -1){
+
+                            while((inputString = br.readLine()) != null){
+                            
+                                
+                                inputString += '\n';
+                                buffer = inputString.getBytes();
+                                
+                                if(inputString.length() <= 50)
+                                    output.write(buffer, 0, inputString.length());
+                                else{
+                                    int j=0;
+                                    for(j =0 ;j<(inputString.length()/50);j++){
+                                        output.write(buffer, j*50, 50);
+                                    }
+                                    //the remaining part
+                                    output.write(buffer, j*50, inputString.length()-j*50);
+                                }
+                            }
+                            
+                        
+	                        
+	                    }else{
 	                    for(int i=0;i<msg.getStartIndex()+msg.getChunkLenth();i++){
 	                        inputString = br.readLine();
 	                        if(i>=msg.getStartIndex()){
@@ -243,6 +266,7 @@ public class DataNode implements Runnable{
 	                        }
 	                        
 	                    }
+	                  }
 	                }
 	            }catch (IOException e) {
 	                    // TODO Auto-generated catch block
