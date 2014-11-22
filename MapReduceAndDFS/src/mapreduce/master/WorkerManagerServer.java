@@ -171,8 +171,38 @@ public class WorkerManagerServer implements Runnable{
     		TaskStatus ts = ws.getTaskReports().get(i);
     		if(ts.getTaskType() == Task.MAP){
     			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+    			//if task failed, send it again
+    			if(ts.getState() == TaskStatus.taskState.FAILED){
+        			Message recoveryMsg = new Message();
+        			recoveryMsg.setMessageType(Message.msgType.COMMAND);
+        			recoveryMsg.setCommandId(CommandType.START);
+        			recoveryMsg.setTaskItem(master.jobMap.get(ts.getJobId()).getMapTasks().get(ts.getTaskId()));
+        			ts.setState(TaskStatus.taskState.SENT);
+        			master.jobMap.get(ts.getJobId()).getMapTaskStatus().set(ts.getTaskId(),ts);
+        			try {
+                        this.sendToWorker(recoveryMsg);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+    			}
+    			
     		}else{
     			master.jobMap.get(ts.getJobId()).getReduceTaskStatus().set(ts.getTaskId(), ts);
+    			if(ts.getState() == TaskStatus.taskState.FAILED){
+                    Message recoveryMsg = new Message();
+                    recoveryMsg.setMessageType(Message.msgType.COMMAND);
+                    recoveryMsg.setCommandId(CommandType.START);
+                    recoveryMsg.setTaskItem(master.jobMap.get(ts.getJobId()).getReduceTasks().get(ts.getTaskId()));
+                    ts.setState(TaskStatus.taskState.SENT);
+                    master.jobMap.get(ts.getJobId()).getReduceTaskStatus().set(ts.getTaskId(),ts);
+                    try {
+                        this.sendToWorker(recoveryMsg);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
     		}
     	}
     	System.out.println("HB:"+ws.getWorkerId());
