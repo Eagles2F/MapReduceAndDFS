@@ -185,9 +185,6 @@ public class Master{
     		System.out.println("No such job!");
     	}else{
     		this.jobMap.get(jobid).KillTasks();
-    	
-    		//remove the job form the map
-    		this.jobMap.remove(jobid);
     	}
     }
     

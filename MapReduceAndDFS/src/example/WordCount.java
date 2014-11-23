@@ -59,9 +59,9 @@ public class WordCount {
 	  }
 
 	  public static void main(String[] args) throws ClassNotFoundException{
-		 if(args.length != 2){
+		 if(args.length != 3){
 			 System.out.println("Wrong input parameters");
-			 System.out.println("Usage: java exmple.WordCount <intput_file_path> <output_file_path>");
+			 System.out.println("Usage: java exmple.WordCount <intput_file_path> <output_file_path> <input line number>");
 			 System.exit(1);
 		 } 
 
@@ -75,7 +75,7 @@ public class WordCount {
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setReducerNum(Integer.valueOf(config.getReducerNum()));
-	    int num_records = Integer.valueOf(config.getRecordNum());  //number of records in the input file
+	    int num_records = Integer.valueOf(args[2]);  //number of records in the input file
 	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
 	    job.setFif(fif);
