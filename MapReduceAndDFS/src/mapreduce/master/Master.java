@@ -105,8 +105,8 @@ public class Master{
 		            	case "ls":
 		            		handleLs();
 		            		break;
-		            	case "cat":
-		            		handleCat();
+		            	case "help":
+		            		handleHelp();
 		            		break;
 		                default:
 		                    System.out.println(inputLine[0]+"is not a valid command");
@@ -193,7 +193,13 @@ public class Master{
     
     /*quit the whole system including dsf and mapreduce master*/
     private void handleQuit(){
-    	
+    	System.out.println("<CmdName> <parameters>	<use of the cmd>");
+    	System.out.println("ws  show the worker status");
+    	System.out.println("ls  show the DFS root directory");
+    	System.out.println("js  show the job status");
+    	System.out.println("ws  show the worker status");
+    	System.out.println("kill <job-id>  kill the specified job");
+    	System.out.println("Contact me if any problem you can't solve through email: yifanl@andrew.cmu.edu");
     }
     
     /*Show all the files in the NameNode FileSystem RootDir*/
@@ -201,8 +207,8 @@ public class Master{
     	this.nameNodeServer.getRootDir().ls();
     }
     
-    /*show the file's content*/
-    private void handleCat(){
+    /*show the cmd help*/
+    private void handleHelp(){
     	
     }
 	//main process
