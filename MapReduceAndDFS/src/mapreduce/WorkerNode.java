@@ -152,7 +152,7 @@ public class WorkerNode {
 	//command handling methods
 	private void handle_kill(Message msg) {
 		System.out.println("Start to kill the process!");
-		runningTaskId index = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskId());
+		runningTaskId index = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskItem().getTaskId());
 		
 		//response message prepared!
 		Message response = new Message(msgType.RESPONSE);
@@ -248,11 +248,14 @@ public class WorkerNode {
 	    }
 	    //delete all the combiner and partitioner output
 	    for(int i=0;i<msg.getReducerNum();i++){
+	        System.out.println("jobid "+msg.getJobId()+tempDfsDir+"/"+ "job"+msg.getJobId()+"combiner" + i+ ".output "+
+	                inputChunkDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
+	        
 	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
 	             fileToClear.delete();
 	        }
-	        fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
+	        fileToClear = new File(inputChunkDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
             if(fileToClear.exists()){
                  fileToClear.delete();
             }
