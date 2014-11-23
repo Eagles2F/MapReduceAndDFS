@@ -74,7 +74,7 @@ public class WordCount {
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
-	    job.setReducerNum(4);
+	    job.setReducerNum(Integer.valueOf(config.getReducerNum()));
 	    int num_records = Integer.valueOf(config.getRecordNum());  //number of records in the input file
 	    FileInputFormat fif = new FileInputFormat(args[0],num_records);
 	    FileOutputFormat fof = new FileOutputFormat(args[1]);
