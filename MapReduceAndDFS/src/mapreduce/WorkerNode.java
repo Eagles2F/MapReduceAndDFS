@@ -89,7 +89,7 @@ public class WorkerNode {
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
-		this.tempDfsDir = new String("../DFS/tepm");
+		this.tempDfsDir = new String("../DFS/temp");
 		this.inputChunkDir = new String("../DFS/InputChunk");
 		
 		this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
@@ -152,6 +152,10 @@ public class WorkerNode {
 	//command handling methods
 	private void handle_kill(Message msg) {
 		System.out.println("Start to kill the process!");
+		System.out.println(msg.getTaskItem());
+		System.out.println(msg.getTaskItem().getJobId());
+		System.out.println(msg.getTaskItem().getType());
+		System.out.println(msg.getTaskItem().getTaskId());
 		runningTaskId index = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskItem().getTaskId());
 		
 		//response message prepared!
@@ -248,14 +252,13 @@ public class WorkerNode {
 	    }
 	    //delete all the combiner and partitioner output
 	    for(int i=0;i<msg.getReducerNum();i++){
-	        System.out.println("jobid "+msg.getJobId()+tempDfsDir+"/"+ "job"+msg.getJobId()+"combiner" + i+ ".output "+
-	                inputChunkDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
+	        
 	        
 	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
 	             fileToClear.delete();
 	        }
-	        fileToClear = new File(inputChunkDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
+	        fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
             if(fileToClear.exists()){
                  fileToClear.delete();
             }
