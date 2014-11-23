@@ -55,7 +55,7 @@ public class WorkerNode {
 
     // process related properties
 	private Thread t;
-	private ConcurrentHashMap<runningTaskId, TaskInstance> currentTaskMap;
+	private ConcurrentHashMap<Integer, TaskInstance> currentTaskMap;
 	private ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>> mapperOutputStreamMap;
 	
 	//worker information report 
@@ -85,7 +85,7 @@ public class WorkerNode {
 	    
 		this.workerID = 0;
 		this.freeSlot = 5;
-		this.currentTaskMap = new ConcurrentHashMap<runningTaskId, TaskInstance>();
+		this.currentTaskMap = new ConcurrentHashMap<Integer, TaskInstance>();
 		this.trackStatus= new WorkerNodeStatus();
 		this.taskLauncher = new TaskLauncher(this);
 		this.workerInfo = new WorkerInfoReport();
@@ -100,7 +100,7 @@ public class WorkerNode {
 		this.hostPort = port;
 		this.workerID = 0;
 		this.freeSlot = 5;
-		this.currentTaskMap = new ConcurrentHashMap<runningTaskId, TaskInstance>();
+		this.currentTaskMap = new ConcurrentHashMap<Integer, TaskInstance>();
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
         this.workerInfo = new WorkerInfoReport();
@@ -132,10 +132,15 @@ public class WorkerNode {
         }
         int taskType;
 	    int taskId;
-	    public runningTaskId(int jobId,int taskType,int taskId){
+	    public  runningTaskId(int jobId,int taskType,int taskId){
 	        this.jobId = jobId;
 	        this.taskType = taskType;
 	        this.taskId = taskId;
+	    }
+	    
+	    public int getIntegratedId(){
+	        int id = jobId<<24+taskId<<8+taskType;
+	        return id;
 	    }
 	    
 	}
@@ -157,12 +162,13 @@ public class WorkerNode {
 		System.out.println(msg.getTaskItem().getType());
 		System.out.println(msg.getTaskItem().getTaskId());
 		runningTaskId index = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskItem().getTaskId());
-		
+		int id = index.getIntegratedId();
+		System.out.println("the killed integerated id "+id);
 		//response message prepared!
 		Message response = new Message(msgType.RESPONSE);
 		
 		response.setResponseId(ResponseType.KILLTASKRES);
-		TaskInstance taskIns = currentTaskMap.get(index);
+		TaskInstance taskIns = currentTaskMap.get(id);
 		taskIns.setExit(true);
 		
 		
@@ -223,7 +229,8 @@ public class WorkerNode {
 		TaskInstance taskIns = new TaskInstance(msg.getTask(),this);
 		taskIns.setRunState(TaskStatus.taskState.QUEUING);
 		runningTaskId taskIndex = new runningTaskId(msg.getTaskItem().getJobId(),msg.getTaskItem().getType(),msg.getTaskItem().getTaskId());
-		currentTaskMap.put(taskIndex, taskIns);
+		System.out.println("task integrated Id: "+taskIndex.getIntegratedId());
+		currentTaskMap.put(taskIndex.getIntegratedId(), taskIns);
 		
 		
 		taskLauncher.addToTaskQueue(taskIns);
@@ -242,8 +249,8 @@ public class WorkerNode {
 	
 	// clean all the resources and temp files related with the job
 	private void  handle_clear(Message msg){
-	    for(runningTaskId index:currentTaskMap.keySet()){
-	        if((index.getJobId() == msg.getJobId()) && (index.getTaskType() == Task.MAP)){
+	    for(int index:currentTaskMap.keySet()){
+	        if((index>>24) == msg.getJobId()){
 	            TaskInstance taskIns = currentTaskMap.get(index);
 	            taskIns.setExit(true);
 	            currentTaskMap.remove(index);
@@ -433,7 +440,7 @@ public class WorkerNode {
 				
 				response.setWorkerID(workerID);
 				
-				for(runningTaskId i:currentTaskMap.keySet()){
+				for(int i:currentTaskMap.keySet()){
 					TaskInstance taskIns = currentTaskMap.get(i);
 					//for all running task, query the thread status
 					if(taskIns.getThread() != null){
