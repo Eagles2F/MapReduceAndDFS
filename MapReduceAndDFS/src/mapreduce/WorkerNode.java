@@ -104,6 +104,7 @@ public class WorkerNode {
         this.trackStatus= new WorkerNodeStatus();
         this.taskLauncher = new TaskLauncher(this);
         this.workerInfo = new WorkerInfoReport();
+        this.tempDfsDir = new String("../DFS/tepm");
         this.inputChunkDir = new String("../DFS/InputChunk");
         
         this.mapperOutputStreamMap = new ConcurrentHashMap<Integer, ArrayList<ObjectOutputStream>>();
@@ -245,26 +246,25 @@ public class WorkerNode {
 	            
 	        }
 	    }
-        
+	    //delete all the combiner and partitioner output
+	    for(int i=0;i<msg.getTask().getReducerNum();i++){
+	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+	        if(fileToClear.exists()){
+	             fileToClear.delete();
+	        }
+	        fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"partitioner" + i+ ".output");
+            if(fileToClear.exists()){
+                 fileToClear.delete();
+            }
+	        
+	    }
+	    
         //response message prepared!
         Message response = new Message(msgType.RESPONSE);
         
         response.setResponseId(ResponseType.CLEANRSP);
         
-        File f = null;  
-        f = new File(tempDfsDir);  
-        File[] files = f.listFiles(); // 得到f文件夹下面的所有文件。  
         
-        for (File file : files) {  
-            file.delete(); 
-        }  
-        
-        f = new File(inputChunkDir);  
-        File[] chunkFiles = f.listFiles(); // 得到f文件夹下面的所有文件。  
-        
-        for (File file : chunkFiles) {  
-            file.delete(); 
-        } 
         
 	    
 	    mapperOutputStreamMap.remove(msg.getJobId());
