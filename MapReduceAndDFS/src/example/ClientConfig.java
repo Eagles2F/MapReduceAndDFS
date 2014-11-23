@@ -48,5 +48,10 @@ public class ClientConfig extends ConfigurationBase implements Serializable{
     public Properties getProperties() {
         return prop;
     }
+
+    public String getReducerNum() {
+        
+        return prop.getProperty("ReducerNum");
+    }
     
 }

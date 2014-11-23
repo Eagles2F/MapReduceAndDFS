@@ -42,7 +42,7 @@ public class UserInputFiles implements Serializable{
 		
 		int count =0;
 		String line ="";
-		System.out.println("filechunk name "+this.fileChunk.getName());
+		
 		try(BufferedReader in = new BufferedReader( new FileReader(this.fileChunk.getNodeLocalFilePath()+"/"+this.fileChunk.getName()) )){
 			while(true){
 				line = in.readLine();
