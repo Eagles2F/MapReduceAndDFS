@@ -34,9 +34,12 @@ public class KeyValue<Key,Value> implements Comparable,Serializable{
     public int compareTo(Object o) {
         int thisHash;
         int compareHash;
+        KeyValue<Object,Object> kv = (KeyValue<Object,Object>)o;
+        String first = (String)kv.getKey();
+        String second = (String)o;
         thisHash = key.hashCode();
         compareHash = ((KeyValue<Object,Object>)o).getKey().hashCode();
             
-        return thisHash - compareHash;
+        return first.compareTo(second);
     }
 }
