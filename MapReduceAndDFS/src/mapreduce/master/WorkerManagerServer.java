@@ -305,6 +305,7 @@ public class WorkerManagerServer implements Runnable{
         		clean.setMessageType(msgType.COMMAND);
         		clean.setCommandId(CommandType.CLEAN);
         		clean.setJobId(msg.getJobId());
+        		clean.setReducerNum(master.jobMap.get(msg.getJobId()).getJob().getReducerNum());
         		for(int key:master.workerMangerServerMap.keySet()){ // send to all the workers to clear the files related to this job
         			master.workerMangerServerMap.get(key).sendToWorker(clean);
         		}
