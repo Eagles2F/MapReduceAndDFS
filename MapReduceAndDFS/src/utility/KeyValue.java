@@ -36,7 +36,7 @@ public class KeyValue<Key,Value> implements Comparable,Serializable{
         int compareHash;
         KeyValue<Object,Object> kv = (KeyValue<Object,Object>)o;
         String first = (String)kv.getKey();
-        String second = (String)o;
+        String second = (String)key;
         thisHash = key.hashCode();
         compareHash = ((KeyValue<Object,Object>)o).getKey().hashCode();
             
