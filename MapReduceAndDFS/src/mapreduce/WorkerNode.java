@@ -247,7 +247,7 @@ public class WorkerNode {
 	        }
 	    }
 	    //delete all the combiner and partitioner output
-	    for(int i=0;i<msg.getTask().getReducerNum();i++){
+	    for(int i=0;i<msg.getReducerNum();i++){
 	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
 	             fileToClear.delete();
