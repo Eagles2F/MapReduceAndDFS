@@ -374,6 +374,7 @@ public class WorkerNode {
 							
 						case CLEAN:
 						    worker.handle_clear(master_cmd);
+						    break;
 						
 						case KILLTASK:	// this command tries to kill a process on this worker
 							worker.handle_kill(master_cmd);

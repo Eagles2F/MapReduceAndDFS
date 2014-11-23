@@ -52,6 +52,7 @@ public class DataNode implements Runnable{
     private String tempDfsDir;
 
     private String inputChunkDir;
+    private String outputDir;
     
     
     public DataNode( WorkerNode worker) {
@@ -60,6 +61,7 @@ public class DataNode implements Runnable{
         DFSFolder = new String("../DFS/");
         this.tempDfsDir = new String("../DFS/temp/");
         this.inputChunkDir = new String("../DFS/InputChunk/");
+        this.outputDir = new String("../DFS/Output/");
         
         this.host = config.getMasterAdd();
         this.hostPort = Integer.valueOf(config.getDataNodeServerPort());
@@ -136,6 +138,16 @@ public class DataNode implements Runnable{
                 File[] chunkFiles = f.listFiles(); // 得到f文件夹下面的所有文件。  
                 
                 for (File file : chunkFiles) {  
+                    file.delete(); 
+                } 
+            }
+            
+            f = new File(outputDir); 
+            if(f.exists()){
+                System.out.println("delete output directory");
+                File[] outputFiles = f.listFiles(); // 得到f文件夹下面的所有文件。  
+                
+                for (File file : outputFiles) {  
                     file.delete(); 
                 } 
             }
