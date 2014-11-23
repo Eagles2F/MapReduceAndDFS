@@ -22,6 +22,7 @@ import utility.CommandType;
 import utility.Configuration;
 import utility.DFSMessage;
 import utility.Message;
+import utility.Message.msgType;
 
 public class Master{
 	//properties
@@ -190,13 +191,21 @@ public class Master{
     
     /*quit the whole system including dsf and mapreduce master*/
     private void handleQuit(){
-    	System.out.println("<CmdName> <parameters>	<use of the cmd>");
-    	System.out.println("ws  show the worker status");
-    	System.out.println("ls  show the DFS root directory");
-    	System.out.println("js  show the job status");
-    	System.out.println("ws  show the worker status");
-    	System.out.println("kill <job-id>  kill the specified job");
-    	System.out.println("Contact me if any problem you can't solve through email: yifanl@andrew.cmu.edu");
+    	System.out.println("Shut down the workers!");
+    	Message msg = new Message();
+    	msg.setCommandId(CommandType.SHUTDOWN);
+    	msg.setMessageType(msgType.COMMAND);
+    	
+    	for(int key:this.workerMangerServerMap.keySet()){
+    		try {
+				this.workerMangerServerMap.get(key).sendToWorker(msg);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+    	
+    	System.out.println("Master has exited!");
+    	System.exit(0);
     }
     
     /*Show all the files in the NameNode FileSystem RootDir*/
@@ -206,7 +215,13 @@ public class Master{
     
     /*show the cmd help*/
     private void handleHelp(){
-    	
+    	System.out.println("<CmdName> <parameters>	<use of the cmd>");
+    	System.out.println("ws  show the worker status");
+    	System.out.println("ls  show the DFS root directory");
+    	System.out.println("js  show the job status");
+    	System.out.println("quit  quit the system");
+    	//System.out.println("kill <job-id>  kill the specified job");
+    	System.out.println("Contact me if any problem you can't solve through email: yifanl@andrew.cmu.edu");
     }
 	//main process
 	public static void main(String[] args){
