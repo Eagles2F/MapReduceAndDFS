@@ -248,11 +248,11 @@ public class WorkerNode {
 	    }
 	    //delete all the combiner and partitioner output
 	    for(int i=0;i<msg.getReducerNum();i++){
-	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"combiner" + i+ ".output");
+	        File fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"combiner" + i+ ".output");
 	        if(fileToClear.exists()){
 	             fileToClear.delete();
 	        }
-	        fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getTask().getJobId()+"partitioner" + i+ ".output");
+	        fileToClear = new File(tempDfsDir+"/"+ "job"+msg.getJobId()+"partitioner" + i+ ".output");
             if(fileToClear.exists()){
                  fileToClear.delete();
             }
